@@ -1,0 +1,19 @@
+
+
+; Directories
+
+!/resources/public/index.html
+*.log
+resources/
+target/
+compiled/
+out/
+
+
+; Files
+
+*.jar
+.DS_Store
+.nrepl-port
+pom.xml
+pom.xml.asc
