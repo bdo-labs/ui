@@ -158,7 +158,8 @@
                                  :static-fns         true
                                  :parallel-build     true
                                  :optimize-constants true})
-        (asset-fingerprint :extensions [".css" ".html"])))
+        (asset-fingerprint :extensions [".css" ".html"])
+        (target)))
 
 
 (deftask test-once
