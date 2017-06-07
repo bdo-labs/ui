@@ -21,20 +21,12 @@
             :label ::label))
 
 
-(defn conform-or-fail [spec args]
-  (if (spec/valid? spec args)
-    (spec/conform spec args)
-    (u/exception (spec/explain-str spec args))))
-
-
-
 (defn checkbox
   [& args]
   (let [{:keys [params label]
-         :or   {label ""}}        (conform-or-fail ::checkbox-args args)
+         :or   {label ""}}        (u/conform-or-fail ::checkbox-args args)
         {:keys [checked? on-click id]
          :or   {id (u/gen-id)}} params]
-    (u/log (some #(= :Toggle %) [:Toggle]))
     [:label {:for   id
              :class (u/names->str [(when-not (some #(= :Toggle %) (:class params)) :Checkbox)
                                    (when checked? :Checked)
