@@ -70,9 +70,9 @@
       [element/checkbox {:checked?  disabled?
                          :on-change #(re-frame/dispatch [::toggle-disabled?])} "Disabled?"]
       [element/auto-complete {:placeholder "Randomly generated strings"
-                      :items       filtered-collection
-                      :multiple?   multiple?
-                      :disabled?   disabled?}]]]))
+                              :items       filtered-collection
+                              :multiple?   multiple?
+                              :disabled?   disabled?}]]]))
 
 
 (defn documentation

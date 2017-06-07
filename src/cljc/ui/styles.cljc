@@ -32,14 +32,14 @@
 ;;
 
 
+(defcssfn attr)
+(defcssfn cubic-bezier)
 (defcssfn linear-gradient)
+(defcssfn rotateZ)
+(defcssfn scale)
 (defcssfn translateX)
 (defcssfn translateY)
 (defcssfn translateZ)
-(defcssfn scale)
-(defcssfn rotateZ)
-(defcssfn cubic-bezier)
-(defcssfn attr)
 
 
 (defn dark?
@@ -326,13 +326,15 @@
     [:input {:position :absolute
              :left     (u/percent -100)
              :z-index  -10}]
-    [(s/+ (s/input (s/focus)) :label) {:background (color/rgb 80 80 80)}]
-    [:label {:background    (color/rgb 220 220 220)
-             :color         :white
+    [(s/+ (s/input (s/focus)) :label) {:opacity 1}]
+    [:label {:background    (color/lighten primary 15)
+             :color         (color/darken primary 40)
              :display       :inline-block
              :padding       [[(u/rem 0.5) (u/rem 1)]]
              :margin        [[(u/rem 0.5) (u/rem 1)]]
+             :opacity       0.4
              :border-radius (u/rem 0.4)
+             :font-size     (u/em 0.75)
              :position      :relative
              :z-index       1
              :user-select   :none
@@ -379,7 +381,7 @@
     [:.Ghost {:color    (color/rgba 0 0 1 0.3)
               :position :absolute
               :top      (u/rem 0.5)}]]
-   [:.Collection {:background         (color/rgba 255 255 255 0.95)
+   [:.Collection {:background         (color/rgba 254 254 255 0.85)
                   :box-shadow         [[0 (u/rem 0.1) (u/rem 0.2) (color/rgba 0 0 1 0.2)]]
                   :max-height         (u/rem 30)
                   :position           :absolute

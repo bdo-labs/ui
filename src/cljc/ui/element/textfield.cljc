@@ -19,15 +19,13 @@
 
 (defn textfield
   [{:keys [on-change on-focus on-key-down on-blur]}]
-  (let [!parent-el (atom nil)
+  (let [!parent-el (clojure.core/atom nil)
         id         (u/gen-id)]
     (fn [& args]
-      (let [{:keys [params]}                (u/conform-or-fail ::textfield-args args)
-            {:keys [value placeholder class disabled? read-only? ghost focus?]
+      (let [{:keys [params]}           (u/conform-or-fail ::textfield-args args)
+            {:keys [value placeholder class disabled? read-only? focus?]
              :or   {disabled?  false
-                    read-only? false
-                    ghost      ""}} params
-            id (or (:id params) id)]
+                    read-only? false}} params]
         (when-let [parent-el @!parent-el]
           (when focus?
             (.focus (.-firstChild parent-el))))
@@ -39,12 +37,12 @@
                            :ref   #(reset! !parent-el %)}
            [:input (merge
                     (dissoc params :class :placeholder :read-only? :disabled? :focus?)
-                    {:id           id
-                     :type         :text
-                     :autoComplete "off"
-                     :read-only    read-only?
-                     :disabled     disabled?
-                     :placeholder  ""})]
+                    {:id            id
+                     :type          :text
+                     :auto-complete "off"
+                     :read-only     read-only?
+                     :disabled      disabled?
+                     :placeholder   ""})]
            [:label {:for id} placeholder]])))))
 
 

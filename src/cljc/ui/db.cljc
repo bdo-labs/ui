@@ -20,8 +20,11 @@
 
 
 (def default-db
-  {:active-panel                          :doc-panel
-   :loading?                              true
-   :ui.docs.auto-complete/multiple        false
-   :ui.docs.auto-complete/disabled        false
-   :ui.docs.inputs/collection             (first (mapv first (spec/exercise ::items 500)))})
+  {:active-panel                   :doc-panel
+   :loading?                       true
+   :ui.docs.auto-complete/multiple false
+   :ui.docs.auto-complete/disabled false
+   :ui.docs.inputs/collection      (->> (spec/exercise ::items 550)
+                                        (drop 50)
+                                        (mapv first)
+                                        (first))})
