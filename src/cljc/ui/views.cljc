@@ -74,9 +74,9 @@
 (defn- doc-panel
   []
   (let [active-item @(re-frame/subscribe [:active-doc-item])
-        virtuals    (sort [:boundary])
-        layouts     (sort [:centered :fill :horizontally :vertically])
-        elements    (sort [:buttons :colors :dialog :inputs :sheet :sidebar])]
+        virtuals    [:boundary]
+        layouts     [:centered :horizontally :vertically :fill]
+        elements    [:buttons :colors :dialog :inputs :sheet :sidebar]]
     [element/sidebar {:locked true}
      [layout/vertically
       [:menu [menu-item :ui]]
