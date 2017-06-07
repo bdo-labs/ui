@@ -89,16 +89,14 @@
  test-cljs {:js-env :phantom})
 
 
-;; It seems that `boot-npm` does not work properly with `npm v8.0`
-;; From what I can see, nothing is being downloaded. Need to
-;; investigate a bit further and possibly create an issue.
 (deftask pre-requisits
   "Install pre-requisits"
   []
   (comp
-   (npm :install {:postcss-cli "latest"}
-        :global true
-        :cache-key ::cache)))
+   (npm :install {:postcss-cli "latest"
+                  :autoprefixer "latest"}
+        :cache-key ::cache)
+   (target)))
 
 
 (deftask readme
@@ -121,13 +119,15 @@
                 :styles-var 'ui.styles/screen)
         (garden :output-to "css/docs.css"
                 :styles-var 'ui.styles/docs)
-        (autoprefixer :files ["ui.css" "docs.css"] :browsers ">= 50%")))
+        (autoprefixer :exec-path "target/node_modules/postcss-cli/bin/postcss"
+                      :files ["ui.css" "docs.css"] :browsers ">= 50%")))
 
 
 (deftask dev
   "Interactive development-build"
   [s speak? bool "Notify when the build is completed"]
   (comp (git-pull :branch "origin" "master")
+        (pre-requisits)
         (readme)
         (serve)
         (watch)
@@ -140,14 +140,14 @@
               :optimizations :none
               :source-map true
               :compiler-options {:parallel-build true})
-        (asset-fingerprint :extensions [".css" ".html"] :skip true)
-        (target)))
+        (asset-fingerprint :extensions [".css" ".html"] :skip true)))
 
 
 (deftask prod
   "Static production-build"
   [s speak? bool "Notify when the build is completed"]
-  (comp (readme)
+  (comp (pre-requisits)
+        (readme)
         (if speak? (speak) identity)
         (styles)
         (cljs :ids #{"ui"}
@@ -158,8 +158,7 @@
                                  :static-fns         true
                                  :parallel-build     true
                                  :optimize-constants true})
-        (asset-fingerprint :extensions [".css" ".html"])
-        (target)))
+        (asset-fingerprint :extensions [".css" ".html"])))
 
 
 (deftask test-once
@@ -190,10 +189,9 @@
 
 
 (deftask deploy
-  "Create a static build and push to github. If the pull-request is
-  accepted, it will be deployed to Clojars"
+  "Bump version and push to Github. Accepted pull-requests are
+  automatically published to Clojars"
   [s speak?        bool "Notify when deployment is completed"
    b bump   VALUE  kw   "What to bump (major minor or patch)"]
   (comp (version bump 'inc)
-        (prod :speak? speak?)
         (git-push)))
