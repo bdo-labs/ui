@@ -15,8 +15,8 @@
                  [garden "1.3.2"]
                  [markdown-clj "0.9.99"]
                  [org.clojars.stumitchell/clairvoyant "0.2.1"]
-                 [org.clojure/clojure "1.9.0-alpha17"]
-                 [org.clojure/clojurescript "1.9.562"]
+                 [org.clojure/clojure "1.9.0-alpha17" :scope "provided"]
+                 [org.clojure/clojurescript "1.9.562" :scope "provided"]
                  [org.clojure/core.async "0.3.443"]
                  [org.clojure/spec.alpha "0.1.123"]
                  [re-frame "0.9.4"]
@@ -140,7 +140,8 @@
               :optimizations :none
               :source-map true
               :compiler-options {:parallel-build true})
-        (asset-fingerprint :extensions [".css" ".html"] :skip true)))
+        (asset-fingerprint :extensions [".css" ".html"] :skip true)
+        (target)))
 
 
 (deftask prod

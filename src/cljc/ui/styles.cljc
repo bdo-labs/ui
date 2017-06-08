@@ -5,7 +5,9 @@
             [garden.arithmetic :refer [-]]
             [garden.units :as u]
             [garden.color :as color]
-            [garden.selectors :as s]))
+            [garden.selectors :as s]
+            [ui.element.clamp :as clamp]
+            [ui.element.progress-bar :as progress-bar]))
 
 
 ;;
@@ -32,7 +34,6 @@
 ;;
 
 
-(defcssfn attr)
 (defcssfn cubic-bezier)
 (defcssfn linear-gradient)
 (defcssfn rotateZ)
@@ -267,54 +268,7 @@
 
 
 (defn- forms [{:keys [primary secondary]}]
-  [
-   [:.Clamp {:box-sizing :border-box
-             :padding    (u/rem 1)
-             :width      (u/percent 100)
-             :text-align :center
-             :transform  (translateZ 0)
-             :position   :relative}
-    [:.Label {:text-align    :left
-              :font-weight   :normal
-              :margin-bottom (u/rem 2)
-              :overflow      :hidden
-              :white-space   :nowrap
-              :text-overflow :ellipsis
-              :font-size     (u/em 1.2)}]
-    [:.Slider {:height     (u/px 2)
-               :background :silver}]
-    [:.Extract {:background primary
-                :position   :absolute
-                :height     (u/percent 100)}]
-    [:.Knob {:background       :white
-             :border-radius    (u/percent 50)
-             :border           [[:solid (u/px 2) primary]]
-             :position         :absolute
-             :transform-origin [[:center :center]]
-             :transition       [[:200ms :ease]]
-             :transform        [[(translateY (u/percent -45)) (translateZ 0)]]
-             :cursor           :pointer
-             :height           (u/rem 0.5)
-             :width            (u/rem 0.5)
-             :z-index          10}
-     [:&:hover {:background primary
-                :transform  [[(translateY (u/percent -50)) (scale 1.4)]]}
-      [:&:after {:opacity 1}]]
-     [:&:after {:display       :block
-                :background    secondary
-                :color         (if (dark? (vals (select-keys secondary [:red :green :blue])))
-                                 (color/darken "#fff" 5) (color/lighten "#000" 5))
-                :border-radius (u/em 0.2)
-                :padding       [[(u/em 0.25) (u/em 0.5)]]
-                :transition    [[:200ms :ease]]
-                :opacity       0
-                :left          (u/percent 50)
-                :font-size     (u/em 0.7)
-                :transform     (translateX (u/percent -50))
-                :position      :absolute
-                :bottom        (u/em 1.5)
-                :content       (attr :data-value)}]]]
-   [:.Auto-complete {:position      :relative
+  [[:.Auto-complete {:position      :relative
                      :width         (u/percent 100)
                      :margin-bottom (u/rem 1)}
     [:&.Read-only [:* {:cursor :default}]]
@@ -717,17 +671,18 @@
    [:.Checkbox {:display     :flex
                 :user-select :none
                 :position    :relative}
+    [:.Shape {:margin-right (u/rem 0.5)}]
     [:input {:position :relative}]
     [:i {:position         :absolute
-         :left             (u/rem 0.5)
+         :left             (u/percent 50)
          :top              (u/rem -0.3)
          :font-size        (u/rem 2.5)
          :transform-origin [[:center :center]]
-         :transform        (scale 0)
+         :transform        [[(scale 0) (translateX (u/percent -50))]]
          :transition       [[:100ms :ease]]
          :z-index          2}]
     [:&.Checked
-     [:i {:transform (scale 1)}]
+     [:i {:transform [[(scale 1) (translateX (u/percent -50))]]}]
      [:input {:background   primary
               :border-color (color/darken primary 10)}]]
     [:input {:-webkit-appearance :none
@@ -738,8 +693,6 @@
              :transition         [[:100ms :ease]]
              :width              (u/rem 1.5)
              :height             (u/rem 1.5)
-             :margin-right       (u/rem 1)
-             :padding            (u/rem 0.5)
              :border-radius      (u/rem 0.2)
              :z-index            1}]]
    [:body {:background-color background}]
@@ -799,4 +752,6 @@
           (calendar theme)
           (typography theme)
           (buttons theme)
-          (tmp theme))))
+          (tmp theme)
+          (clamp/style theme)
+          (progress-bar/style theme))))
