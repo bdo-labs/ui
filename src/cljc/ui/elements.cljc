@@ -8,6 +8,7 @@
             [ui.element.auto-complete :as auto-complete]
             [ui.element.progress-bar :as progress-bar]
             [ui.element.textfield :as textfield]
+            [ui.element.boundary :as boundary]
             [ui.element.collection :as collection]
             [ui.element.label :as label]
             [ui.element.checkbox :as checkbox]
@@ -69,3 +70,7 @@
 (def dialog modal/dialog)
 
 (def progress-bar progress-bar/progress-bar)
+
+
+;; Virtuals
+(def boundary boundary/boundary)

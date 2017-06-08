@@ -5,6 +5,7 @@
             [garden.units :as unit]
             [garden.color :as color]
             [re-frame.core :as re-frame]
+            [ui.element.boundary :refer [boundary]]
             [ui.util :as u]))
 
 
@@ -140,6 +141,7 @@
      :as   params} coll]
    (let [id              (u/gen-id)
          set-active-knob #(re-frame/dispatch [::set-active-knob id %1])
+         mouse-within    #(u/log (.-mouseX %))
          mouse-down      (fn [knob] #(set-active-knob knob))]
      ;; (re-frame/dispatch [::initialize-clamp id coll])
      (let [active-knob       @(re-frame/subscribe [::active-knob id])
@@ -161,14 +163,17 @@
                         :lower lower-value
                         (str lower-value " - " upper-value))])
         ;; Wrap the slider in a boundary that exposes a relative clientX-stream
-        [:div.Slider
-         (when-not (= (:range params) :lower)
-           [:div.Knob {:on-mouse-down (mouse-down :first)
-                       :data-value    (str lower-value)
-                       :style         {:left (str lower-clamp "%")}}])
-         (when-not (= (:range params) :upper)
-           [:div.Knob {:on-mouse-down (mouse-down :last)
-                       :data-value    (str upper-value)
-                       :style         {:left (str upper-clamp "%")}}])
-         [:div.Extract
-          {:style extract-dimension}]]]))))
+        [boundary {:on-mouse-within mouse-within
+                   :offset          {:top  (unit/rem 1)
+                                     :left (unit/rem 3)}}
+         [:div.Slider {}
+          (when-not (= (:range params) :lower)
+            [:div.Knob {:on-mouse-down (mouse-down :first)
+                        :data-value    (str lower-value)
+                        :style         {:left (str lower-clamp "%")}}])
+          (when-not (= (:range params) :upper)
+            [:div.Knob {:on-mouse-down (mouse-down :last)
+                        :data-value    (str upper-value)
+                        :style         {:left (str upper-clamp "%")}}])
+          [:div.Extract
+           {:style extract-dimension}]]]]))))
