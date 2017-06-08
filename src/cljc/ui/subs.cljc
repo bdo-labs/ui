@@ -15,3 +15,8 @@
 (reg-sub :active-doc-item extract)
 (reg-sub :active-panel extract)
 (reg-sub :icon-font extract)
+
+
+(reg-sub :progress
+         (fn [db [key]]
+           (or (-> db key) 0)))

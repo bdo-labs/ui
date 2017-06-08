@@ -7,6 +7,7 @@
             [ui.util :as u]
             [ui.docs.centered :as centered]
             [ui.docs.fill :as fill]
+            [ui.docs.progress :as progress]
             [ui.docs.horizontally :as horizontally]
             [ui.docs.vertically :as vertically]
             [ui.docs.colors :as colors]
@@ -66,6 +67,7 @@
     :colors [colors/documentation]
     :dialog [dialog/documentation]
     :inputs [inputs/documentation]
+    :progress [progress/documentation]
     :sheet [sheet/documentation]
     :sidebar [sidebar/documentation]
     [intro]))
@@ -76,7 +78,7 @@
   (let [active-item @(re-frame/subscribe [:active-doc-item])
         virtuals    [:boundary]
         layouts     [:centered :horizontally :vertically :fill]
-        elements    [:buttons :colors :dialog :inputs :sheet :sidebar]]
+        elements    [:buttons :colors :dialog :inputs :progress :sheet :sidebar]]
     [element/sidebar {:locked true}
      [layout/vertically
       [:menu [menu-item :ui]]
@@ -92,6 +94,9 @@
 
 
 (defn main-panel []
-  (let [active-panel (re-frame/subscribe [:active-panel])]
+  (let [active-panel (re-frame/subscribe [:active-panel])
+        progress     (re-frame/subscribe [:progress])]
     (fn []
-      [panels @active-panel])))
+      [:div {:style {:height "100%"}}
+       [element/progress-bar {:progress @progress}]
+       [panels @active-panel]])))

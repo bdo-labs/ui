@@ -39,3 +39,9 @@
  (fn [{:keys [db]} [doc-item]]
    {:dispatch [:set-active-panel :doc-panel]
     :db (assoc db :active-doc-item doc-item)}))
+
+(re-frame/reg-event-db
+ :set-progress
+ [interceptors]
+ (fn [db [progress]]
+   (assoc db :progress progress)))
