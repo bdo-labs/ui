@@ -43,14 +43,13 @@
                  [hendrick/boot-medusa "0.1.1" :scope "test"]
                  [ns-tracker "0.3.1" :scope "test"]
                  [org.clojure/test.check "0.9.0" :scope "test"]
-                 [org.clojure/tools.nrepl "0.2.12" :scope "test"]
+                 [org.clojure/tools.nrepl "0.2.13" :scope "test"]
                  [org.martinklepsch/boot-garden "1.3.2-0" :scope "test"]
                  [pandeiro/boot-http "0.8.3" :scope "test"]
                  [powerlaces/boot-cljs-devtools "0.2.0" :scope "test"]
                  ;; [powerlaces/boot-figreload "0.1.1-SNAPSHOT" :scope "test"]
                  [tolitius/boot-check "0.1.4" :scope "test"]
-                 [weasel "0.7.0"  :scope "test"]
-                 ])
+                 [weasel "0.7.0"  :scope "test"]])
 
 
 (require '[adzerk.boot-cljs :refer [cljs]]
@@ -133,9 +132,10 @@
         (watch)
         (if speak? (speak) identity)
         (reload :on-jsload 'ui.core/mount-root)
+        (cljs-devtools)
+        (dirac)
         (styles)
         (cljs-repl)
-        (cljs-devtools)
         (cljs :ids #{"ui"}
               :optimizations :none
               :source-map true

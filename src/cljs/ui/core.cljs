@@ -6,6 +6,7 @@
             [re-frisk.core :refer [enable-re-frisk!]]
             [reagent.core :as reagent]
             [secretary.core :as secretary]
+            [devtools.core :as devtools]
             [ui.config :as config]
             [ui.routes :as routes]
             [ui.views :as views]
@@ -17,6 +18,7 @@
 ;; track of the entire application-state
 (defn dev-setup []
   (when config/debug?
+    (devtools/install!)
     (enable-console-print!)
     (enable-re-frisk!)
     (println "dev mode")))
