@@ -25,7 +25,7 @@
 ;; TODO Add parameters
 (defn article
   ([& content]
-   (into [:article {}] (map section content))))
+   (into [:article {:role :article}] (map section content))))
 
 
 (defn vr [] [:div.Vertical-rule])

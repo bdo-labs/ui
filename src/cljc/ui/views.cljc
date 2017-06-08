@@ -28,7 +28,7 @@
 
 
 (defn- footer []
-  [:footer
+  [:footer {:role :contentinfo}
    [layout/horizontally {:no-gap true :class [:legal]}
     [:span (str "© BDO 2017")]
     [:a {:href "//bdo-labs.github.io/"} (str "Blog")]
