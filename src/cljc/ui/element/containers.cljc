@@ -1,7 +1,7 @@
 (ns ui.element.containers
   (:require [ui.util :refer [names->str]]
-            [clojure.test.check.generators :as gen]
-            [clojure.spec.alpha :as spec]
+            #_[clojure.test.check.generators :as gen]
+            [clojure.spec :as spec]
             [garden.color :as color]
             [ui.util :as u]))
 

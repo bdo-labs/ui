@@ -1,3 +1,3 @@
 (ns ui.element.numbers.specs
-  (:require [clojure.test.check.generators :as gen]))
+  (:require #_[clojure.test.check.generators :as gen]))
 

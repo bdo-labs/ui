@@ -1,7 +1,7 @@
 (ns ui.docs.container
   (:require [re-frame.core :refer [subscribe dispatch reg-sub reg-event-db]]
-            [clojure.test.check.generators :as gen]
-            [clojure.spec.alpha :as spec]
+            #_[clojure.test.check.generators :as gen]
+            [clojure.spec :as spec]
             [ui.layout :as layout]
             [ui.elements :as element]))
 

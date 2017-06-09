@@ -1,7 +1,7 @@
 (ns ui.element.numbers.events
   (:require [re-frame.core :refer [reg-event-db reg-event-fx]]
-            [clojure.test.check.generators :as gen]
-            [clojure.spec.alpha :as spec]
+            #_[clojure.test.check.generators :as gen]
+            [clojure.spec :as spec]
             [ui.util :as u]
             [clojure.string :as str]))
 

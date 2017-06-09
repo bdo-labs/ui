@@ -1,6 +1,6 @@
 (ns ui.element.button
-  (:require [clojure.test.check.generators :as gen]
-            [clojure.spec.alpha :as spec]
+  (:require #_[clojure.test.check.generators :as gen]
+            [clojure.spec :as spec]
             [clojure.string :as str]
             [clojure.string :as str]
             [ui.util :as u]))

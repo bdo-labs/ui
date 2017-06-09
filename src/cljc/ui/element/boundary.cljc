@@ -5,11 +5,11 @@
 
 
 (defn style [{:keys [primary]}]
-  [:.Boundary {:position :relative}
-   [:.Made-visible {:position :absolute
-                    :border [[:dashed (unit/px 1) primary]]
-                    :height (unit/percent 100)
-                    :width (unit/percent 100)}]])
+  [[:.Boundary {:position :relative}
+    [:.Made-visible {:position :absolute
+                     :border   [[:dashed (unit/px 1) primary]]
+                     :height   (unit/percent 100)
+                     :width    (unit/percent 100)}]]])
 
 
 (defn boundary

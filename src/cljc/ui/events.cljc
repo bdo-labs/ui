@@ -1,6 +1,6 @@
 (ns ui.events
-  (:require [clojure.test.check.generators :as gen]
-            [clojure.spec.alpha :as spec]
+  (:require #_[clojure.test.check.generators :as gen]
+            [clojure.spec :as spec]
             [re-frame.core :as re-frame]
             [ui.db :as db]
             [ui.util :as u]
@@ -22,7 +22,8 @@
        :doc "This is an interceptor-pipeline that every handler must run
              through for validation against the application-state."}
   interceptors
-  [check-spec
+  [
+   ;; check-spec
    re-frame/trim-v])
 
 (re-frame/reg-event-db :initialize-db (fn  [_ _] db/default-db))

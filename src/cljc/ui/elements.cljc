@@ -19,8 +19,8 @@
             [ui.element.modal :as modal]
             [ui.element.menu :as menu]
             [ui.element.timeline :as timeline]
-            [ui.element.color-swatch :as color-swatch]
-            [ui.element.color-picker :as color-picker]
+            ;; [ui.element.color-swatch :as color-swatch]
+            ;; [ui.element.color-picker :as color-picker]
             [ui.element.numbers.views :as numbers]))
 
 
@@ -33,8 +33,8 @@
 (def icon icon/icon)
 
 
-(def color-swatch color-swatch/color-swatch)
-(def color-picker color-picker/color-picker)
+;; (def color-swatch color-swatch/color-swatch)
+;; (def color-picker color-picker/color-picker)
 
 
 (def container containers/container)

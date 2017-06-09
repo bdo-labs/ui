@@ -1,6 +1,6 @@
 (ns ui.db
-  (:require [clojure.test.check.generators :as gen]
-            [clojure.spec.alpha :as spec]))
+  (:require #_[clojure.test.check.generators :as gen]
+            [clojure.spec :as spec]))
 
 
 (spec/def ::id nat-int?)

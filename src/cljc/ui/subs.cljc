@@ -1,7 +1,7 @@
 (ns ui.subs
   (:require [re-frame.core :as re-frame :refer [reg-sub]]
-            [clojure.test.check.generators :as gen]
-            [clojure.spec.alpha :as spec]
+            #_[clojure.test.check.generators :as gen]
+            [clojure.spec :as spec]
             [ui.element.numbers.subs]
             [ui.util :as u]))
 

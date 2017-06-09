@@ -12,13 +12,13 @@
                  [com.andrewmcveigh/cljs-time "0.5.0"]
                  [day8.re-frame/undo "0.3.2"]
                  [day8/re-frame-tracer "0.1.1-SNAPSHOT"]
-                 [garden "1.3.2"]
+                 [garden "2.0.0-alpha1"]
                  [markdown-clj "0.9.99"]
                  [org.clojars.stumitchell/clairvoyant "0.2.1"]
-                 [org.clojure/clojure "1.9.0-alpha17"]
-                 [org.clojure/clojurescript "1.9.562"]
+                 [org.clojure/clojure "1.9.0-alpha13" :scope "provided"]
+                 [org.clojure/clojurescript "1.9.293" :scope "provided"]
                  [org.clojure/core.async "0.3.443"]
-                 [org.clojure/spec.alpha "0.1.123"]
+                 ;; [org.clojure/spec.alpha "0.1.123"]
                  [re-frame "0.9.4"]
                  [re-frisk "0.4.5" :scope "test"]
                  [reagent "0.6.2"]
@@ -111,11 +111,12 @@
   requires that `postcss-cli` and `autoprefixer` is installed"
   []
   (comp (garden :output-to "css/ui.css"
-             :styles-var 'ui.styles/screen)
-     (garden :output-to "css/docs.css"
-             :styles-var 'ui.styles/docs)
-     (autoprefixer :exec-path "target/node_modules/postcss-cli/bin/postcss"
-                   :files ["ui.css" "docs.css"] :browsers ">= 50%")))
+                :styles-var 'ui.styles/screen)
+        (garden :output-to "css/docs.css"
+                :styles-var 'ui.styles/docs)
+        (autoprefixer :exec-path "target/node_modules/postcss-cli/bin/postcss"
+                      :files ["ui.css" "docs.css"]
+                      :browsers ">= 50%")))
 
 
 (deftask dev

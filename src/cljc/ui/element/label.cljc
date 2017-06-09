@@ -1,5 +1,5 @@
 (ns ui.element.label
-  (:require [clojure.spec.alpha :as spec]))
+  (:require [clojure.spec :as spec]))
 
 
 (spec/def ::label-params

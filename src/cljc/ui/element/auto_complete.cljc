@@ -1,6 +1,6 @@
 (ns ui.element.auto-complete
   #?(:cljs (:require-macros [cljs.core.async.macros :refer [go]]))
-  (:require [clojure.spec.alpha :as spec]
+  (:require [clojure.spec :as spec]
             [clojure.string :as str]
             [clojure.core.async :refer [<! timeout #?(:clj go)]]
             #?(:cljs [reagent.core :refer [atom]])

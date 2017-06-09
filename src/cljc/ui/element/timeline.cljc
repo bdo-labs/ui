@@ -6,7 +6,7 @@
             [ui.element.button :refer [button]]
             [ui.element.containers :refer [container]]
             [ui.util :as u]
-            [clojure.spec.alpha :as spec]))
+            [clojure.spec :as spec]))
 
 
 (def months

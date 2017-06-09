@@ -5,8 +5,8 @@
   A set of functions that will work for 99% of your layout-needs.
   "
   (:require [ui.elements :as element]
-            [clojure.test.check.generators :as gen]
-            [clojure.spec.alpha :as spec]))
+            #_[clojure.test.check.generators :as gen]
+            [clojure.spec :as spec]))
 
 (defn fill
   "# Fill

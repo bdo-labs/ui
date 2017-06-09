@@ -1,6 +1,6 @@
 (ns ui.element.checkbox
   (:require [ui.util :as u]
-            [clojure.spec.alpha :as spec]))
+            [clojure.spec :as spec]))
 
 
 

@@ -1,5 +1,5 @@
 (ns ui.element.collection
-  (:require [clojure.spec.alpha :as spec]
+  (:require [clojure.spec :as spec]
             [clojure.string :as str]
             [ui.util :as u :refer [=i]]))
 

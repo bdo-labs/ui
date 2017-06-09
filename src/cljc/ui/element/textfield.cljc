@@ -1,5 +1,5 @@
 (ns ui.element.textfield
-  (:require [clojure.spec.alpha :as spec]
+  (:require [clojure.spec :as spec]
             [ui.util :as u]))
 
 

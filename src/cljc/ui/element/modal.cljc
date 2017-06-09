@@ -1,8 +1,8 @@
 (ns ui.element.modal
   (:require [ui.element.containers :refer [container]]
             [ui.element.button :refer [button]]
-            [clojure.test.check.generators :as gen]
-            [clojure.spec.alpha :as spec]
+            #_[clojure.test.check.generators :as gen]
+            [clojure.spec :as spec]
             [ui.util :as u]))
 
 

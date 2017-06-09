@@ -1,9 +1,10 @@
 (ns ui.util
   (:require [clojure.string :as str]
-            [clojure.test.check.generators :as gen]
-            [clojure.spec.alpha :as spec]
+            #_[clojure.test.check.generators :as gen]
+            [clojure.spec :as spec]
             [markdown.core :as markdown]
             [tongue.core :as tongue]
+            [garden.color :as color]
             #?(:cljs [cljs.core :refer [random-uuid]])))
 
 
@@ -159,3 +160,17 @@
 (def format-number-en
   (tongue/number-formatter { :group ","
                              :decimal "." }))
+
+
+(defn dark?
+  "Is the [r g b]-color supplied a dark color?"
+  [{:keys [r g b]}]
+  (> (- 1 (/ (+ (* 0.299 r)
+                (* 0.587 g)
+                (* 0.114 b)) 255)) 0.5))
+
+
+(defn gray
+  "Creates a [shade] of gray"
+  [shade]
+  (color/rgb (vec (take 3 (repeat shade)))))
