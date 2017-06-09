@@ -55,7 +55,7 @@
             :height           (unit/rem 0.5)
             :width            (unit/rem 0.5)
             :z-index          10}
-    [:&:hover :&.Dirty {:background primary}]
+    [#{:&:hover :&.Dirty} {:background primary}]
     [:&:hover {:transform  [[(translateY (unit/percent -50)) (scale 1.4)]]}
      [:&:after {:opacity 1}]]
     [:&:after {:display       :block
@@ -79,7 +79,7 @@
 
 (re-frame/reg-event-db
  ::initialize-clamp
- (fn [db [k id coll]]
+ (fn [db [_ id coll]]
    (-> db
        (assoc-in [::collection id] (sort coll)))))
 
