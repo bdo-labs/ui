@@ -66,10 +66,12 @@
 (defn number-filter
   "Output a range slider with multiple knobs"
   [sheet-ref col-ref]
-  (let [values @(subscribe [:unique-values sheet-ref col-ref])]
-    [clamp {:key     (str "filter-" col-ref "-range")
-              :labels? true
-              :range :both} values]))
+  (let [values    @(subscribe [:unique-values sheet-ref col-ref])
+        on-change #(u/log %)]
+    [clamp {:id        (str "filter-" col-ref "-range")
+            :labels?   true
+            :on-change on-change
+            :range     :both} values]))
 
 
 (defn column-menu

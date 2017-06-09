@@ -6,8 +6,9 @@
 
 (defn documentation []
   (let [progress-bar (re-frame/subscribe [:progress])
-        set-progress-bar #(re-frame/dispatch [:set-progress (.-value (.-target %))])
-        make-progress #(re-frame/dispatch [:set-progress (+ @progress-bar 10)])]
+        set-progress-bar #(re-frame/dispatch [:set-progress %])
+        make-progress #(re-frame/dispatch [:set-progress (+ @progress-bar 10)])
+        on-change #(set-progress-bar %)]
     [element/article
      "# Progress
 
@@ -21,7 +22,7 @@
      Mess with the clamp to make some progress 🤓
      "
      ;; TODO Replace with the clamp-element ones it's working
-     [element/clamp {:labels? true
-                     :range :upper} (range 100)]
-     [:input {:type :number
-              :on-change set-progress-bar}]]))
+     [element/clamp {:id "progress-clamp"
+                     :labels? true
+                     :range :upper
+                     :on-change on-change} (range 100)]]))
