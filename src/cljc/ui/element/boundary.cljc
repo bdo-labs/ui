@@ -25,13 +25,12 @@
         mouse-up       #(on-mouse-up %)
         mouse-enter    #(reset! !within? true)
         mouse-leave    #(reset! !within? false)
-        mouse-move     #(when @!within?
-                          (let [dim (.getBoundingClientRect @!element)
-                                mouse-x (- (.-pageX %) (.-left dim))
-                                mouse-x-pct (* (/ mouse-x (.-width dim)) 100)]
-                            (set! (.-mouseX %) mouse-x)
-                            (set! (.-mousePercentX %) mouse-x-pct)
-                            (on-mouse-within %)))]
+        mouse-move     #(let [dim (.getBoundingClientRect @!element)
+                              mouse-x (- (.-pageX %) (.-left dim))
+                              mouse-x-pct (* (/ mouse-x (.-width dim)) 100)]
+                          (set! (.-mouseX %) mouse-x)
+                          (set! (.-mousePercentX %) mouse-x-pct)
+                          (on-mouse-within %))]
     [:div.Boundary {:on-mouse-enter mouse-enter
                     :on-mouse-up    mouse-up
                     :on-mouse-move  mouse-move

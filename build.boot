@@ -15,8 +15,8 @@
                  [garden "1.3.2"]
                  [markdown-clj "0.9.99"]
                  [org.clojars.stumitchell/clairvoyant "0.2.1"]
-                 [org.clojure/clojure "1.9.0-alpha17" :scope "provided"]
-                 [org.clojure/clojurescript "1.9.562" :scope "provided"]
+                 [org.clojure/clojure "1.9.0-alpha17"]
+                 [org.clojure/clojurescript "1.9.562"]
                  [org.clojure/core.async "0.3.443"]
                  [org.clojure/spec.alpha "0.1.123"]
                  [re-frame "0.9.4"]
@@ -32,7 +32,6 @@
                  [adzerk/boot-test "1.2.0" :scope "test"]
                  [afrey/boot-asset-fingerprint "1.3.1" :scope "test"]
                  [binaryage/devtools "0.9.4" :scope "test"]
-                 [binaryage/dirac "1.2.9" :scope "test"]
                  [com.cemerick/piggieback "0.2.1"  :scope "test"]
                  [crisptrutski/boot-cljs-test "0.3.1" :scope "test"]
                  [danielsz/boot-autoprefixer "0.1.0" :scope "test"]
@@ -47,7 +46,6 @@
                  [org.martinklepsch/boot-garden "1.3.2-0" :scope "test"]
                  [pandeiro/boot-http "0.8.3" :scope "test"]
                  [powerlaces/boot-cljs-devtools "0.2.0" :scope "test"]
-                 ;; [powerlaces/boot-figreload "0.1.1-SNAPSHOT" :scope "test"]
                  [tolitius/boot-check "0.1.4" :scope "test"]
                  [weasel "0.7.0"  :scope "test"]])
 
@@ -64,8 +62,7 @@
          '[funcool.boot-codeina :refer :all]
          '[hendrick.boot-medusa :refer :all]
          '[org.martinklepsch.boot-garden :refer [garden]]
-         ;; '[powerlaces.boot-figreload :refer [reload]]
-         '[powerlaces.boot-cljs-devtools :refer [cljs-devtools dirac]]
+         '[powerlaces.boot-cljs-devtools :refer [cljs-devtools]]
          '[tolitius.boot-check :as check]
          '[pandeiro.boot-http :refer [serve]]
          '[afrey.boot-asset-fingerprint :refer [asset-fingerprint]])
@@ -91,11 +88,10 @@
 (deftask pre-requisits
   "Install pre-requisits"
   []
-  (comp
-   (npm :install {:postcss-cli "latest"
-                  :autoprefixer "latest"}
-        :cache-key ::cache)
-   (target)))
+  (comp (npm :install {:postcss-cli  "latest"
+                    :autoprefixer "latest"}
+          :cache-key ::cache)
+     (target)))
 
 
 (deftask readme
@@ -103,7 +99,7 @@
   client-side"
   []
   (let [content (str "(ns ui.readme)\n\n(def content \"" (slurp "README.md") "\")")
-        out "src/cljc/ui/readme.cljc"]
+        out     "src/cljc/ui/readme.cljc"]
     (doto out
       (spit content))
     identity))
@@ -115,52 +111,51 @@
   requires that `postcss-cli` and `autoprefixer` is installed"
   []
   (comp (garden :output-to "css/ui.css"
-                :styles-var 'ui.styles/screen)
-        (garden :output-to "css/docs.css"
-                :styles-var 'ui.styles/docs)
-        (autoprefixer :exec-path "target/node_modules/postcss-cli/bin/postcss"
-                      :files ["ui.css" "docs.css"] :browsers ">= 50%")))
+             :styles-var 'ui.styles/screen)
+     (garden :output-to "css/docs.css"
+             :styles-var 'ui.styles/docs)
+     (autoprefixer :exec-path "target/node_modules/postcss-cli/bin/postcss"
+                   :files ["ui.css" "docs.css"] :browsers ">= 50%")))
 
 
 (deftask dev
   "Interactive development-build"
   [s speak? bool "Notify when the build is completed"]
   (comp (git-pull :branch "origin" "master")
-        (pre-requisits)
-        (readme)
-        (serve)
-        (watch)
-        (if speak? (speak) identity)
-        (reload :on-jsload 'ui.core/mount-root)
-        (cljs-devtools)
-        (dirac)
-        (styles)
-        (cljs-repl)
-        (cljs :ids #{"ui"}
-              :optimizations :none
-              :source-map true
-              :compiler-options {:parallel-build true})
-        (asset-fingerprint :extensions [".css" ".html"] :skip true)
-        (target)))
+     (pre-requisits)
+     (readme)
+     (serve)
+     (watch)
+     (if speak? (speak) identity)
+     (reload :on-jsload 'ui.core/mount-root)
+     (cljs-devtools)
+     (styles)
+     (cljs-repl)
+     (cljs :ids #{"ui"}
+           :optimizations :none
+           :source-map true
+           :compiler-options {:parallel-build true
+                              :preloads       '[devtools.preload]})
+     (asset-fingerprint :skip true)
+     (target)))
 
 
 (deftask prod
   "Static production-build"
   [s speak? bool "Notify when the build is completed"]
   (comp (pre-requisits)
-        (readme)
-        (if speak? (speak) identity)
-        (styles)
-        (cljs :ids #{"ui"}
-              :optimizations :advanced
-              :compiler-options {:closure-defines    {"goog.DEBUG" false}
-                                 :pretty-print       false
-                                 :pseudo-names       true
-                                 :static-fns         true
-                                 :parallel-build     true
-                                 :optimize-constants true})
-        (asset-fingerprint :extensions [".css" ".html"])
-        (target)))
+     (readme)
+     (if speak? (speak) identity)
+     (styles)
+     (cljs :ids #{"ui"}
+           :optimizations :advanced
+           :compiler-options {:closure-defines    {"goog.DEBUG" false}
+                              :pretty-print       false
+                              :static-fns         true
+                              :parallel-build     true
+                              :optimize-constants true})
+     (asset-fingerprint :extensions [".css" ".html"])
+     (target)))
 
 
 (deftask test-once
@@ -168,7 +163,7 @@
   [s speak? bool "Notify when the build is completed"]
   (merge-env! :source-paths #{"test"})
   (comp (if speak? (speak) identity)
-        (test-cljs)))
+     (test-cljs)))
 
 
 (deftask test-auto
@@ -176,18 +171,18 @@
   [s speak? bool "Notify when the build is completed"]
   (merge-env! :source-paths #{"test"})
   (comp (watch)
-        (if speak? (speak) identity)
-        (test-cljs)))
+     (if speak? (speak) identity)
+     (test-cljs)))
 
 
 (deftask check-src []
   "Linting & other code-conformance tests"
   (merge-env! :source-paths #{"test"})
   (comp
-    (check/with-yagni)
-    (check/with-eastwood)
-    (check/with-kibit)
-    (check/with-bikeshed)))
+   (check/with-yagni)
+   (check/with-eastwood)
+   (check/with-kibit)
+   (check/with-bikeshed)))
 
 
 (deftask deploy

@@ -55,8 +55,8 @@
             :height           (unit/rem 0.5)
             :width            (unit/rem 0.5)
             :z-index          10}
-    [:&:hover {:background primary
-               :transform  [[(translateY (unit/percent -50)) (scale 1.4)]]}
+    [:&:hover :&.Dirty {:background primary}]
+    [:&:hover {:transform  [[(translateY (unit/percent -50)) (scale 1.4)]]}
      [:&:after {:opacity 1}]]
     [:&:after {:display       :block
                :background    secondary
@@ -74,6 +74,9 @@
                :content       (attr :data-value)}]]])
 
 
+;; Events
+
+
 (re-frame/reg-event-db
  ::initialize-clamp
  (fn [db [k id coll]]
@@ -88,76 +91,68 @@
 
 
 (re-frame/reg-event-db
+ ::unset-active-knob
+ (fn [db [_ id]]
+   (update-in db [::active-knob] dissoc id)))
+
+
+(re-frame/reg-event-fx
  ::move-knob
- (fn [db [_ id pct]]
-   (let [percent (Math/abs (Math/floor pct))]
-     (assoc-in db [::lower-clamp id] percent))))
+ (fn [{:keys [db]} [_ id pct]]
+   (let [active-knob (get-in db [::active-knob id])
+         percent (Math/abs (Math/floor pct))]
+     (if (= active-knob ::lower-knob)
+       (let [maximum (get-in db [::upper-knob id] 100)]
+         (u/log maximum)
+         {:db (assoc-in db [active-knob id] (min maximum percent))})
+       (let [minimum (get-in db [::lower-knob id] 0)]
+        {:db (assoc-in db [active-knob id] (max minimum percent))})))))
 
 
-(re-frame/reg-event-db
- ::set-lower-clamp
- (fn [db [_ id percent]]
-   (assoc-in db [::lower-clamp id] percent)))
-
-
-(re-frame/reg-event-db
- ::set-upper-clamp
- (fn [db [_ id percent]]
-   (assoc-in db [::upper-clamp id] percent)))
-
-
-(re-frame/reg-event-db
- ::set-collection
- (fn [db [_ id coll]]
-   (assoc-in db [::collection id] coll)))
-
+;; Subscriptions
 
 (re-frame/reg-sub ::active-knob (fn [db [k id]] (get-in db [k id])))
-(re-frame/reg-sub ::lower-clamp (fn [db [k id]] (get-in db [k id])))
-(re-frame/reg-sub ::upper-clamp (fn [db [k id]] (get-in db [k id])))
+
+
+(re-frame/reg-sub
+ ::lower-knob
+ (fn [db [k id]]
+   (get-in db [k id] 0)))
+
+
+(re-frame/reg-sub
+ ::upper-knob
+ (fn [db [k id]] (get-in db [k id] 100)))
+
+
 (re-frame/reg-sub ::collection (fn [db [k id]] (get-in db [k id])))
 
 
-;; FIXME This only works because the collection is equal to the percentage-count
 (re-frame/reg-sub
  ::lower-value
  (fn [[_ id]]
    [(re-frame/subscribe [::collection id])
-    (re-frame/subscribe [::minimum id])
-    (re-frame/subscribe [::lower-clamp id])])
- (fn [[coll minimum lower-clamp] _]
-   (or (Math/abs (Math/floor (* (/ (count coll) 100) lower-clamp))) minimum)))
+    (re-frame/subscribe [::lower-knob id])])
+ (fn [[coll lower-knob] _]
+   (let [idx (->> (/ (count coll) 100)
+                  (* lower-knob)
+                  (Math/round)
+                  (Math/abs)
+                  (max 0))]
+     (nth coll idx))))
 
 
 (re-frame/reg-sub
  ::upper-value
  (fn [[_ id]]
    [(re-frame/subscribe [::collection id])
-    (re-frame/subscribe [::maximum id])
-    (re-frame/subscribe [::lower-clamp id])])
- (fn [[coll maximum upper-clamp] _]
-   (let [idx (Math/abs (Math/floor (* (/ (count coll) 100) upper-clamp)))]
-     (or (nth coll idx) maximum))))
-
-
-(re-frame/reg-sub
- ::minimum
- (fn [[_ id]]
-   [(re-frame/subscribe [::collection id])])
- (fn [[coll] _]
-   (->> coll
-        (sort)
-        (first))))
-
-
-(re-frame/reg-sub
- ::maximum
- (fn [[_ id]]
-   [(re-frame/subscribe [::collection id])])
- (fn [[coll] _]
-   (->> coll
-        (sort)
-        (last))))
+    (re-frame/subscribe [::upper-knob id])])
+ (fn [[coll upper-knob] _]
+   (let [idx (->> (* (/ (dec (count coll)) 100) upper-knob)
+                  (Math/round)
+                  (Math/abs)
+                  (min (dec (count coll))))]
+     (nth coll idx))))
 
 
 (defn clamp
@@ -168,34 +163,26 @@
      :as   params} coll]
    (re-frame/dispatch [::initialize-clamp id coll])
    (let [;; Subscriptions
-         active-knob       @(re-frame/subscribe [::active-knob id])
-         lower-value       @(re-frame/subscribe [::lower-value id])
-         upper-value       @(re-frame/subscribe [::upper-value id])
-         lower-clamp       @(re-frame/subscribe [::lower-clamp id])
-         upper-clamp       @(re-frame/subscribe [::upper-clamp id])
+         active-knob     @(re-frame/subscribe [::active-knob id])
+         lower-value     @(re-frame/subscribe [::lower-value id])
+         upper-value     @(re-frame/subscribe [::upper-value id])
+         lower-knob      @(re-frame/subscribe [::lower-knob id])
+         upper-knob      @(re-frame/subscribe [::upper-knob id])
          ;; Events
-         set-active-knob   #(re-frame/dispatch [::set-active-knob id %1])
-         mouse-within      #(when-not (nil? active-knob)
-                              (let [x (.-mousePercentX %)]
-                                (re-frame/dispatch [::move-knob id x])))
-         mouse-up          (fn [] #(set-active-knob nil))
-         mouse-down        (fn [knob] #(set-active-knob knob))
-         ;; Transformations
-         extract-dimension (case (:range params)
-                             :upper {:left  (str lower-clamp "%")
-                                     :right 0}
-                             :both  {:left  (str lower-clamp "%")
-                                     :width (str (- upper-clamp lower-clamp) "%")}
-                             {:left  0
-                              :width (str upper-clamp "%")})]
-     (on-change {:lower lower-value
-                 :upper upper-value})
+         set-active-knob #(re-frame/dispatch [::set-active-knob id %])
+         mouse-within    #(when-not (nil? active-knob)
+                            (let [x (.-mousePercentX %)]
+                              (re-frame/dispatch [::move-knob id x])
+                              (on-change {:min lower-value
+                                          :max upper-value})))
+         mouse-up        #(re-frame/dispatch [::unset-active-knob id])
+         mouse-down      (fn [knob] #(set-active-knob knob))]
      [:div.Clamp {:id  id
                   :key id}
       (when labels?
         [:div.Label (case (:range params)
-                      :upper lower-value
-                      :lower upper-value
+                      :upper upper-value
+                      :lower lower-value
                       (str lower-value " - " upper-value))])
       ;; Wrap the slider in a boundary that exposes a relative clientX-stream
       [boundary {:on-mouse-within mouse-within
@@ -204,12 +191,20 @@
                                    :left (unit/rem 3)}}
        [:div.Slider {}
         (when-not (= (:range params) :lower)
-          [:div.Knob {:on-mouse-down (mouse-down :first)
+          [:div.Knob {:on-mouse-down (mouse-down ::lower-knob)
                       :data-value    (str lower-value)
-                      :style         {:left (str lower-clamp "%")}}])
+                      :class         (if (not= lower-knob 0) "Dirty" "")
+                      :style         {:left (str lower-knob "%")}}])
         (when-not (= (:range params) :upper)
-          [:div.Knob {:on-mouse-down (mouse-down :last)
+          [:div.Knob {:on-mouse-down (mouse-down ::upper-knob)
+                      :class         (if (not= upper-knob 100) "Dirty" "")
                       :data-value    (str upper-value)
-                      :style         {:left (str upper-clamp "%")}}])
+                      :style         {:left (str upper-knob "%")}}])
         [:div.Extract
-         {:style extract-dimension}]]]])))
+         {:style (case (:range params)
+                   :upper {:left  (str lower-knob "%")
+                           :right 0}
+                   :both  {:left  (str lower-knob "%")
+                           :width (str (- upper-knob lower-knob) "%")}
+                   {:left  0
+                    :width (str upper-knob "%")})}]]]])))

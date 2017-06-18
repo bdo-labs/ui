@@ -180,12 +180,8 @@
    [".Container:not(.Vertically):not(.Compact) > * + *" {:margin-left (unit/rem 1)}]
    [".Container.Vertically:not(.Compact) > * + *" {:margin-top (unit/rem 1)}]
    [:.Container {:box-sizing       :border-box
-                 :flex-grow        1
-                 :flex-shrink      1
-                 :flex             1
-                 :-webkit-box-flex 1
-                 :-ms-flex         [[0 1 :auto]]}
-    ^:prefix {:display :flex}
+                 :display          :flex
+                 :flex             [[1 1 (unit/percent 0)]]}
     [:&.Hide {:display :none}]
     [(s/& (s/not :Vertically)) {:flex-direction :row}]
     [(s/& (s/not :.No-wrap)) {:flex-wrap :wrap}]
@@ -216,7 +212,7 @@
                      :min-height 0
                      :height     (unit/percent 100)
                      :width      (unit/percent 100)}]
-    [:&.Rounded {:border-radius (unit/rem 0.2)}]
+    [:&.Rounded {:border-radius (unit/rem 0.8)}]
     [:&.Raised {:box-shadow [[0 (unit/rem 0.2) (unit/rem 0.2) (color/rgba 0 0 1 0.3)]]}]]])
 
 
@@ -264,8 +260,14 @@
   [:to {:background (gray 220)}])
 
 
+(defkeyframes fade
+  [:from {:opacity 0}]
+  [:to {:opacity 1}])
+
+
 (defn animations [theme]
-  [pulse-color])
+  [pulse-color]
+  [fade])
 
 
 (defn- forms [{:keys [primary secondary]}]
@@ -620,6 +622,7 @@
     [(s/& (s/not :.Open)) {:display :none}]
     [:&.Open
      [:.Backdrop {:opacity 1
+                  :animation [[fade :200ms :ease]]
                   :z-index 10}]]]
    [:.Dialog-content {:background    :white
                       :border-radius (unit/rem 0.8)
@@ -735,10 +738,7 @@
      [:body {:background :white}]
      [:.Functional-hide {:position :absolute
                          :left     (unit/vw -200)}]
-     [:.Sidebar {:background 245 245 245}
-      ;; [:sidebar
-      ;;  [:a {:color (-> theme :default :secondary)}]]
-      ])))
+     [:.Sidebar {:background 245 245 245}])))
 
 
 (def screen

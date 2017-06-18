@@ -51,7 +51,7 @@
        [:select#to-the {:defaultValue "left" :on-change set-to-the}
         [:option {:value "left"} "Left"]
         [:option {:value "right"} "Right"]]]
-      [layout/vertically {:class [:demo] :fill true}
+      [layout/vertically {:class [:demo]}
        [element/sidebar {:open open? :backdrop backdrop? :ontop ontop? :to-the to-the}
         [layout/vertically
          [:h3 "Sidebar content"]]

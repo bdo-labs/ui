@@ -8,7 +8,7 @@
   (let [progress-bar (re-frame/subscribe [:progress])
         set-progress-bar #(re-frame/dispatch [:set-progress %])
         make-progress #(re-frame/dispatch [:set-progress (+ @progress-bar 10)])
-        on-change #(set-progress-bar %)]
+        on-change #(set-progress-bar (:min %))]
     [element/article
      "# Progress
 

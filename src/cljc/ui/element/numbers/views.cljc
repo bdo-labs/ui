@@ -67,7 +67,7 @@
   "Output a range slider with multiple knobs"
   [sheet-ref col-ref]
   (let [values    @(subscribe [:unique-values sheet-ref col-ref])
-        on-change #(u/log %)]
+        on-change #(dispatch [:filter-range sheet-ref col-ref %])]
     [clamp {:id        (str "filter-" col-ref "-range")
             :labels?   true
             :on-change on-change
@@ -168,23 +168,7 @@
                      inst-formatter u/format-inst}
               :as   params}]
   (let [columns @(subscribe [:columns sheet-ref])
-        rows    @(subscribe [:rows sheet-ref])
-        ;; toggle-duplicate  (fn [event] (.toggle (.-classList (.-target event)) "Duplicate"))
-        ;; on-mouse-down     #(do (toggle-duplicate %)
-        ;;                        (reset! !dup-val @(subscribe [:cell sheet-ref (.-title (.-target %))]))
-        ;;                        (dispatch [:set-first-selection sheet-ref (.-title (.-target %))])
-        ;;                        (.add (.-classList (.-target %)) "First"))
-        ;; on-mouse-out      #(.remove (.-classList (.-target %)) "Last")
-        ;; on-mouse-over     #(when @!mouse-down?
-        ;;                      (do (toggle-duplicate %)
-        ;;                          (.add (.-classList (.-target %)) "Last")
-        ;;                          (dispatch [:set-cell-val sheet-ref (.-title (.-target %)) @!dup-val])
-        ;;                          #_(:cljs (.map (->> ".Duplicate"
-        ;;                                              (.querySelectorAll @!worksheet)
-        ;;                                              (.call js/Array.prototype.slice))
-        ;;                                         (fn [el]
-        ;;                                           (set! (.-innerHTML (.-firstChild el)) @!dup-val))))))
-        ]
+        rows    @(subscribe [:rows sheet-ref])]
     [:div.Body
      [table
       [colgroup "headers"
@@ -209,9 +193,6 @@
                                    (map (fn [{:keys [cell-ref value align fill]}]
                                           (let [k (merge
                                                    {:key   cell-ref
-                                                    ;; :on-mouse-down on-mouse-down
-                                                    ;; :on-mouse-over on-mouse-over
-                                                    ;; :on-mouse-out  on-mouse-out
                                                     :style (merge {}
                                                                   (when ((complement nil?) align) {:text-align align})
                                                                   (when ((complement nil?) fill) {:background fill}))

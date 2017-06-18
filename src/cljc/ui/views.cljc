@@ -4,7 +4,6 @@
             [ui.readme :as readme]
             [ui.elements :as element]
             [ui.layout :as layout]
-            [ui.util :as u]
             [ui.docs.centered :as centered]
             [ui.docs.fill :as fill]
             [ui.docs.progress :as progress]
@@ -27,7 +26,7 @@
        (name item)])))
 
 
-(defn- footer []
+#_(defn- footer []
   [:footer {:role :contentinfo}
    [layout/horizontally {:no-gap true :class [:legal]}
     [:span (str "© BDO 2017")]
@@ -83,7 +82,8 @@
      [layout/vertically
       [:menu [menu-item :ui]]
       (into [:menu [:h5 "layout/"]] (for [l layouts] [menu-item l])) [:br]
-      (into [:menu [:h5 "elements/"]] (for [elem elements] [menu-item elem]))]
+      (into [:menu [:h5 "elements/"]] (for [elem elements] [menu-item elem])) [:br]
+      (into [:menu [:h5 "virtuals/"]] (for [v virtuals] [menu-item v])) [:br]]
      [doc-item active-item]]))
 
 
