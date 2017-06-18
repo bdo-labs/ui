@@ -137,7 +137,8 @@
            :source-map true
            :compiler-options {:parallel-build true
                               :preloads       '[devtools.preload]})
-     (asset-fingerprint :skip true)
+     (asset-fingerprint :skip true
+                        :extensions [".css" ".html"])
      (target)))
 
 

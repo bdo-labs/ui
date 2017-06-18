@@ -6,6 +6,7 @@
             [garden.selectors :as selector :refer [defpseudoelement]]
             [ui.util :as u]
             [ui.element.boundary :as boundary]
+            [ui.element.checkbox :as checkbox]
             [ui.element.clamp :as clamp]
             [ui.element.progress-bar :as progress-bar]))
 
@@ -252,7 +253,7 @@
     (selector/> :*) {:margin-right (unit/rem 1)}]])
 
 
-#_(defkeyframes pulse-color
+(defkeyframes pulse-color
   [:from {:background (u/gray 240)}]
   [:to {:background (u/gray 220)}])
 
@@ -298,8 +299,7 @@
                  :margin   [[(unit/rem 3) 0 (unit/rem 1)]]}
     [:&.Dirty
      [:label {:left             0
-              :transform "translateY(-100%) scale( 0.75)"
-              ;; :transform        [[(translateY (unit/percent -100)) (scale 0.75)]]
+              :transform        [[(translateY (unit/percent -100)) (scale 0.75)]]
               :transform-origin [[:top :left]]}]]
     [:&.Read-only [:* {:cursor :pointer}]]
     [:&.Disabled [:* {:cursor :not-allowed}]
@@ -311,7 +311,7 @@
     [:label {:position   :absolute
              :color      :silver
              :transition [[:all :200ms :ease]]
-             ;; :transform  (translateZ 0)
+             :transform  (translateZ 0)
              :left       0
              :cursor     :text
              :top        (unit/rem 0.5)
@@ -328,7 +328,7 @@
      [:&:focus {:border-color primary}
       [:+ [:label {:color            :black
                    :left             0
-                   ;; :transform        [[(translateY (unit/percent -100)) (scale 0.75)]]
+                   :transform        [[(translateY (unit/percent -100)) (scale 0.75)]]
                    :transform-origin [[:top :left]]}]]]
      [:&:disabled {:cursor :not-allowed}]
      [:&:required
@@ -392,7 +392,7 @@
      [#{:th :td} {:border-top [[:solid (unit/px 1) (u/gray 230)]]}]]
     [:.Column-heading {:position :relative}
      [:.Dropdown-origin {:opacity    0
-                         ;; :transform  [[(translateY (unit/percent -50)) (rotateZ (unit/deg 90))]]
+                         :transform  [[(translateY (unit/percent -50)) (rotateZ (unit/deg 90))]]
                          :transition [[:200ms :ease]]
                          :cursor     :pointer
                          :outline    :none
@@ -455,7 +455,7 @@
                  :bottom        0
                  :left          (unit/percent 50)
                  :cursor        :row-resize
-                 ;; :transform     [[(css (translateX (unit/percent -50))) (css (translateY (unit/percent 50)))]]
+                 :transform     [[(translateX (unit/percent -50)) (translateY (unit/percent 50))]]
                  :height        (unit/em 0.4)
                  :width         (unit/em 0.4)
                  :background    (color/rgb [245 228 90])}]]]
@@ -524,9 +524,9 @@
                 :background       (u/gray 255)
                 :border           [[:solid (unit/px 1) (u/gray 220)]]
                 :box-sizing       :border-box
-                ;; :transform        [[(translateY (unit/percent 100)) (scale 1)]]
+                :transform        [[(translateY (unit/percent 100)) (scale 1)]]
                 :transform-origin [[:top :right]]
-                ;; :transition       [[:200ms (cubic-bezier 0.770, 0.000, 0.175, 1.000)]]
+                :transition       [[:200ms (cubic-bezier 0.770, 0.000, 0.175, 1.000)]]
                 :bottom           0
                 :right            0
                 :z-index          10
@@ -591,28 +591,14 @@
 
 
 (defn- tmp [{:keys [primary secondary background positive negative]}]
-  [[#{:.Code :pre} {:background    (u/gray 250)
-                 :border-radius (unit/rem 0.3)
-                 :color         (u/gray 170)
-                 :font-family   [[:monospace]]
-                 :white-space   :pre
-                 :padding       (unit/rem 2)}]
-   [#{:.Code :code} {:line-height 1.8}
-    [:label {:background    (color/rgb [38 189 230])
-             :color         :white
-             :border-radius (unit/rem 1)
-             :padding       [[(unit/rem 0.2) (unit/rem 0.5)]]}]]
-   [:.Keyword {:color (color/rgb [60 140 180])}]
-   [:.Symbol {:color (color/rgb [60 220 190])}]
-   [:.Parens {:color (color/rgb [180 70 200])}]
-   [:.Dialog {:position :fixed
+  [[:.Dialog {:position :fixed
               :left     0
               :top      0
               :height   (unit/percent 100)
               :width    (unit/percent 100)
               :margin   [[0 :!important]]
               :z-index  10}
-    [(selector/& (selector/not :.Open)) {:display :none}]
+    ;; [(selector/& (selector/not :.Open)) {:display :none}]
     [:&.Open
      [:.Backdrop {:opacity 1
                   :animation [[fade :200ms :ease]]
@@ -624,77 +610,6 @@
                       :top           (unit/percent 50)
                       :transform     [[(translateY (unit/percent -50)) (translateX (unit/percent -50))]]
                       :z-index       12}]
-   [:.Shape {:display        :inline-flex
-             :position       :relative
-             :flex-direction :column}]
-   [#{:.Checkbox :.Toggle}
-    [:input {:-webkit-appearance :none
-             :background         :white
-             :border             [[:solid (unit/px 1) :silver]]
-             :outline            :none}]]
-   [:.Radio
-    [:.Shape {:border-radius (unit/percent 50)}]]
-   [:.Toggle
-    [:.Shape {:width        (unit/rem 4)
-              :margin-right (unit/rem 1)}]
-    [:input {:border-radius (unit/rem 1.2)
-             :background "linear-gradient(45deg,rgba(0 0 0 0.2),rgba(0,0,0,0.1))"
-             :background    (linear-gradient (unit/deg 45) (color/rgba [0 0 1 0.2]) (color/rgba [0 0 1 0.1]))
-             :position      :absolute
-             :transition    [[:200ms :ease]]
-             :top           0
-             :margin        0
-             :height        (unit/percent 100)
-             :width         (unit/percent 100)
-             :z-index       1}]
-    [:i {:background      :white
-         :box-shadow      [[0 (unit/px 1) (unit/px 2) (color/rgba [0 0 1 0.5])]]
-         :display         :flex
-         :margin          (unit/rem 0.1)
-         :align-items     :center
-         :justify-content :center
-         :padding         (unit/rem 0.5)
-         :align-self      :flex-start
-         :position        :relative
-         :transition      [[:200ms :ease]]
-         :line-height     0
-         :height          (unit/rem 1)
-         :width           (unit/rem 1)
-         :z-index         2
-         :border-radius   (unit/percent 50)}]
-    [:&.Checked
-     [:i {:transform "translateX(1.75rem)"
-          :transform (translateX (unit/rem 1.75))}]
-     [:input {:background   (linear-gradient (unit/deg 45) (color/lighten positive 5) (color/darken positive 5))
-              :border-color (color/darken positive 10)}]]]
-   [:.Checkbox {:display     :flex
-                :user-select :none
-                :position    :relative}
-    [:.Shape {:margin-right (unit/rem 0.5)}]
-    [:input {:position :relative}]
-    [:i {:position         :absolute
-         :left             (unit/percent 50)
-         :top              (unit/rem -0.3)
-         :font-size        (unit/rem 2.5)
-         :transform-origin [[:center :center]]
-         :transform "scale(0) translateX(-50%)"
-         :transform        [[(scale 0) (translateX (unit/percent -50))]]
-         :transition       [[:100ms :ease]]
-         :z-index          2}]
-    [:&.Checked
-     [:i {:transform [[(scale 1) (translateX (unit/percent -50))]]}]
-     [:input {:background   primary
-              :border-color (color/darken primary 10)}]]
-    [:input {:-webkit-appearance :none
-             :background         :white
-             :border             [[:solid (unit/px 1) :silver]]
-             :position           :relative
-             :outline            :none
-             :transition         [[:100ms :ease]]
-             :width              (unit/rem 1.5)
-             :height             (unit/rem 1.5)
-             :border-radius      (unit/rem 0.2)
-             :z-index            1}]]
    [:body {:background-color background}]
    [:menu [:a {:display :block}]]
    [:a {:color           secondary ; primary
@@ -705,56 +620,64 @@
 
 
 (def docs
-  (list
-   [:.Container
-    [:&.Demo {:background          (repeat 2 triangle)
-              :background-position [[0 0] [(unit/px 10) (unit/px 10)]]
-              :background-size     [[(unit/px 20) (unit/px 20)]]
-              :min-width           (unit/vw 50)
-              :min-height          (unit/vh 35)
-              :box-shadow          [[:inset 0 (unit/px 2) (unit/px 8) (color/rgba [0 0 1 0.3])]]}
-     [:&.Horizontally
-      [:&.Align-left {:align-items :flex-start}]
-      [:&.Align-right {:justify-content :flex-end}]]
-     [:&.Vertically
-      [:&.Align-top {:align-items :flex-start}]
-      [:&.Align-bottom {:justify-content :flex-end}]]
-     [:.Fill {:background (-> theme :default :primary)
-              :border     [[:dashed (unit/px 1) (color/rgba [0 0 1 0.2])]]}]]]
-   [:.Demo-box {:border           [[:solid (unit/px 1) :silver]]
-                :background-color :white
-                :padding          (unit/rem 2)}]
-   [:body {:background :white}]
-   [:.Functional-hide {:position :absolute
-                       :left     (unit/vw -200)}]
-   [:.Sidebar {:background (u/gray 245)}])
-  #_(let [contrast (u/gray 240)
-          triangle (linear-gradient (unit/deg 45)
-                                    [contrast (unit/percent 25)]
-                                    [:transparent (unit/percent 25)]
-                                    [:transparent (unit/percent 75)]
-                                    [contrast (unit/percent 75)]
-                                    contrast)]
-      ))
+  (let [contrast (u/gray 240)
+        triangle (linear-gradient (unit/deg 45)
+                                  [contrast (unit/percent 25)]
+                                  [:transparent (unit/percent 25)]
+                                  [:transparent (unit/percent 75)]
+                                  [contrast (unit/percent 75)]
+                                  contrast)]
+    [:.Container
+     [:&.Demo {:background          (repeat 2 triangle)
+               :background-position [[0 0] [(unit/px 10) (unit/px 10)]]
+               :background-size     [[(unit/px 20) (unit/px 20)]]
+               :min-width           (unit/vw 50)
+               :min-height          (unit/vh 35)
+               :box-shadow          [[:inset 0 (unit/px 2) (unit/px 8) (color/rgba [0 0 1 0.3])]]}
+      [:&.Horizontally
+       [:&.Align-left {:align-items :flex-start}]
+       [:&.Align-right {:justify-content :flex-end}]]
+      [:&.Vertically
+       [:&.Align-top {:align-items :flex-start}]
+       [:&.Align-bottom {:justify-content :flex-end}]]
+      [:.Fill {:background (-> theme :default :primary)
+               :border     [[:dashed (unit/px 1) (color/rgba [0 0 1 0.2])]]}]]]
+    [#{:.Code :pre} {:background    (u/gray 250)
+                    :border-radius (unit/rem 0.3)
+                    :color         (u/gray 170)
+                    :font-family   [[:monospace]]
+                    :white-space   :pre
+                    :padding       (unit/rem 2)}]
+    [#{:.Code :code} {:line-height 1.8}
+     [:label {:background    (color/rgb [38 189 230])
+              :color         :white
+              :border-radius (unit/rem 1)
+              :padding       [[(unit/rem 0.2) (unit/rem 0.5)]]}]]
+    [:.Keyword {:color (color/rgb [60 140 180])}]
+    [:.Symbol {:color (color/rgb [60 220 190])}]
+    [:.Parens {:color (color/rgb [180 70 200])}]
+    [:.Demo-box {:border           [[:solid (unit/px 1) :silver]]
+                 :background-color :white
+                 :padding          (unit/rem 2)}]
+    [:body {:background :white}]
+    [:.Functional-hide {:position :absolute
+                        :left     (unit/vw -200)}]
+    [:.Sidebar {:background (u/gray 245)}]))
 
 
-;; FIXME Problematic selectors are ignored using reader-comment "#_"
-;; FIXME Problems using `cssfns`
 (def screen
   (let [theme (:default theme)]
-    (map #(into '() %)
-         [(structure theme)
-          (layouts theme)
-          (containers theme)
-          #_(animations theme)
-          (numbers theme)
-          (forms theme)
-          (color-picker theme)
-          (calendar theme)
-          (typography theme)
-          (buttons theme)
-          (dropdown theme)
-          (tmp theme)
-          (clamp/style theme)
-          (boundary/style theme)
-          (progress-bar/style theme)])))
+    (map #(into '() %) [(structure theme)
+                        (layouts theme)
+                        (containers theme)
+                        (numbers theme)
+                        (forms theme)
+                        (color-picker theme)
+                        (calendar theme)
+                        (typography theme)
+                        (buttons theme)
+                        (dropdown theme)
+                        (checkbox/style theme)
+                        (clamp/style theme)
+                        (boundary/style theme)
+                        (progress-bar/style theme)])))

@@ -1,5 +1,10 @@
 (ns ui.element.progress-bar
-  (:require [garden.units :as unit]))
+  #?(:cljs (:require-macros [garden.def :refer [defcssfn defkeyframes defstyles]]))
+  (:require #?(:clj [garden.def :refer [defcssfn defkeyframes defstyles]])
+            [garden.units :as unit]))
+
+
+(defcssfn translateZ)
 
 
 (defn style
@@ -13,7 +18,7 @@
     [:.Progress {:background primary
                  :height     (unit/percent 100)
                  :transition [[:200ms :ease]]
-                 :transform  "translateZ(0)"
+                 :transform  (translateZ 0)
                  :width      0}]]])
 
 
