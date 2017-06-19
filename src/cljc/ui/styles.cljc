@@ -1,6 +1,7 @@
 (ns ui.styles
   #?(:cljs (:require-macros [garden.def :refer [defcssfn defkeyframes defstyles]]))
   (:require #?(:clj [garden.def :refer [defcssfn defkeyframes defstyles]])
+            [garden.stylesheet :as stylesheet]
             [garden.core :refer [css]]
             [garden.units :as unit]
             [garden.color :as color]
@@ -69,7 +70,7 @@
                                             :width  (unit/percent 100)}]
    [#{:html :body :menu :ul} {:margin  0
                               :padding 0}]
-   [:main {:height "calc(100vh - 64px)"}]
+   [:main {:height (stylesheet/calc (- (unit/vh 100) (unit/px 64)))}]
    [#{:.Vertical-rule :.Horizontal-rule} {:background-color :silver}]
    [:.Vertical-rule {:width        (unit/px 1)
                      :min-height   (unit/rem 2.5)
@@ -118,7 +119,7 @@
             :position           :relative
             :height             (unit/percent 100)}]
     [:&.Locked
-     [:main {:width "calc(100% - 360px)"}]]
+     [:main {:width (stylesheet/calc (- (unit/percent 100) (unit/px 360)))}]]
     #_[(selector/& (selector/not :.Locked))
      [:.Slider {:transition [[:500ms :ease]]}]
      [:&.Align-left
@@ -172,10 +173,10 @@
    #_[".Container.Vertically:not(.Compact) > * + *" {:margin-top (unit/rem 1)}]
    [:.Container
     #:flex {:grow   1
-            :shrink 1
-            :basis (unit/percent 0)}
+            :shrink 0
+            :basis  :auto}
     {:box-sizing :border-box
-     :display :flex}
+     :display    :flex}
     [:&.Hide {:display :none}]
     ;; [(selector/& (selector/not :.Vertically)) {:flex-direction :row}]
     ;; [(selector/& (selector/not :.No-wrap)) {:flex-wrap :wrap}]
@@ -201,11 +202,11 @@
     ;; TODO https://github.com/noprompt/garden/issueselector/127
     #_[(selector/& :.Container (selector/> (selector/not :.Compact) (selector/+ :* :*))) {:margin-left (unit/rem 2)}]
     [#{:&.Fill :.Fill} {:box-sizing :border-box
-                        :flex       1
-                        :min-width  0
-                        :min-height 0
-                        :height     (unit/percent 100)
-                        :width      (unit/percent 100)}]
+                       :flex       1
+                       :min-width  0
+                       :min-height 0
+                       :height     (unit/percent 100)
+                       :width      (unit/percent 100)}]
     [:&.Rounded {:border-radius (unit/rem 1)}]
     [:&.Raised {:box-shadow [[0 (unit/rem 0.2) (unit/rem 0.2) (color/rgba [0 0 1 0.3])]]}]]])
 

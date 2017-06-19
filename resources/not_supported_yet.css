@@ -21,3 +21,16 @@
 /* Color-picker */
 .Swatch::-webkit-color-swatch-wrapper { padding: 0; }
 .Swatch::-webkit-color-swatch { border: 0; }
+
+
+/* Sidebar */
+.Sidebar:not(.Locked) {}
+.Sidebar:not(.Locked) .Slider, .Sidebar:not(.Locked).Ontop sidebar { transition: 500ms ease; }
+.Sidebar:not(.Locked).Align-left sidebar { left: -360px; }
+.Sidebar:not(.Locked).Align-right sidebar { right: -360px; }
+.Sidebar:not(.Locked).Open .Backdrop { opacity: 1; z-index: 8; }
+.Sidebar:not(.Locked).Open:not(.Ontop).Align-left .Slider { transform: translateX(360px); }
+.Sidebar:not(.Locked).Open:not(.Ontop).Align-right .Slider { transform: translateX(-360px); }
+.Sidebar:not(.Locked).Open.Ontop sidebar { box-shadow: 0 0 6rem rgba(0,0,0,0.5); }
+.Sidebar:not(.Locked).Open.Ontop.Align-left sidebar { transform: translateX(360px); }
+.Sidebar:not(.Locked).Open.Ontop.Align-right sidebar { transform: translateX(-360px); }
