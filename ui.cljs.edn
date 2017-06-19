@@ -1,0 +1,4 @@
+{:require     [ui.core]
+ :init-fn     [ui.core/init]
+ ;; :boot-reload {:on-jsload ui.core/mount-root}
+ }
