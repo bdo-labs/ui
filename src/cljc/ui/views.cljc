@@ -22,7 +22,7 @@
     (fn [item]
       [:a {:key (str "menu-item-" (name item))
            :class (if (= @active-doc-item item) "Primary" "")
-           :href (str "/#/" (name item))}
+           :href (str "./#/" (name item))}
        (name item)])))
 
 
