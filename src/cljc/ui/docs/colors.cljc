@@ -4,8 +4,7 @@
             [ui.element.content :refer [article]]
             [ui.styles :as styles]
             [ui.layout :as layout]
-            [ui.element.color-picker :refer [color-picker]]
-            [ui.util :as u]))
+            [ui.element.color-picker :refer [color-picker]]))
 
 
 (re-frame/reg-event-db
@@ -41,15 +40,18 @@
         set-secondary #(re-frame/dispatch [::set-secondary %])]
     [article
      "# Color-picker
-      Pick and choose colors that can easily be persisted as a theme"
-     [layout/horizontally {:rounded? true
-                           :raised?  true
-                           :style    {:background "rgb(250,250,250)"}}
-      [layout/vertically
-       [:span "Primary"]
-       [color-picker {:hex       primary
-                      :on-change set-primary}]]
-      [layout/vertically
-       [:span "Secondary"]
-       [color-picker {:hex       secondary
-                      :on-change set-secondary}]]]]))
+      Pick and choose colors that can easily be persisted as a theme "
+     [layout/vertically {:rounded? true
+                         :raised?  true
+                         :style    {:background "rgb(250,250,250)"}}
+      [layout/horizontally
+       [layout/vertically
+        [:span "Primary"]
+        [color-picker {:hex       primary
+                       :on-change set-primary}]]
+       [layout/vertically
+        [:span "Secondary"]
+        [color-picker {:hex       secondary
+                       :on-change set-secondary}]]]
+      [layout/centered
+       [:small [:em (str "Note that clicking the color-value changes it's type, so you can copy the version you prefer to your clip-board")]]]]]))
