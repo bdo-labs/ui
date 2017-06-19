@@ -1,5 +1,5 @@
 (ns ui.docs.sheet
-  (:require #_[clojure.test.check.generators :as gen]
+  (:require [clojure.test.check.generators :as gen]
             [clojure.spec :as spec]
             [clojure.string :as str]
             [ui.element.auto-complete :refer [auto-complete]]

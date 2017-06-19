@@ -1,10 +1,10 @@
 (ns ui.docs.colors
   (:require [re-frame.core :as re-frame]
-            ;; [garden.color :as color]
+            [garden.color :as color]
             [ui.element.content :refer [article]]
             [ui.styles :as styles]
             [ui.layout :as layout]
-            ;; [ui.element.color-picker :refer [color-picker]]
+            [ui.element.color-picker :refer [color-picker]]
             [ui.util :as u]))
 
 
@@ -20,21 +20,21 @@
    (assoc db ::secondary hex)))
 
 
-;; (re-frame/reg-sub
-;;  ::primary
-;;  (fn [db [k]]
-;;    (or (get db k)
-;;        (color/rgb->hex (-> styles/theme :default :primary)))))
+(re-frame/reg-sub
+ ::primary
+ (fn [db [k]]
+   (or (get db k)
+       (color/hex (-> styles/theme :default :primary)))))
 
 
-;; (re-frame/reg-sub
-;;  ::secondary
-;;  (fn [db [k]]
-;;    (or (get db k)
-;;        (color/rgb->hex (-> styles/theme :default :secondary)))))
+(re-frame/reg-sub
+ ::secondary
+ (fn [db [k]]
+   (or (get db k)
+       (color/hex (-> styles/theme :default :secondary)))))
 
 
-#_(defn documentation []
+(defn documentation []
   (let [primary       @(re-frame/subscribe [::primary])
         secondary     @(re-frame/subscribe [::secondary])
         set-primary   #(re-frame/dispatch [::set-primary %])

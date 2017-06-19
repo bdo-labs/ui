@@ -9,7 +9,7 @@
             [ui.docs.progress :as progress]
             [ui.docs.horizontally :as horizontally]
             [ui.docs.vertically :as vertically]
-            ;; [ui.docs.colors :as colors]
+            [ui.docs.colors :as colors]
             [ui.docs.dialog :as dialog]
             [ui.docs.buttons :as buttons]
             [ui.docs.inputs :as inputs]
@@ -63,7 +63,7 @@
 
     ;; Elements
     :buttons [buttons/documentation]
-    ;; :colors [colors/documentation]
+    :colors [colors/documentation]
     :dialog [dialog/documentation]
     :inputs [inputs/documentation]
     :progress [progress/documentation]
@@ -83,7 +83,7 @@
       [:menu [menu-item :ui]]
       (into [:menu [:h5 "layout/"]] (for [l layouts] [menu-item l])) [:br]
       (into [:menu [:h5 "elements/"]] (for [elem elements] [menu-item elem])) [:br]
-      (into [:menu [:h5 "virtuals/"]] (for [v virtuals] [menu-item v])) [:br]]
+      #_(into [:menu [:h5 "virtuals/"]] (for [v virtuals] [menu-item v])) [:br]]
      [doc-item active-item]]))
 
 
