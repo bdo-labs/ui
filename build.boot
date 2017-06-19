@@ -156,7 +156,8 @@
                               :static-fns         true
                               :parallel-build     true
                               :optimize-constants true})
-     (asset-fingerprint :extensions [".css" ".html"])
+     (asset-fingerprint :extensions [".css" ".html"]
+                        :asset-host "https://bdo-labs.github.com/ui/")
      (target)))
 
 
