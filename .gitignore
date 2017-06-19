@@ -2,9 +2,7 @@
 
 ; Directories
 
-!/resources/public/index.html
 *.log
-resources/
 target/
 compiled/
 out/
