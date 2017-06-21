@@ -14,7 +14,8 @@
             [ui.docs.buttons :as buttons]
             [ui.docs.inputs :as inputs]
             [ui.docs.sheet :as sheet]
-            [ui.docs.sidebar :as sidebar]))
+            [ui.docs.sidebar :as sidebar]
+            [ui.docs.timeline :as timeline]))
 
 
 (defn- menu-item []
@@ -67,6 +68,7 @@
     :dialog [dialog/documentation]
     :inputs [inputs/documentation]
     :progress [progress/documentation]
+    :timeline [timeline/documentation]
     :sheet [sheet/documentation]
     :sidebar [sidebar/documentation]
     [intro]))
@@ -77,7 +79,7 @@
   (let [active-item @(re-frame/subscribe [:active-doc-item])
         virtuals    [:boundary]
         layouts     [:centered :horizontally :vertically :fill]
-        elements    [:buttons :colors :dialog :inputs :progress :sheet :sidebar]]
+        elements    [:buttons :colors :dialog :inputs :progress :timeline :sheet :sidebar]]
     [element/sidebar {:locked true}
      [layout/vertically
       [:menu [menu-item :ui]]
@@ -100,3 +102,4 @@
       [:div {:style {:height "100%"}}
        [element/progress-bar {:progress @progress}]
        [panels @active-panel]])))
+

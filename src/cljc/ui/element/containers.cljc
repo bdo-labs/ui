@@ -15,7 +15,19 @@
   (fn [params & content]
     (if-not (map? params)
       [container {} params content]
-      (let [{:keys [raised? rounded? direction align justify compact no-gap no-wrap class on-click style fill]} params
+      (let [{:keys [raised?
+                    rounded?
+                    direction
+                    align
+                    justify
+                    compact
+                    no-gap
+                    no-wrap
+                    class
+                    on-click
+                    style
+                    fill
+                    background]} params
             classes (names->str (concat [:Container
                                          (if (not-empty direction)
                                            (if (= "column" direction) "Vertically" "Horizontally")
@@ -29,8 +41,11 @@
                                          (when (true? no-wrap) :No-wrap)
                                          (when (true? compact) :Compact)]
                                         class))]
-        [:div (merge (dissoc params :direction :align :justify :fill :no-gap :no-wrap :compact :rounded? :raised?)
-                     {:style style :class classes :on-click on-click})
+        [:div (merge (dissoc params :direction :align :justify :fill :no-gap :no-wrap :compact :rounded? :raised? :background)
+                     {:style (merge style
+                                    (when-not (nil? background) {:background background}))
+                      :class classes
+                      :on-click on-click})
          (map-indexed #(with-meta %2 {:key (str "content-" %1)}) content)]))))
 
 

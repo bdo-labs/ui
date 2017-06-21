@@ -351,10 +351,10 @@
                   :z-index            2}
     ;; TODO Make it an immediate child selector
     [:li {:border-bottom [[:solid (unit/rem 0.1) (color/rgba [150 150 150 0.1])]]
-          :padding       [[(unit/rem 1) (unit/rem 2)]]}]
-    [:&.Selected {:background (color/rgba [0 0 1 0.02])}]
-    [:&:hover {:background-color (color/rgba [200 200 200 0.1])}]
-    [:&:last-child {:border-bottom :none}]]])
+          :padding       [[(unit/rem 1) (unit/rem 2)]]}
+     [:&.Selected {:background (color/rgba [0 0 1 0.02])}]
+     [:&:hover {:background-color (color/rgba [200 200 200 0.1])}]
+     [:&:last-child {:border-bottom :none}]]]])
 
 
 (defn- calendar [{:keys [primary secondary]}]
@@ -583,6 +583,7 @@
     [:&.Icon {:padding [[(unit/em 0.7) (unit/em 0.8)]]
               :min-width 0}
      [:i {:font-size (unit/em 1.5)
+          :min-width (unit/px 18)
           :line-height (unit/em 1.25)}]]
     [:&.No-chrome {:border-color     :transparent
                    :background-color :transparent}]

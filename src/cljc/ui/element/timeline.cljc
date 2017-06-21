@@ -1,12 +1,15 @@
 (ns ui.element.timeline
   (:require [#?(:clj clj-time.core :cljs cljs-time.core) :as t]
+            #?(:cljs [cljsjs.hammer])
             [clojure.string :as str]
             [re-frame.core :as re-frame]
             [reagent.core :as reagent]
             [ui.element.button :refer [button]]
             [ui.element.containers :refer [container]]
             [ui.util :as u]
-            [clojure.spec :as spec]))
+            ;[clojure.test.check.generators :as gen]
+            ;[clojure.spec :as spec]
+            ))
 
 
 (def months
@@ -139,21 +142,21 @@
 
 
 ;; (spec/def ::position inst?)
-(spec/def ::show-year? boolean?)
-(spec/def ::show-tertial? boolean?)
-(spec/def ::show-quarter? boolean?)
-(spec/def ::show-twomonth? boolean?)
-(spec/def ::show-month? boolean?)
+;; (spec/def ::show-year? boolean?)
+;; (spec/def ::show-tertial? boolean?)
+;; (spec/def ::show-quarter? boolean?)
+;; (spec/def ::show-twomonth? boolean?)
+;; (spec/def ::show-month? boolean?)
 
 
-(spec/def ::timeline-args
-  (spec/keys :opt-un [
-                   ;; ::position
-                   ::show-year?
-                   ::show-tertial?
-                   ::show-quarter?
-                   ::show-twomonth?
-                   ::show-month?]))
+;; (spec/def ::timeline-args
+;;   (spec/keys :opt-un [
+;;                    ;; ::position
+;;                    ::show-year?
+;;                    ::show-tertial?
+;;                    ::show-quarter?
+;;                    ::show-twomonth?
+;;                    ::show-month?]))
 
 
 (defn timeline
@@ -285,6 +288,6 @@
                                                                      (not= year t-year))
                                                        :class    [:fill]} year]])])]]]))})))))
 
-(spec/fdef timeline
-        :args ::timeline-args
-        :ret vector?)
+;; (spec/fdef timeline
+;;         :args ::timeline-args
+;;         :ret vector?)
