@@ -6,10 +6,10 @@
 (defn icon-button
   ([icon-name]
    [icon-button {} icon-name])
-  ([{:keys [class font-name] :as params} icon-name]
+  ([{:keys [class font] :as params} icon-name]
    [button (merge {:class (concat [:Icon] class)}
                   (dissoc params
                           :class
-                          :font-name))
+                          :font))
     " "
-    [icon {:font-name font-name} icon-name]]))
+    [icon {:font font} icon-name]]))

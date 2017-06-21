@@ -578,8 +578,10 @@
                  :color            (if (u/dark? primary) :white :black)
                  }
      [:&:hover {:background-color (color/lighten primary 10)}]]
-    [:&.Icon {:padding [[(unit/em 0.7) (unit/em 2)]]}
-     [:i {:font-size (unit/em 1.5)}]]
+    [:&.Icon {:padding [[(unit/em 0.7) (unit/em 0.8)]]
+              :min-width 0}
+     [:i {:font-size (unit/em 1.5)
+          :line-height (unit/em 1.25)}]]
     [:&.No-chrome {:border-color     :transparent
                    :background-color :transparent}]
     ;; [(selector/& (selector/not :disabled)) {:cursor :pointer}]
@@ -589,10 +591,10 @@
                   :border-color     negative}]
     [:&.Flat {:background-color :transparent
               :border           [[:solid (unit/em 0.1) :inherit]]}]
-    [:.Rounded {:border-radius (unit/em 2)}]]])
+    [:&.Rounded {:border-radius (unit/em 2)}]]])
 
 
-(defn- tmp [{:keys [primary secondary background positive negative]}]
+(defn- tmp [{:keys [primary secondary background]}]
   [[:.Dialog {:position :fixed
               :left     0
               :top      0

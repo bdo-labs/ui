@@ -13,7 +13,10 @@
     [element/button {:class [:primary]} "Bar"]
     [element/button {:class [:secondary] :rounded? true} "Baz"]
     [element/button {:rounded? true :flat? true} "Qux"]
-    [element/icon-button {:font-name "material-icons"} "fingerprint"]]
+    [element/icon-button {:font "ion"} "ionic"]
+    [element/icon-button {:font     "material-icons"
+                          :flat?    true
+                          :rounded? true} "fingerprint"]]
    [:p
     [:em
      [:small
