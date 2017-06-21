@@ -112,7 +112,8 @@
   [params & content]
   (if-not (map? params)
     [header {} params content]
-    (let [classes [:Header (case (:size params) "large" :Large :Small)]]
+    (let [classes (merge [:Header (case (:size params) "large" :Large :Small)]
+                         (:class params))]
       [container
        (merge params {:class   classes
                       :align   "center"

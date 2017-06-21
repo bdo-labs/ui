@@ -17,9 +17,9 @@
    (assoc db ::to-the alignment)))
 
 
-(re-frame/reg-sub ::backdrop u/extract)
-(re-frame/reg-sub ::open u/extract)
-(re-frame/reg-sub ::ontop u/extract)
+(re-frame/reg-sub ::backdrop u/extract-or-false)
+(re-frame/reg-sub ::open u/extract-or-false)
+(re-frame/reg-sub ::ontop u/extract-or-false)
 (re-frame/reg-sub ::to-the u/extract)
 
 
@@ -37,15 +37,12 @@
      "# Sidebar
      "
      [layout/vertically {:fill true}
-      [:span
-       [:input#open {:type :checkbox :checked open? :on-click toggle-open}]
-       [:label {:for :open} "Open?"]]
-      [:span
-       [:input#backdrop {:type :checkbox :checked backdrop? :on-click toggle-backdrop}]
-       [:label {:for :backdrop} "Backdrop?"]]
-      [:span
-       [:input#ontop {:type :checkbox :checked ontop? :on-click toggle-ontop}]
-       [:label {:for :ontop} "Ontop?"]]
+      [element/checkbox {:checked? open?
+                         :on-click toggle-open} "Open?"]
+      [element/checkbox {:checked? backdrop?
+                         :on-click toggle-backdrop} "Backdrop?"]
+      [element/checkbox {:checked? ontop?
+                         :on-click toggle-ontop} "Ontop?"]
       [:span
        [:label {:for :to-the} "To the "]
        [:select#to-the {:defaultValue "left" :on-change set-to-the}

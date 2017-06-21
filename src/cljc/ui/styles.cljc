@@ -1,8 +1,7 @@
 (ns ui.styles
-  #?(:cljs (:require-macros [garden.def :refer [defcssfn defkeyframes defstyles]]))
-  (:require #?(:clj [garden.def :refer [defcssfn defkeyframes defstyles]])
+  #?(:cljs (:require-macros [garden.def :refer [defcssfn defkeyframes]]))
+  (:require #?(:clj [garden.def :refer [defcssfn defkeyframes]])
             [garden.stylesheet :as stylesheet]
-            [garden.core :refer [css]]
             [garden.units :as unit]
             [garden.color :as color]
             [garden.selectors :as selector :refer [defpseudoelement]]
@@ -89,7 +88,8 @@
                :margin-right (unit/rem 3)}]]])
 
 
-(defn- layouts [{:keys [background primary]}]
+(defn- layouts
+  [{:keys [background]}]
   [[:.Backdrop {:background (color/rgba [0 0 1 0.5])
                 :width      (unit/percent 100)
                 :height     (unit/percent 100)
@@ -99,7 +99,8 @@
                 :transition [[:opacity :500ms :ease]]
                 :opacity    0
                 :z-index    -1}]
-   [[:.Sidebar.Locked.Align-left :.Slider :main] {:margin-left (unit/px 360)}]
+   ;; Should use immediate descender-selector
+   ;; [[:.Sidebar.Locked.Align-left :.Slider :main] {:margin-left (unit/px 360)}]
    [:.Sidebar {:overflow :hidden
                :width    (unit/percent 100)
                :height   (unit/percent 100)}
@@ -142,7 +143,7 @@
 
 (defn- header [theme]
   [[#{:.Header :.Card} {:background-color :white
-                     :box-shadow       [[0 (unit/rem 0.2) (unit/rem 0.3) (color/rgba [35 35 35 0.2])]]}]
+                       :box-shadow       [[0 (unit/rem 0.2) (unit/rem 0.3) (color/rgba [35 35 35 0.2])]]}]
    [:.Header {:justify-content :space-between
               :align-items     :center
               :width           (unit/vw 100)
@@ -161,8 +162,8 @@
 
 (defn- card [theme]
   [[:.Card
-    #:min {:width      (unit/rem 26)
-           :height (unit/rem (golden 26))}
+    {:min-width  (unit/rem 26)
+     :min-height (unit/rem (golden 26))}
     {:border-radius (unit/rem 0.3)
      :overflow      :hidden}]])
 
@@ -172,11 +173,11 @@
    #_[".Container:not(.Vertically):not(.Compact) > * + *" {:margin-left (unit/rem 1)}]
    #_[".Container.Vertically:not(.Compact) > * + *" {:margin-top (unit/rem 1)}]
    [:.Container
-    #:flex {:grow   1
-            :shrink 0
-            :basis  :auto}
-    {:box-sizing :border-box
-     :display    :flex}
+    {:flex-grow   1
+     :flex-shrink 0
+     :flex-basis  :auto
+     :box-sizing  :border-box
+     :display     :flex}
     [:&.Hide {:display :none}]
     ;; [(selector/& (selector/not :.Vertically)) {:flex-direction :row}]
     ;; [(selector/& (selector/not :.No-wrap)) {:flex-wrap :wrap}]
@@ -211,7 +212,7 @@
     [:&.Raised {:box-shadow [[0 (unit/rem 0.2) (unit/rem 0.2) (color/rgba [0 0 1 0.3])]]}]]])
 
 
-(defn- tmp-div [{:keys [primary]}]
+(defn- tmp-div [theme]
   [[:.Hide {:display :none}]
    [:.Timeline {:width :auto :position :absolute}
     #_[".Button:not(.Flat) + .Button:not(.Flat)" {:border-bottom-left-radius 0
@@ -243,9 +244,9 @@
 (defn- typography [{:keys [font-scale font-weight]
                 :or   {font-scale  (unit/em 1.8)
                        font-weight 100}}]
-  [[:html #:font {:size   (unit/percent 62.5)
-                  :weight font-weight
-                  :family [:Roboto [:Helvetica :Neue] :Helvetica]}]
+  [[:html {:font-size   (unit/percent 62.5)
+                  :font-weight font-weight
+                  :font-family [:Roboto [:Helvetica :Neue] :Helvetica]}]
    [#{:body :input} {:font-size font-scale}]
    [#{:h1 :h2 :h3 :h4 :h5 :h6} {:font-weight :normal}]
    [:p {:line-height (unit/em 1.55) :margin-bottom (unit/em 3.1)}]
@@ -306,10 +307,10 @@
     [:&.Read-only [:* {:cursor :pointer}]]
     [:&.Disabled [:* {:cursor :not-allowed}]
      [:label {:color :silver}]]
-    (selector/> :input) {:box-sizing :border-box
-                  :margin     0
-                  :display    :inline-block
-                  :width      (unit/percent 100)}
+    [:input {:box-sizing :border-box
+             :margin     0
+             :display    :inline-block
+             :width      (unit/percent 100)}]
     [:label {:position   :absolute
              :color      :silver
              :transition [[:all :200ms :ease]]
@@ -348,8 +349,9 @@
                   :list-style         :none
                   :padding            0
                   :z-index            2}
-    (selector/> :li) {:border-bottom [[:solid (unit/rem 0.1) (color/rgba [150 150 150 0.1])]]
-               :padding       [[(unit/rem 1) (unit/rem 2)]]}
+    ;; TODO Make it an immediate child selector
+    [:li {:border-bottom [[:solid (unit/rem 0.1) (color/rgba [150 150 150 0.1])]]
+          :padding       [[(unit/rem 1) (unit/rem 2)]]}]
     [:&.Selected {:background (color/rgba [0 0 1 0.02])}]
     [:&:hover {:background-color (color/rgba [200 200 200 0.1])}]
     [:&:last-child {:border-bottom :none}]]])
@@ -434,8 +436,8 @@
                         :white-space   :nowrap
                         :text-overflow :ellipsis}]
      [:&.Number {:text-align :right}]
-     [#{:&.Index :&.Alpha} #:font {:size   (unit/em 0.7)
-                            :weight 100}]
+     [#{:&.Index :&.Alpha} {:font-size   (unit/em 0.7)
+                           :font-weight 100}]
      [:&.Smaller {:font-size (unit/em 0.45)}]
      [#{:&.Index :&.Select :&.Alpha} {:text-align :center}]]
     [:.Editable
@@ -521,7 +523,7 @@
                 :padding   (unit/em 0.5)}]]]))
 
 
-(defn- dropdown [{:keys [primary secondary]}]
+(defn- dropdown [theme]
   [[:.Dropdown {:position         :absolute
                 :background       (u/gray 255)
                 :border           [[:solid (unit/px 1) (u/gray 220)]]

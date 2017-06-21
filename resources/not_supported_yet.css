@@ -1,4 +1,12 @@
 
+/*
+These are selectors that are not yet supported in version 2.0 of
+garden I trimmed our code to 2.0 because there was a bug with
+color-output in 1.x as well as there where some missing features.
+Unfortunately it was a bad call as there where many more broken things
+in 2.0, but at-least our upgrade-path is way easier now.
+*/
+
 
 /* Container */
 .Container:not(.Vertically):not(.Compact) > * + * { margin-left: 1rem; }
@@ -34,3 +42,4 @@
 .Sidebar:not(.Locked).Open.Ontop sidebar { box-shadow: 0 0 6rem rgba(0,0,0,0.5); }
 .Sidebar:not(.Locked).Open.Ontop.Align-left sidebar { transform: translateX(360px); }
 .Sidebar:not(.Locked).Open.Ontop.Align-right sidebar { transform: translateX(-360px); }
+.Sidebar.Locked.Align-left > .Slider > main { margin-left: 360px; }
