@@ -1,20 +1,20 @@
-(def +title+ "ui")
+(def +title+ 'ui)
 (def +description+ "A Straight-Forward Library for Composing User-Interfaces")
 (def +url+ "https://github.com/bdo-labs/ui")
 
 
 (set-env!
  :source-paths #{"src/cljc" "src/cljs"}
- :resource-paths #{"resources"}
+ :resource-paths #{"resources" "src/cljc" "src/cljs"}
  :dependencies '[;; Project Dependencies
                  [clj-time "0.13.0"]
                  [cljsjs/hammer "2.0.4-5"]
                  [com.andrewmcveigh/cljs-time "0.5.0"]
-                 [day8.re-frame/undo "0.3.2"]
-                 [day8/re-frame-tracer "0.1.1-SNAPSHOT"]
+                 ;; [day8.re-frame/undo "0.3.2"]
+                 [day8/re-frame-tracer "0.1.1-SNAPSHOT" :scope "test"]
                  [garden "2.0.0-alpha1"]
                  [markdown-clj "0.9.99"]
-                 [org.clojars.stumitchell/clairvoyant "0.2.1"]
+                 [org.clojars.stumitchell/clairvoyant "0.2.1" :scope "test"]
                  [org.clojure/clojure "1.9.0-alpha13" :scope "provided"]
                  [org.clojure/clojurescript "1.9.293" :scope "provided"]
                  [org.clojure/core.async "0.3.443"]
@@ -58,6 +58,7 @@
          '[danielsz.autoprefixer :refer [autoprefixer]]
          '[degree9.boot-npm :refer [npm]]
          '[degree9.boot-semver :refer :all]
+         '[degree9.boot-semver.impl :refer [get-version]]
          '[degree9.boot-semgit :refer :all]
          '[funcool.boot-codeina :refer :all]
          '[hendrick.boot-medusa :refer :all]
@@ -69,8 +70,8 @@
 
 
 (task-options!
- apidoc {:title          +title+
-         :version        "latest"
+ apidoc {:title          (name +title+)
+         :version        (get-version)
          :description    +description+
          :src-uri        (str +url+ "/tree/master/")
          :src-uri-prefix "#L"
@@ -80,6 +81,9 @@
       :url         +url+
       :license     {"The MIT License (MIT)"
                     "http://opensource.org/licenses/mit-license.php"}}
+ jar {:main 'ui.main
+      :file "ui.jar"
+      :manifest {"Description" +description+}}
  repl {:middleware '[cemerick.piggieback/wrap-cljs-repl]}
  target {:dir #{"target"}}
  test-cljs {:js-env :phantom})
