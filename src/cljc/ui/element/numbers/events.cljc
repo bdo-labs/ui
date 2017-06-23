@@ -14,6 +14,7 @@
 (spec/def ::row-heading #{:alpha :numeric :select :hidden})
 (spec/def ::type #{:number :inst :string})
 
+(spec/def ::lock (spec/coll-of boolean?))
 
 (spec/def ::col-ref (spec/with-gen
                       (spec/and keyword? #(re-matches #"[A-Z]+" (name %)))
@@ -69,7 +70,7 @@
 
 (spec/def ::column
   (spec/keys :req-un [::type ::col-ref ::rows]
-             :opt-un [::min ::max ::freeze? ::editable? ::sortable? ::filterable?]))
+             :opt-un [::min ::max ::freeze? ::editable? ::sortable? ::filterable? ::lock]))
 
 
 (spec/def ::columns
