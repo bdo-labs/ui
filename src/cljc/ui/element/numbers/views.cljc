@@ -97,8 +97,8 @@
 (defn headings
   "Headings include column-headings, caption and all of the title-rows"
   [sheet-ref {:keys [caption? row-heading column-heading column-widths]
-              :or {column-heading :hidden
-                   row-heading :hidden}}]
+              :or   {column-heading :hidden
+                     row-heading    :hidden}}]
   (let [col-refs           @(subscribe [:col-refs sheet-ref])
         columns            @(subscribe [:columns sheet-ref])
         title-rows         @(subscribe [:title-rows sheet-ref])
@@ -148,25 +148,32 @@
             (map (fn [row]
                    (let [row-num (u/row-num (:cell-ref (first row)))]
                      [:tr.Titlerow {:key (str "Titlerow-" row-num)}
-                            (when-not (= row-heading :hidden)
-                              [:th.Index row-num])
-                            (when-not (= row-heading :hidden)
-                              [:th {:style {:border-top 0 :border-bottom 0}}])
-                            (map-indexed (fn [n title]
-                                           [:th.Titlecolumn {:key (str "Title-" n)}
-                                            [:span (:value title)]
-                                            (when (= sorted-column (u/col-ref (:cell-ref title)))
-                                              [:span.Arrow
-                                               (if sort-ascending? "↑" "↓")])]) row)]))))]]]))
+                      (when-not (= row-heading :hidden)
+                        ;; TODO Move to stylesheet
+                        [:th.Index {:style (if (= column-heading :hidden)
+                                             {:border-top "1px solid rgb(230,230,230)"}
+                                             {})} row-num])
+                      (when-not (= row-heading :hidden)
+                        [:th {:style {:border-top 0 :border-bottom 0}}])
+                      (map-indexed (fn [n title]
+                                     [:th.Titlecolumn {:key (str "Title-" n)}
+                                      [:span (:value title)]
+                                      (when (= sorted-column (u/col-ref (:cell-ref title)))
+                                        [:span.Arrow
+                                         (if sort-ascending? "↑" "↓")])
+                                      (when (and (= column-heading :hidden)
+                                                 (= row-num 0))
+                                        [:span
+                                         [:button.Dropdown-origin {:on-click (toggle-column-menu (u/col-ref (:cell-ref title)))} "›"]
+                                         [column-menu sheet-ref (u/col-ref (:cell-ref title))]])]) row)]))))]]]))
 
 
 (defn body
-  [sheet-ref {:keys [editable? row-heading column-widths number-formatter inst-formatter]
+  [sheet-ref {:keys [editable? row-heading column-widths number-formatter inst-formatter locked]
               :or   {column-widths []
                      row-heading :hidden
                      number-formatter u/format-number-en
-                     inst-formatter u/format-inst}
-              :as   params}]
+                     inst-formatter u/format-inst}}]
   (let [columns @(subscribe [:columns sheet-ref])
         rows    @(subscribe [:rows sheet-ref])]
     [:div.Body
@@ -190,18 +197,21 @@
                                 [:td.Spacer {:style {:border-top 0 :border-bottom 0}}])
                               ;; Rows
                               (->> row
-                                   (map (fn [{:keys [cell-ref value align fill]}]
+                                   (map-indexed (fn [x {:keys [cell-ref value align fill]}]
                                           (let [k (merge
                                                    {:key   cell-ref
                                                     :style (merge {}
                                                                   (when ((complement nil?) align) {:text-align align})
                                                                   (when ((complement nil?) fill) {:background fill}))
-                                                    :class (u/names->str [(when editable? :Editable)])}
+                                                    :class (u/names->str [(when editable? :Editable)
+                                                                          (when (and (> (count locked) x)
+                                                                                     (nth locked x)) :Locked)])}
                                                    (when editable? {:title cell-ref}))]
                                             (cond
                                               (number? value) [:td.Cell.Number k [:span (number-formatter value)]]
                                               (inst? value)   [:td.Cell.Date k [:span (inst-formatter value)]]
                                               (vector? value) [:td.Cell.Custom k value]
+                                              (fn? value)     [:td.Cell.Custom k (value)]
                                               :else           [:td.Cell.String k
                                                                (if (str/starts-with? value "http")
                                                                  [:a {:href value} value]
@@ -209,7 +219,7 @@
 
 
 (defn sheet
-  [{:keys [editable?]
+  [{:keys [editable? caption?]
     :or {editable? false}
     :as params} data]
   (let [!worksheet        (atom nil)
@@ -228,7 +238,9 @@
     [:div.Worksheet.Fill {:ref           set-worksheet-ref
                           :on-mouse-down set-mouse-down
                           :on-mouse-up   set-mouse-up
-                          :class         (u/names->str (into [(when editable? :editable)] (:class params)))}
+                          :class         (u/names->str (into [(when editable? :editable)
+                                                              (when caption? :caption)] (:class params)))}
      [:div.Table
       [headings sheet-ref params]
       [body sheet-ref params]]]))
+

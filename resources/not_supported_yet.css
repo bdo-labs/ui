@@ -42,4 +42,9 @@ in 2.0, but at-least our upgrade-path is way easier now.
 .Sidebar:not(.Locked).Open.Ontop sidebar { box-shadow: 0 0 6rem rgba(0,0,0,0.5); }
 .Sidebar:not(.Locked).Open.Ontop.Align-left sidebar { transform: translateX(360px); }
 .Sidebar:not(.Locked).Open.Ontop.Align-right sidebar { transform: translateX(-360px); }
+.Sidebar.Locked main { width: calc(100% - 360px); }
 .Sidebar.Locked.Align-left > .Slider > main { margin-left: 360px; }
+
+
+/* Worksheet */
+.Worksheet:not(.Caption) .Titlerow:first-child .Titlecolumn { border-top: solid 1px rgb(230,230,230); }

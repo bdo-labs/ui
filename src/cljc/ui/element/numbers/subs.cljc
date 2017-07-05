@@ -35,15 +35,18 @@
          (fn [[_ sheet-ref col-ref]]
            (subscribe [:column sheet-ref col-ref]))
          (fn [column]
-           (->> (:rows column)
-                (remove :title-row?)
-                (map :value)
-                (distinct)
-                (sort <))))
+           (let [uniq (->> (:rows column)
+                           (remove :title-row?)
+                           (map :value)
+                           (distinct)
+                           (sort <))]
+             (if (vector? (first uniq))
+               (map #(:sort-value (meta %)) uniq)
+               uniq))))
 
 
 ;; Filtering
-;; TODO Needs a few lines of documentation as it's not immediately obvious
+;; FIXME It's not really obvious how this works, needs a bit of clean-up
 (defn filter-rows [columns _]
   (when (not-empty columns)
     (let [filter-fns (map :filters columns)]

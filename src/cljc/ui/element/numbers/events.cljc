@@ -14,7 +14,7 @@
 (spec/def ::row-heading #{:alpha :numeric :select :hidden})
 (spec/def ::type #{:number :inst :string})
 
-(spec/def ::lock (spec/coll-of boolean?))
+(spec/def ::locked (spec/coll-of boolean?))
 
 (spec/def ::col-ref (spec/with-gen
                       (spec/and keyword? #(re-matches #"[A-Z]+" (name %)))
@@ -70,7 +70,7 @@
 
 (spec/def ::column
   (spec/keys :req-un [::type ::col-ref ::rows]
-             :opt-un [::min ::max ::freeze? ::editable? ::sortable? ::filterable? ::lock]))
+             :opt-un [::min ::max ::freeze? ::editable? ::sortable? ::filterable? ::locked]))
 
 
 (spec/def ::columns
@@ -109,15 +109,17 @@
                        (remove :title-row?)
                        (map :value))
         first-val (first rows)]
-    (merge col (cond
-                 (number? first-val) {:type :number
-                                      :min  (reduce min rows)
-                                      :max  (reduce max rows)}
-                 (inst? first-val)   {:type :inst
-                                      :min  (reduce < rows)
-                                      :max  (reduce > rows)}
-                 (string? first-val) {:type :string}
-                 :else               {:type :any}))))
+    (if-let [meta-type (:type (meta first-val))]
+      meta-type
+      (merge col (cond
+                   (number? first-val) {:type :number
+                                        :min  (reduce min rows)
+                                        :max  (reduce max rows)}
+                   (inst? first-val)   {:type :inst
+                                        :min  (reduce < rows)
+                                        :max  (reduce > rows)}
+                   (string? first-val) {:type :string}
+                   :else               {:type :any})))))
 
 
 (defn data->columns

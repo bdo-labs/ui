@@ -2,10 +2,11 @@
   (:require [clojure.test.check.generators :as gen]
             [clojure.spec :as spec]
             [clojure.string :as str]
-            [ui.element.auto-complete :refer [auto-complete]]
             [ui.elements :as element]
             [ui.layout :as layout]
-            [tongue.core :as tongue]))
+            [tongue.core :as tongue]
+            [ui.util :as u]
+            #?(:cljs [reagent.core :refer [atom]])))
 
 
 (spec/def ::segment #{"Government" "Midmarket" "Enterprise" "Small Business" "Channel Partners"})
@@ -42,25 +43,34 @@
 
 
 (defn documentation []
-  (let [rows      199
-        title-row ["Segment" "Units-Sold" "Manufacturing" "Sales-Price" "Date"]
-        body      (mapv vec (map first (drop 49 (spec/exercise ::fixture (+ rows 50)))))
-        ;; uniqs     (map-indexed #(do {:id %1 :text %2}) (distinct (mapv first body)))
-        data      (into [title-row] body
-                        #_(->> body
-                             (map (fn [row]
-                                    (let [first-col [auto-complete {:placeholder (first row)
-                                                                    :items       uniqs}]]
-                                      (assoc-in row [0] first-col))))))]
-    [layout/vertically {:fill true}
-     [element/sheet {:name             "Worksheet"
-                     :caption?         true
-                     :number-formatter format-number-no
-                     :inst-formatter   format-inst
-                     :column-heading   :alpha
-                     :row-heading      :numeric
-                     :editable?        true
-                     } data]]))
+  (let [!caption?        (atom false)
+        !column-heading? (atom false)
+        !row-heading?    (atom false)
+        rows             199
+        title-row        ["Segment" "Units-Sold" "Manufacturing" "Sales-Price" "Date"]
+        body             (mapv vec (map first (drop 49 (spec/exercise ::fixture (+ rows 50)))))
+        uniqs            (map-indexed #(do {:id %1 :text %2}) (distinct (mapv first body)))
+        b                (map #(assoc-in % [0] ^{:type :string
+                                                 :sort-value (first %)} [element/auto-complete {:placeholder (first %)
+                                                                                                :items       uniqs}]) body)
+        data             (into [title-row] b)]
+    (fn []
+      [layout/vertically
+       [layout/horizontally
+        [element/checkbox {:checked? @!caption?
+                           :on-click #(reset! !caption? (not @!caption?))} "Caption?"]
+        [element/checkbox {:checked? @!column-heading?
+                           :on-click #(reset! !column-heading? (not @!column-heading?))} "Column-Heading?"]
+        [element/checkbox {:checked? @!row-heading?
+                           :on-click #(reset! !row-heading? (not @!row-heading?))} "Row-Heading?"]]
+       [element/sheet {:name             "Worksheet"
+                       :caption?         @!caption?
+                       :number-formatter format-number-no
+                       :inst-formatter   format-inst
+                       :locked           (vec (conj (repeat (dec (count title-row)) true) false))
+                       :column-heading   (if @!column-heading? :alpha :hidden)
+                       :row-heading      (if @!row-heading? :numeric :hidden)
+                       :editable?        true} data]])))
 
 
 ;; (spec/def ::point nat-int?)
@@ -74,4 +84,5 @@
 ;;          :close ::point
 ;;          :volume ::volume
 ;;          :title ::title))
+
 
