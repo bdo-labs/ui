@@ -7,8 +7,8 @@
   []
   [element/article
    "# Horizontally"
-   [layout/vertically {:fill true}
-    [layout/horizontally {:align "left" :class [:demo] :fill true}
+   [layout/vertically {:fill? true :gap? false}
+    [layout/horizontally {:class "demo" :fill? true}
      [:div.Demo-box "Box"]
      [:div.Demo-box "Box"]
      [:div.Demo-box "Box"]]]])

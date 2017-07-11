@@ -10,13 +10,14 @@
    "
    [layout/horizontally
     [element/button {:flat? true} "Foo"]
-    [element/button {:class [:primary]} "Bar"]
-    [element/button {:class [:secondary] :rounded? true} "Baz"]
+    [element/button {:class "primary"} [:span "Bar"]]
+    [element/button {:class "secondary" :rounded? true} "Baz"]
     [element/button {:rounded? true :flat? true} "Qux"]
-    [element/icon-button {:font "ion"} "ionic"]
-    [element/icon-button {:font     "material-icons"
-                          :flat?    true
-                          :rounded? true} "fingerprint"]]
+    [element/button {}
+     [element/icon {:font "ion"} "ionic"]]
+    [element/button {:flat?     true
+                     :circular? true}
+     [element/icon {:font "material-icons"} "fingerprint"]]]
    [:p
     [:em
      [:small

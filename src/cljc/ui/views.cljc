@@ -6,16 +6,18 @@
             [ui.layout :as layout]
             [ui.docs.centered :as centered]
             [ui.docs.fill :as fill]
-            [ui.docs.progress :as progress]
             [ui.docs.horizontally :as horizontally]
             [ui.docs.vertically :as vertically]
+            [ui.docs.buttons :as buttons]
+            [ui.docs.icons :as icons]
+            [ui.docs.progress :as progress]
             [ui.docs.colors :as colors]
             [ui.docs.dialog :as dialog]
-            [ui.docs.buttons :as buttons]
-            [ui.docs.inputs :as inputs]
-            [ui.docs.sheet :as sheet]
-            [ui.docs.sidebar :as sidebar]
-            [ui.docs.timeline :as timeline]))
+            #_[ui.docs.dropdown :as dropdown]
+            #_[ui.docs.inputs :as inputs]
+            #_[ui.docs.sheet :as sheet]
+            #_[ui.docs.sidebar :as sidebar]
+            ))
 
 
 (defn- menu-item []
@@ -27,20 +29,11 @@
        (name item)])))
 
 
-#_(defn- footer []
-  [:footer {:role :contentinfo}
-   [layout/horizontally {:no-gap true :class [:legal]}
-    [:span (str "© BDO 2017")]
-    [:a {:href "//bdo-labs.github.io/"} (str "Blog")]
-    [:a {:href ""} (str "Terms Of Service")]
-    [:a {:href ""} (str "Privacy Policy")]]])
-
-
 (defn- intro
   []
   [element/article
    readme/content
-   [element/sheet
+   #_[element/sheet
     {:name           "Release History"
      :caption?       true
      :column-widths  [120 180]}
@@ -66,11 +59,12 @@
     :buttons [buttons/documentation]
     :colors [colors/documentation]
     :dialog [dialog/documentation]
-    :inputs [inputs/documentation]
+    ;; :dropdown [dropdown/documentation]
+    :icons [icons/documentation]
+    ;; :inputs [inputs/documentation]
     :progress [progress/documentation]
-    :timeline [timeline/documentation]
-    :sheet [sheet/documentation]
-    :sidebar [sidebar/documentation]
+    ;; :sheet [sheet/documentation]
+    ;; :sidebar [sidebar/documentation]
     [intro]))
 
 
@@ -79,7 +73,7 @@
   (let [active-item @(re-frame/subscribe [:active-doc-item])
         virtuals    [:boundary]
         layouts     [:centered :horizontally :vertically :fill]
-        elements    [:buttons :colors :dialog :inputs :progress :timeline :sheet :sidebar]]
+        elements    [:buttons :colors :dialog :icons :progress]]
     [element/sidebar {:locked true}
      [layout/vertically
       [:menu [menu-item :ui]]

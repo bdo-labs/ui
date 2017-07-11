@@ -47,14 +47,14 @@
         toggle-email   #(re-frame/dispatch [::toggle-email?])]
     [layout/horizontally
      [layout/vertically
-      [element/checkbox {:checked?  bacon?
+      [element/checkbox {:checked   bacon?
                          :on-change toggle-bacon} "Bacon"]
-      [element/checkbox {:checked?  cheese?
+      [element/checkbox {:checked   cheese?
                          :on-change toggle-cheese} "Cheese"]
-      [element/checkbox {:checked?  ketchup?
+      [element/checkbox {:checked   ketchup?
                          :on-change toggle-ketchup} "Ketchup"]]
      [layout/vertically
-      [element/toggle {:checked?  email?
+      [element/toggle {:checked   email?
                        :on-change toggle-email} "Eat here?"]]]))
 
 
@@ -65,9 +65,9 @@
         filtered-collection @(re-frame/subscribe [::filtered-collection])]
     [layout/horizontally
      [layout/vertically
-      [element/checkbox {:checked?  multiple?
+      [element/checkbox {:checked   multiple?
                          :on-change #(re-frame/dispatch [::toggle-multiple?])} "Multiple?"]
-      [element/checkbox {:checked?  disabled?
+      [element/checkbox {:checked   disabled?
                          :on-change #(re-frame/dispatch [::toggle-disabled?])} "Disabled?"]
       [element/auto-complete {:placeholder "Randomly generated strings"
                               :items       filtered-collection

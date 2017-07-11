@@ -81,12 +81,15 @@
       :url         +url+
       :license     {"The MIT License (MIT)"
                     "http://opensource.org/licenses/mit-license.php"}}
- jar {:main 'ui.main
-      :file "ui.jar"
+ jar {:main     'ui.main
+      :file     "ui.jar"
       :manifest {"Description" +description+}}
  repl {:middleware '[cemerick.piggieback/wrap-cljs-repl]}
  target {:dir #{"target"}}
- test-cljs {:js-env :phantom})
+ test-cljs {:js-env :phantom}
+ autoprefixer {:exec-path "target/node_modules/postcss-cli/bin/postcss"
+               :files ["ui.css" "docs.css"]
+               :browsers ">= 50%"})
 
 
 (deftask pre-requisits
@@ -118,32 +121,28 @@
                 :styles-var 'ui.styles/screen)
         (garden :output-to "css/docs.css"
                 :styles-var 'ui.styles/docs)
-        (autoprefixer :exec-path "target/node_modules/postcss-cli/bin/postcss"
-                      :files ["ui.css" "docs.css"]
-                      :browsers ">= 50%")))
+        (autoprefixer)))
 
 
 (deftask dev
   "Interactive development-build"
-  [s speak? bool "Notify when the build is completed"]
-  (comp (git-pull :branch "origin" "master")
-     (pre-requisits)
-     (readme)
-     (serve)
-     (watch)
-     (if speak? (speak) identity)
-     (reload :on-jsload 'ui.core/mount-root)
-     (cljs-devtools)
-     (styles)
-     (cljs-repl)
-     (cljs :ids #{"ui"}
-           :optimizations :none
-           :source-map true
-           :compiler-options {:parallel-build true
-                              :preloads       '[devtools.preload]})
-     (asset-fingerprint :skip true
-                        :extensions [".css" ".html"])
-     (target)))
+  [s speak? bool "Audible notification when a build is completed"]
+  (comp ;(git-pull :branch "origin" "master")
+   (pre-requisits)
+   (readme)
+   (serve)
+   (watch)
+   (if speak? (speak) identity)
+   (cljs-devtools)
+   (reload :on-jsload 'ui.core/mount-root)
+   (styles)
+   (cljs :ids #{"ui"}
+         :optimizations :none
+         :source-map true
+         :compiler-options {:parallel-build true
+                            :preloads       '[devtools.preload]})
+   (asset-fingerprint :verbose true :skip true)
+   (target)))
 
 
 (deftask prod

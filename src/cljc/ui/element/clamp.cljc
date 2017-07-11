@@ -103,7 +103,6 @@
          percent (Math/abs (Math/floor pct))]
      (if (= active-knob ::lower-knob)
        (let [maximum (get-in db [::upper-knob id] 100)]
-         (u/log maximum)
          {:db (assoc-in db [active-knob id] (min maximum percent))})
        (let [minimum (get-in db [::lower-knob id] 0)]
         {:db (assoc-in db [active-knob id] (max minimum percent))})))))

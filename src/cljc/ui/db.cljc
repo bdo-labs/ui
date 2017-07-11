@@ -1,5 +1,5 @@
 (ns ui.db
-  (:require #_[clojure.test.check.generators :as gen]
+  (:require [clojure.test.check.generators :as gen]
             [clojure.spec :as spec]))
 
 

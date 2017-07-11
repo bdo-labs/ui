@@ -6,7 +6,6 @@
             [ui.util :as u]))
 
 
-
 (spec/def ::font-prefix
   (spec/with-gen (spec/and string? #(> (count %) 1) #(< (count %) 4))
     #(spec/gen #{"ion"})))
@@ -30,7 +29,7 @@
                  "search" "settings" "shuffle" "stop"})))
 
 
-(spec/def ::size #{"small" "medium" "large"})
+(spec/def ::size nat-int?)
 
 
 (spec/def ::icon-params
@@ -45,24 +44,17 @@
 
 
 (defn icon
-  [params icon-name]
-  (let [args  (spec/conform ::icon-args [params icon-name])
-        font  (apply hash-map (-> args :params :font))
-        style (case (:size params)
-                "small"  {:font-size "1em"}
-                "medium" {:font-size "1.4em"}
-                "large"  {:font-size "2.8em"}
-                {})]
+  [& args]
+  (let [{:keys [params icon]}       (spec/conform ::icon-args args)
+        {:keys [font size] :or {size 2}} params
+        style                            {:font-size (str size "rem")}
+        params                           (dissoc params :size :font)
+        font                             (apply hash-map font)]
     (if-let [font-name (:font-name font)]
-      [:i (merge (dissoc params
-                         :size
-                         :font) {:class font-name :style style}) icon-name]
+      [:i.Icon (merge {:class font-name :style style} params) icon]
       (let [font-prefix (:font-prefix font)
-            classes     (str/join " " [font-prefix (str font-prefix "-" icon-name)])]
-        [:i (merge (dissoc params
-                           :size
-                           :font) {:class classes
-                                   :style style})]))))
+            class       (str/join " " [font-prefix (str font-prefix "-" icon)])]
+        [:i.Icon (merge {:class class :style style} params)]))))
 
 
 (spec/fdef icon

@@ -8,8 +8,12 @@
             [ui.util :as u]
             [ui.element.boundary :as boundary]
             [ui.element.checkbox :as checkbox]
+            [ui.element.containers :as containers]
+            [ui.element.menu :as menu]
+            [ui.element.button :as button]
             [ui.element.clamp :as clamp]
-            [ui.element.progress-bar :as progress-bar]))
+            [ui.element.progress-bar :as progress-bar]
+            [ui.element.loaders :as loaders]))
 
 
 ;;
@@ -36,7 +40,6 @@
 ;;
 
 
-(defcssfn cubic-bezier)
 (defcssfn linear-gradient)
 (defcssfn rotateZ)
 (defcssfn scale)
@@ -62,13 +65,18 @@
 (defn- golden [x] (* (/ x 16) 9))
 
 
+(defn- base [theme]
+  [[:ul {:list-style-position :inside}]])
+
+
 (defn- structure [theme]
   [[:body {:overflow :hidden}]
+   [:.hide {:display :none}]
    ;; TODO #app:first-child, really!?
    [#{:html :body :#app :#app:first-child} {:height (unit/percent 100)
-                                            :width  (unit/percent 100)}]
+                                           :width  (unit/percent 100)}]
    [#{:html :body :menu :ul} {:margin  0
-                              :padding 0}]
+                             :padding 0}]
    [:main {:height (stylesheet/calc (- (unit/vh 100) (unit/px 64)))}]
    [#{:.Vertical-rule :.Horizontal-rule} {:background-color :silver}]
    [:.Vertical-rule {:width        (unit/px 1)
@@ -141,19 +149,19 @@
        [:&.Align-right [:sidebar {:transform (translateX (unit/px -360))}]]]]]]])
 
 
+
 (defn- header [theme]
-  [[#{:.Header :.Card} {:background-color :white
-                       :box-shadow       [[0 (unit/rem 0.2) (unit/rem 0.3) (color/rgba [35 35 35 0.2])]]}]
+  [[#{:.Header :.Card} {:background-color :white}]
    [:.Header {:justify-content :space-between
               :align-items     :center
               :width           (unit/vw 100)
               :box-sizing      :border-box
               :padding         [[0 (unit/rem 1)]]
               :position        :relative}
-    [:&.Small {:flex    [[0 0 (unit/px 64)]]
+    [:&.small {:flex    [[0 0 (unit/px 64)]]
                :height  (unit/px 64)
                :z-index 7}]
-    [:&.Large {:flex    [[0 0 (unit/px 128)]]
+    [:&.large {:flex    [[0 0 (unit/px 128)]]
                :height  (unit/px 128)
                :z-index 7}]
     [:img {:max-height    (unit/px 48)
@@ -168,75 +176,9 @@
      :overflow      :hidden}]])
 
 
-(defn- container [theme]
-  [[:.Flex {:flex 1}]
-   #_[".Container:not(.Vertically):not(.Compact) > * + *" {:margin-left (unit/rem 1)}]
-   #_[".Container.Vertically:not(.Compact) > * + *" {:margin-top (unit/rem 1)}]
-   [:.Container
-    {:flex-grow   1
-     :flex-shrink 0
-     :flex-basis  :auto
-     :box-sizing  :border-box
-     :display     :flex}
-    [:&.Hide {:display :none}]
-    ;; [(selector/& (selector/not :.Vertically)) {:flex-direction :row}]
-    ;; [(selector/& (selector/not :.No-wrap)) {:flex-wrap :wrap}]
-    ;; [(selector/& (selector/not :.No-gap)) {:padding (unit/rem 2)}]
-    ;; [(selector/& (selector/not (selector/attr-contains :class "Align"))) {:align-items :flex-start}]
-    ;; [(selector/& (selector/not (selector/attr-contains :class "Justify"))) {:justify-content :flex-start}]
-    [:&.Timeline {:border-bottom [[:solid (unit/px 1) (color/rgb [190 190 190])]]
-                  :height        (unit/px 100)
-                  :flex-grow     0}
-     [:.Month {:border-right [[:solid (unit/px 1) (color/rgb [190 190 190])]]}]
-     [:.Day {:border-left [[:solid (unit/px 1) (color/rgb [190 190 190])]]
-             :height      (unit/px 20)}]]
-    [:&.Vertically {:flex-direction :column}]
-    [:&.Align-start {:align-items :flex-start}]
-    [:&.Align-end {:align-items :flex-end}]
-    [:&.Align-stretch {:align-items :stretch}]
-    [:&.Align-center {:align-items :center}]
-    [:&.Justify-space-around {:justify-content :space-around}]
-    [:&.Justify-space-between {:justify-content :space-between}]
-    [:&.Justify-center {:justify-content :center}]
-    [:&.Justify-start {:justify-content :flex-start}]
-    [:&.Justify-end {:justify-content :flex-end}]
-    ;; TODO https://github.com/noprompt/garden/issueselector/127
-    #_[(selector/& :.Container (selector/> (selector/not :.Compact) (selector/+ :* :*))) {:margin-left (unit/rem 2)}]
-    [#{:&.Fill :.Fill} {:box-sizing :border-box
-                       :flex       1
-                       :min-width  0
-                       :min-height 0
-                       :height     (unit/percent 100)
-                       :width      (unit/percent 100)}]
-    [:&.Rounded {:border-radius (unit/rem 1)}]
-    [:&.Raised {:box-shadow [[0 (unit/rem 0.2) (unit/rem 0.2) (color/rgba [0 0 1 0.3])]]}]]])
-
-
-(defn- tmp-div [theme]
-  [[:.Hide {:display :none}]
-   [:.Timeline {:width :auto :position :absolute}
-    #_[".Button:not(.Flat) + .Button:not(.Flat)" {:border-bottom-left-radius 0
-                                                :border-top-left-radius    0
-                                                :position                  :relative}
-     [:&:before {:content    "' '"
-                 :display    :block
-                 :width      (unit/rem 2.5)
-                 :height     (unit/rem 3.7)
-                 :position   :absolute
-                 :top        (unit/rem -0.1)
-                 :left       (unit/rem -2.5)
-                 :background :inherit}]]]
-   [:.Timeline-wrapper {:width       (unit/percent 100)
-                        :height      :auto
-                        :user-select :none
-                        :position    :relative
-                        :overflow    :hidden}]])
-
-
 (defn- containers [theme]
   (map #(into '() %)
-       [(tmp-div theme)
-        (container theme)
+       [(containers/style theme)
         (header theme)
         (card theme)]))
 
@@ -275,7 +217,7 @@
   [[:.Auto-complete {:position      :relative
                      :width         (unit/percent 100)
                      :margin-bottom (unit/rem 1)}
-    [:&.Read-only [:* {:cursor :default}]]
+    [:&.read-only [:* {:cursor :default}]]
     [:.Textfield {:margin-bottom 0}]]
    [:.Labels
     [:.Label:first-child {:margin-left 0}]
@@ -300,12 +242,12 @@
              :margin-right  (unit/rem 0.5)}]]
    [:.Textfield {:position :relative
                  :margin   [[(unit/rem 3) 0 (unit/rem 1)]]}
-    [:&.Dirty
+    [:&.dirty
      [:label {:left             0
               :transform        [[(translateY (unit/percent -100)) (scale 0.75)]]
               :transform-origin [[:top :left]]}]]
-    [:&.Read-only [:* {:cursor :pointer}]]
-    [:&.Disabled [:* {:cursor :not-allowed}]
+    [:&.read-only [:* {:cursor :pointer}]]
+    [:&.disabled [:* {:cursor :not-allowed}]
      [:label {:color :silver}]]
     [:input {:box-sizing :border-box
              :margin     0
@@ -370,16 +312,16 @@
     [:td {:padding (unit/rem 1)}]
     [#{:.Previous :.Next} {:color (color/lighten secondary 50)}]
     [:.Day {:pointer :not-allowed}
-     [:&.Selectable {:cursor :pointer}
+     [:&.selectable {:cursor :pointer}
       [:&:hover [:span {:background (color/lighten primary 30)}]]]
      [:span {:border-radius (unit/percent 50)
              :display       :inline-block
              :padding       (unit/rem 1)
              :height        (unit/rem 2)
              :width         (unit/rem 2)}]
-     [:&.Today
+     [:&.today
       (selector/> :span) {:border [[:solid (unit/px 1) (color/darken primary 10)]]}]
-     [:&.Selected.Selectable {:color  :white
+     [:&.selected.selectable {:color  :white
                               :cursor :default}
       (selector/> :span) {:background primary}]]]])
 
@@ -441,11 +383,11 @@
     [#{:td :th} [:span {:overflow      :hidden
                        :white-space   :nowrap
                        :text-overflow :ellipsis}]
-     [:&.Number {:text-align :right}]
-     [#{:&.Index :&.Alpha} {:font-size   (unit/em 0.7)
+     [:&.number {:text-align :right}]
+     [#{:&.index :&.Alpha} {:font-size   (unit/em 0.7)
                            :font-weight 100}]
-     [:&.Smaller {:font-size (unit/em 0.45)}]
-     [#{:&.Index :&.Select :&.Alpha} {:text-align :center}]]
+     [:&.smaller {:font-size (unit/em 0.45)}]
+     [#{:&.index :&.select :&.alpha} {:text-align :center}]]
     [:.Editable
      [:&:hover {:position :relative}
       [:&:before {:content    "' '"
@@ -458,17 +400,17 @@
                   :left       (unit/px -1)
                   :position   :absolute}]
       #_[:&:after {:content       "' '"
-                 :border-radius (unit/percent 50)
-                 :border        [[:solid (unit/px 1) (u/gray 150)]]
-                 :display       :block
-                 :position      :absolute
-                 :bottom        0
-                 :left          (unit/percent 50)
-                 :cursor        :row-resize
-                 :transform     [[(translateX (unit/percent -50)) (translateY (unit/percent 50))]]
-                 :height        (unit/em 0.4)
-                 :width         (unit/em 0.4)
-                 :background    (color/rgb [245 228 90])}]]]
+                   :border-radius (unit/percent 50)
+                   :border        [[:solid (unit/px 1) (u/gray 150)]]
+                   :display       :block
+                   :position      :absolute
+                   :bottom        0
+                   :left          (unit/percent 50)
+                   :cursor        :row-resize
+                   :transform     [[(translateX (unit/percent -50)) (translateY (unit/percent 50))]]
+                   :height        (unit/em 0.4)
+                   :width         (unit/em 0.4)
+                   :background    (color/rgb [245 228 90])}]]]
     [:.Headers {:width (unit/percent 100)}]
     [:.Body {:max-height (unit/vh 70)
              :background :white
@@ -484,7 +426,7 @@
      [:tr
       [:&:hover
        [:td {:background-color (u/gray 245)}]]
-      [:&.Selected
+      [:&.selected
        [#{:td :th} {:background-color (u/gray 245)}]]]]
     [#{:th :td} {:border-bottom [[:solid (unit/px 1) (u/gray 230)]]
                 :border-right  [[:solid (unit/px 1) (u/gray 230)]]
@@ -495,7 +437,7 @@
                     :border     [[:solid (unit/px 1) :silver]]}]
      [:.Textfield {:margin  0
                    :padding 0}
-      [:&.Dirty
+      [:&.dirty
        [:label {:display :none}]]
       [:input
        [:&:focus
@@ -531,82 +473,6 @@
                 :padding   (unit/em 0.5)}]]]))
 
 
-(defn- dropdown [theme]
-  [[:.Dropdown {:position         :absolute
-                :background       (u/gray 255)
-                :border           [[:solid (unit/px 1) (u/gray 220)]]
-                :box-sizing       :border-box
-                :font-weight      :normal
-                :font-size        (unit/rem 1)
-                :transform        [[(translateY (unit/percent 100)) (scale 1)]]
-                :transform-origin [[:top :right]]
-                :transition       [[:200ms (cubic-bezier 0.770, 0.000, 0.175, 1.000)]]
-                :bottom           0
-                :right            0
-                :z-index          10
-                :max-height       (unit/rem 40)
-                :overflow         :auto
-                :width            (unit/percent 100)
-                :max-width        (unit/rem 25)}
-    ;; [(selector/& (selector/not :.Open)) {:transform [[(translateY (unit/percent 100)) (scale 0)]]}]
-    [:.Row {:text-align    :left
-            :margin-top    (unit/em 0.5)
-            :margin-bottom (unit/em 0.5)
-            :width         (unit/percent 100)
-            :overflow      :hidden
-            :white-space   :nowrap
-            :text-overflow :ellipsis}
-     [:label {:display :inline-block
-              :width   (unit/percent 100)}]]
-    [:.Button {:border-radius  0
-               :border-left    0
-               :border-right   0
-               :border-top     0
-               :margin         0
-               :text-align     :left
-               :text-transform :none
-               :width          (unit/percent 100)}]]])
-
-
-(defn- buttons [{:keys [primary secondary positive negative]}]
-  [[:.Button {:appearance     :none
-              :background     (u/gray 230)
-              :border-radius  (unit/em 0.2)
-              :border         [[:solid (unit/em 0.1) (u/gray 215)]]
-              :outline        :none
-              :user-select    :none
-              :min-width      (unit/rem 8)
-              :text-transform :uppercase
-              :transition     [[:background-color :200ms :ease]]
-              :padding        [[(unit/em 1) (unit/em 2)]]}
-    [:&:hover {:background-color (u/gray 240)}]
-    [:&.Secondary {:background-color secondary
-                   :border-color     secondary
-                   :color            (if (u/dark? secondary) :white :black)
-                   }
-     [:&:hover {:background-color (color/lighten secondary 10)}]]
-    [:&.Primary {:background-color primary
-                 :border-color     primary
-                 :color            (if (u/dark? primary) :white :black)
-                 }
-     [:&:hover {:background-color (color/lighten primary 10)}]]
-    [:&.Icon {:padding [[(unit/em 0.7) (unit/em 0.8)]]
-              :min-width 0}
-     [:i {:font-size (unit/em 1.5)
-          :min-width (unit/px 18)
-          :line-height (unit/em 1.25)}]]
-    [:&.No-chrome {:border-color     :transparent
-                   :background-color :transparent}]
-    ;; [(selector/& (selector/not :disabled)) {:cursor :pointer}]
-    [:&.Positive {:background-color positive
-                  :border-color     positive}]
-    [:&.Negative {:background-color negative
-                  :border-color     negative}]
-    [:&.Flat {:background-color :transparent
-              :border           [[:solid (unit/em 0.1) :inherit]]}]
-    [:&.Rounded {:border-radius (unit/em 2)}]]])
-
-
 (defn- tmp [{:keys [primary secondary background]}]
   [[:.Dialog {:position :fixed
               :left     0
@@ -616,10 +482,10 @@
               :margin   [[0 :!important]]
               :z-index  10}
     ;; [(selector/& (selector/not :.Open)) {:display :none}]
-    [:&.Open
-     [:.Backdrop {:opacity 1
+    [:&.open
+     [:.Backdrop {:opacity   1
                   :animation [[:fade :200ms :ease]]
-                  :z-index 10}]]]
+                  :z-index   10}]]]
    [:.Dialog-content {:background    :white
                       :border-radius (unit/rem 0.8)
                       :position      :absolute
@@ -631,32 +497,26 @@
    [:menu [:a {:display :block}]]
    [:a {:color           secondary
         :text-decoration :none}
-    [:&.Primary {:color primary}]
+    [:&.primary {:color primary}]
     [:&:hover {:color (color/darken secondary 30)}
-     [:&.Primary {:color primary}]]]])
+     [:&.primary {:color primary}]]]])
 
 
 (defn- in-doc [{:keys [primary]}]
   (let [contrast (u/gray 240)
         triangle [(linear-gradient (unit/deg 45)
-                                  [contrast (unit/percent 25)]
-                                  [:transparent (unit/percent 25)]
-                                  [:transparent (unit/percent 75)]
-                                  [contrast (unit/percent 75)]
-                                  contrast)]]
+                                   [contrast (unit/percent 25)]
+                                   [:transparent (unit/percent 25)]
+                                   [:transparent (unit/percent 75)]
+                                   [contrast (unit/percent 75)]
+                                   contrast)]]
     [[:.Container
-      [:&.Demo {:background          (vec (repeat 2 triangle))
+      [:&.demo {:background          (vec (repeat 2 triangle))
                 :background-position [[0 0] [(unit/px 10) (unit/px 10)]]
                 :background-size     [[(unit/px 20) (unit/px 20)]]
                 :min-width           (unit/vw 50)
                 :min-height          (unit/vh 35)
                 :box-shadow          [[:inset 0 (unit/px 2) (unit/px 8) (color/rgba [0 0 1 0.3])]]}
-       [:&.Horizontally
-        [:&.Align-left {:align-items :flex-start}]
-        [:&.Align-right {:justify-content :flex-end}]]
-       [:&.Vertically
-        [:&.Align-top {:align-items :flex-start}]
-        [:&.Align-bottom {:justify-content :flex-end}]]
        [:.Fill {:background (-> theme :default :primary)
                 :border     [[:dashed (unit/px 1) (color/rgba [0 0 1 0.2])]]}]]]
      [#{:.Code :pre} {:background    (u/gray 250)
@@ -689,6 +549,7 @@
 (def screen
   (let [theme (:default theme)]
     (map #(into '() %) [(animations theme)
+                        (base theme)
                         (structure theme)
                         (layouts theme)
                         (containers theme)
@@ -697,10 +558,11 @@
                         (color-picker theme)
                         (calendar theme)
                         (typography theme)
-                        (buttons theme)
-                        (dropdown theme)
+                        (button/style theme)
+                        (menu/style theme)
                         (checkbox/style theme)
                         (tmp theme)
                         (clamp/style theme)
                         (boundary/style theme)
-                        (progress-bar/style theme)])))
+                        (progress-bar/style theme)
+                        (loaders/style theme)])))

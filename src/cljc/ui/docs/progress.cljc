@@ -16,7 +16,7 @@
 
      ### Progress-bar
 
-     The progress-bar is what you would use to show global
+     The progress-bar is what you would use to show global-
      progress. Typically an entire page-load
 
      Mess with the clamp to make some progress 🤓
@@ -25,4 +25,7 @@
      [element/clamp {:id "progress-clamp"
                      :labels? true
                      :range :upper
-                     :on-change on-change} (range 100)]]))
+                     :on-change on-change} (range 100)]
+     "# Spinner
+     "
+     [element/spinner]]))

@@ -9,21 +9,16 @@ in 2.0, but at-least our upgrade-path is way easier now.
 
 
 /* Container */
-.Container:not(.Vertically):not(.Compact) > * + * { margin-left: 1rem; }
-.Container.Vertically:not(.Compact) > * + * { margin-top: 1rem; }
-.Container:not(.Vertically) { flex-direction: row; -webkit-flex-direction: row; }
-.Container:not(.No-wrap) { flex-wrap: wrap; -webkit-flex-wrap: wrap; }
-.Container:not(.No-gap) { padding: 2rem; }
-.Container:not([class~=Align]) { align-items: flex-start; -webkit-align-items: flex-start; }
-.Container:not([class~=Justify]) { justify-content: flex-start; -webkit-justify-content: flex-start; }
+.Container.layout-horizontally:not(.compact) > * + * { margin-left: 1rem; }
+.Container.layout-vertically:not(.compact) > * + * { margin-top: 1rem; }
 
 
 /* Dialog */
-.Dialog:not(.Open) { display: none; }
+.Dialog:not(.open) { display: none; }
 
 
 /* Drop-down */
-.Dropdown:not(.Open) { transform: translateY(100%) scale(0); -webkit-transform: translateY(100%) scale(0); }
+/*.Dropdown:not(.open) { transform: translateY(100%) scale(0); -webkit-transform: translateY(100%) scale(0); }*/
 
 
 /* Color-picker */
@@ -32,19 +27,23 @@ in 2.0, but at-least our upgrade-path is way easier now.
 
 
 /* Sidebar */
-.Sidebar:not(.Locked) {}
-.Sidebar:not(.Locked) .Slider, .Sidebar:not(.Locked).Ontop sidebar { transition: 500ms ease; }
-.Sidebar:not(.Locked).Align-left sidebar { left: -360px; }
-.Sidebar:not(.Locked).Align-right sidebar { right: -360px; }
-.Sidebar:not(.Locked).Open .Backdrop { opacity: 1; z-index: 8; }
-.Sidebar:not(.Locked).Open:not(.Ontop).Align-left .Slider { transform: translateX(360px); }
-.Sidebar:not(.Locked).Open:not(.Ontop).Align-right .Slider { transform: translateX(-360px); }
-.Sidebar:not(.Locked).Open.Ontop sidebar { box-shadow: 0 0 6rem rgba(0,0,0,0.5); }
-.Sidebar:not(.Locked).Open.Ontop.Align-left sidebar { transform: translateX(360px); }
-.Sidebar:not(.Locked).Open.Ontop.Align-right sidebar { transform: translateX(-360px); }
-.Sidebar.Locked main { width: calc(100% - 360px); }
-.Sidebar.Locked.Align-left > .Slider > main { margin-left: 360px; }
+.Sidebar:not(.locked) {}
+.Sidebar:not(.locked) .Slider, .Sidebar:not(.locked).ontop sidebar { transition: 500ms ease; }
+.Sidebar:not(.locked).align-left sidebar { left: -360px; }
+.Sidebar:not(.locked).align-right sidebar { right: -360px; }
+.Sidebar:not(.locked).open .Backdrop { opacity: 1; z-index: 8; }
+.Sidebar:not(.locked).open:not(.ontop).align-left .Slider { transform: translateX(360px); }
+.Sidebar:not(.locked).open:not(.ontop).align-right .Slider { transform: translateX(-360px); }
+.Sidebar:not(.locked).open.ontop sidebar { box-shadow: 0 0 6rem rgba(0,0,0,0.5); }
+.Sidebar:not(.locked).open.ontop.align-left sidebar { transform: translateX(360px); }
+.Sidebar:not(.locked).open.ontop.align-right sidebar { transform: translateX(-360px); }
+.Sidebar.locked main { width: calc(100% - 360px); }
+.Sidebar.locked.align-left > .Slider > main { margin-left: 360px; }
 
 
 /* Worksheet */
 .Worksheet:not(.Caption) .Titlerow:first-child .Titlecolumn { border-top: solid 1px rgb(230,230,230); }
+
+
+/* Buttons */
+.Button[disabled] { opacity: 0.1; }

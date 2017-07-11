@@ -28,11 +28,10 @@
 
 (defn color-picker
   [{:keys [hex disabled readonly on-change] :as params}]
-  (let [classes (u/names->str [:Color-picker
-                               (when (true? disabled) "disabled")
+  (let [classes (u/names->str [(when (true? disabled) "disabled")
                                (when (true? readonly) "readonly")])]
-    [:div (merge (dissoc params :disabled :readonly :hex)
-                 {:class classes})
+    [:div.Color-picker (merge (dissoc params :disabled :readonly :hex)
+                              {:class classes})
      [color-swatch hex on-change true]
      [color-value hex]]))
 

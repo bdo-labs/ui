@@ -13,18 +13,15 @@
 
 (defn documentation
   []
-  (let [fill?       @(re-frame/subscribe [::fill?])
-        toggle-fill #(re-frame/dispatch [::toggle-fill?])]
-    [element/article
-     "# Centered
+  [element/article
+   "# Centered
 
      As the name suggests, this layout will center it's children  
      vertically and horizontally dead-center.
+
      "
-     [layout/vertically {:fill true}
-      [element/checkbox {:checked?  fill?
-                         :on-change toggle-fill} "Fill?"]
-      [layout/centered {:class [:demo] :fill fill?}
-       [:div.Demo-box "Box"]
-       [:div.Demo-box "Box"]
-       [:div.Demo-box "Box"]]]]))
+   [layout/vertically {:fill? true :gap? false}
+    [layout/centered {:class "demo"}
+     [:div.Demo-box "Box"]
+     [:div.Demo-box "Box"]
+     [:div.Demo-box "Box"]]]])

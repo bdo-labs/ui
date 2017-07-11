@@ -95,8 +95,9 @@
   (->> (remove nil? lst)
        (map #(if (vector? %) (slug (names->str %)) %))
        (map name)
-       (map str/capitalize)
-       (str/join " ")))
+       ;; (map str/capitalize)
+       (str/join " ")
+       (str/lower-case)))
 
 
 (defn char-range
@@ -174,3 +175,35 @@
   "Creates a [shade] of gray"
   [shade]
   (color/rgb (vec (take 3 (repeat shade)))))
+
+
+(defn keys-from-spec [s]
+  (->> (spec/form s)
+       (filter vector?)
+       (flatten)
+       (mapv (comp keyword name))))
+
+
+(defn param->class [[k v]]
+  (-> (cond
+        (vector? v)  (str (name k) "-" (str/join "-" (map name v)))
+        (keyword? v) (str (name k) "-" (name v))
+        (true? v)    (name k)
+        :else        "")
+      (str/replace #"\?" "")))
+
+
+(defn params->classes [params]
+  (->> params
+       (keep param->class)
+       (str/join " ")
+       (str (:class params) " ")
+       (str/trim)))
+
+
+(defn aligned->align [v]
+  (case v
+    (:top :left)     :start
+    (:bottom :right) :end
+    :center))
+

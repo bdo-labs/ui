@@ -6,69 +6,42 @@
   "
   (:require [ui.elements :as element]
             #_[clojure.test.check.generators :as gen]
-            [clojure.spec :as spec]))
+            [clojure.spec :as spec]
+            [ui.util :as u]))
 
-(defn fill
-  "# Fill
+(spec/def ::alignment #{:start :end :center})
+(spec/def ::horizontal-alignment #{:left :right :center})
+(spec/def ::vertical-alignment #{:top :bottom :middle})
+(spec/def ::variable-content (spec/* (or vector? string?)))
 
-   ### Fill the void in whatever direction it's parent decides
-  "
-  [& content]
-  (into [:span.Fill] content))
+(spec/def ::layout-params
+  (spec/keys :opt-un [::aligned]))
 
-(spec/def ::centered-params (spec/cat))
-(spec/def ::centered-content (spec/and vector? not-empty))
-(spec/def ::centered-args
-  (spec/cat :params ::centered-params
-         :content ::centered-content))
+(spec/def ::layout-args
+  (spec/cat :params (spec/? ::layout-params)
+            :content ::variable-content))
 
-;; TODO Introduce `:start-from` and `:space`
-;;    | :space would be one of [:between :around :none], whereas :none is
-;;    | the equivalent of align stretched
-;;    | :start-from is context-driven, so if the layout is horizontal, you
-;;    | can set it to [:left :right :center], whilst with vertical layouts
-;;    | would have [:top :middle :bottom]
 
-(defn centered
-  "# Centered
+(defn- layout [layout & args]
+  (let [{:keys [params content]} (u/conform-or-fail ::layout-args args)
+        align                    [(u/aligned->align (or (-> params :aligned :x) :left))
+                                  (u/aligned->align (or (-> params :aligned :y) :top))]
+        params                   (merge {:layout layout :align align}
+                                        (dissoc params :aligned))]
+    (apply element/container (into [params] content))))
 
-   ### Layout children; centered both horizontally and vertically
-  "
-  [params & content]
-  (let [local-props {:justify "center" :align "center"}]
-    (if-not (map? params)
-      [element/container local-props params
-       (map-indexed #(with-meta %2 {:key (str "center-" %1)}) content)]
-      [element/container (merge params local-props)
-       (map-indexed #(with-meta %2 {:key (str "center-" %1)}) content)])))
 
-(spec/fdef centered
-        :args ::centered-args
-        :ret vector?)
+(defn horizontally [& args]
+  (apply layout :horizontally args))
 
-(defn horizontally
-  "#Horizontally
 
-   ### Layout children horizontally
-  "
-  [params & content]
-  (let [local-props {:direction "row"}]
-    (if-not (map? params)
-      [element/container local-props params
-       (map-indexed #(with-meta %2 {:key (str "horizontally-" %1)}) content)]
-      (let []
-       [element/container (merge params local-props)
-        (map-indexed #(with-meta %2 {:key (str "horizontally-" %1)}) content)]))))
+(defn vertically [& args]
+  (apply layout :vertically args))
 
-(defn vertically
-  "#Vertically
 
-   ### Layout children vertically
-  "
-  [params & content]
-  (let [local-props {:direction "column"}]
-    (if-not (map? params)
-      [element/container local-props params
-       (map-indexed #(with-meta %2 {:key (str "vertically-" %1)}) content)]
-      [element/container (merge params local-props)
-       (map-indexed #(with-meta %2 {:key (str "vertically-" %1)}) content)])))
+(defn centered [& args]
+  (let [{:keys [params content]} (u/conform-or-fail ::layout-args args)
+        params                   (merge {:align [:center :center]} params)]
+    (apply layout :horizontally params content)))
+
+(defn fill [] [:span.Fill])

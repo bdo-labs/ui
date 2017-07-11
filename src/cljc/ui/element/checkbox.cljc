@@ -17,14 +17,14 @@
   [[:.Shape {:display        :inline-flex
              :position       :relative
              :flex-direction :column}]
-   [#{:.Checkbox :.Toggle}
+   [#{:.Checkbox :.toggle}
     [:input {:-webkit-appearance :none
              :background         :white
              :border             [[:solid (unit/px 1) :silver]]
              :outline            :none}]]
    [:.Radio
     [:.Shape {:border-radius (unit/percent 50)}]]
-   [:.Toggle
+   [:.toggle
     [:.Shape {:width        (unit/rem 4)
               :margin-right (unit/rem 1)}]
     [:input {:border-radius (unit/rem 1.2)
@@ -51,7 +51,7 @@
          :width           (unit/rem 1)
          :z-index         2
          :border-radius   (unit/percent 50)}]
-    [:&.Checked
+    [:&.checked
      [:i {:transform (translateX (unit/rem 1.75))}]
      [:input {:background   (linear-gradient (unit/deg 45) (color/lighten positive 5) (color/darken positive 5))
               :border-color (color/darken positive 10)}]]]
@@ -68,7 +68,12 @@
          :transform        [[(scale 0) (translateX (unit/percent -50))]]
          :transition       [[:100ms :ease]]
          :z-index          2}]
-    [:&.Checked
+    [:&.indeterminate
+     [:i {:transform-origin [[:left :center]]
+          :transform        [[(scale 0.75) (translateX (unit/percent -50))]]}]
+     [:input {:background   primary
+              :border-color (color/darken primary 10)}]]
+    [:&.checked
      [:i {:transform [[(scale 1) (translateX (unit/percent -50))]]}]
      [:input {:background   primary
               :border-color (color/darken primary 10)}]]
@@ -92,8 +97,7 @@
 
 (spec/def ::checkbox-params
   (spec/keys
-   :req-un [::checked?]
-   :opt-un [::id]))
+   :opt-un [::id ::checked]))
 
 
 (spec/def ::checkbox-args
@@ -104,19 +108,26 @@
 (defn checkbox
   [& args]
   (let [{:keys [params label]
-         :or   {label ""}}        (u/conform-or-fail ::checkbox-args args)
-        {:keys [checked? on-click id]
+         :or   {label ""}}      (u/conform-or-fail ::checkbox-args args)
+        {:keys [checked on-click id]
          :or   {id (u/gen-id)}} params]
     [:label {:for   id
-             :class (u/names->str [(when-not (some #(= :Toggle %) (:class params)) :Checkbox)
-                                   (when checked? :Checked)
-                                   (:class params)])}
+             :class (->> (u/names->str [(case checked
+                                          (true :checked) :Checked
+                                          :indeterminate  :Indeterminate
+                                          :Not-Checked)
+                                        (:class params)])
+                         (str (when-not (some #(= :Toggle %) (:class params)) " Checkbox ")))}
      [:div.Shape
-      [:i (when-not (some #(= :Toggle %) (:class params)) {:class :ion-ios-checkmark-empty})]
-      [:input (merge (dissoc params :checked? :id :class)
+      [:i (when-not (some #(= :Toggle %) (:class params))
+            (case checked
+              (true :checked) {:class :ion-ios-checkmark-empty}
+              :indeterminate  {:class :ion-ios-minus-empty}
+              {}))]
+      [:input (merge (dissoc params :checked :id :class)
                      {:id      id
                       :type    :checkbox
-                      :checked checked?})]] label]))
+                      :checked checked})]] label]))
 
 
 (spec/fdef checkbox

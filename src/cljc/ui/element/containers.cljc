@@ -1,72 +1,87 @@
 (ns ui.element.containers
-  (:require [ui.util :refer [names->str]]
-            #_[clojure.test.check.generators :as gen]
-            [clojure.spec :as spec]
+  (:require [clojure.spec :as spec]
+            [clojure.string :as str]
+            [garden.units :as unit]
             [garden.color :as color]
             [ui.util :as u]))
 
 
-(defn container
-  "
-  Container
-  Containers ease the process of creating robust layout's.
-  "
-  [params & content]
-  (fn [params & content]
-    (if-not (map? params)
-      [container {} params content]
-      (let [{:keys [raised?
-                    rounded?
-                    direction
-                    align
-                    justify
-                    compact
-                    no-gap
-                    no-wrap
-                    class
-                    on-click
-                    style
-                    fill
-                    background]} params
-            classes (names->str (concat [:Container
-                                         (if (not-empty direction)
-                                           (if (= "column" direction) "Vertically" "Horizontally")
-                                           "Horizontally")
-                                         (when (not-empty align) (str "Align-" align))
-                                         (when (not-empty justify) (str "Justify-" justify))
-                                         (when rounded? :Rounded)
-                                         (when raised? :Raised)
-                                         (when (true? fill) :Fill)
-                                         (when (true? no-gap) :No-gap)
-                                         (when (true? no-wrap) :No-wrap)
-                                         (when (true? compact) :Compact)]
-                                        class))]
-        [:div (merge (dissoc params :direction :align :justify :fill :no-gap :no-wrap :compact :rounded? :raised? :background)
-                     {:style (merge style
-                                    (when-not (nil? background) {:background background}))
-                      :class classes
-                      :on-click on-click})
-         (map-indexed #(with-meta %2 {:key (str "content-" %1)}) content)]))))
+(defn style [theme]
+  [[:.Flex {:flex 1}]
+   #_[".Container:not(.Vertically):not(.Compact) > * + *" {:margin-left (unit/rem 1)}]
+   #_[".Container.Vertically:not(.Compact) > * + *" {:margin-top (unit/rem 1)}]
+   [:.Container {:flex-grow   1
+                 :flex-shrink 0
+                 :flex-basis  :auto
+                 :box-sizing  :border-box
+                 :display     :flex}
+    [:&.hide {:display :none}]
+    [:&.gap {:padding (unit/rem 2)}]
+    [:&.wrap {:flex-wrap :wrap}]
+    ;; [(selector/& (selector/not :.Vertically)) {:flex-direction :row}]
+    ;; [(selector/& (selector/not :.No-wrap)) {:flex-wrap :wrap}]
+    ;; [(selector/& (selector/not :.No-gap)) {:padding (unit/rem 2)}]
+    ;; [(selector/& (selector/not (selector/attr-contains :class "Align"))) {:align-items :flex-start}]
+    ;; [(selector/& (selector/not (selector/attr-contains :class "Justify"))) {:justify-content :flex-start}]
+    [:&.layout-vertically {:flex-direction :column}]
+    [:&.align-start-start {:align-items     :flex-start
+                           :justify-content :flex-start}]
+    [:&.align-end-end {:align-items     :flex-end
+                       :justify-content :flex-end}]
+    [:&.align-center-center {:align-items     :center
+                             :justify-content :center}]
+    [:&.space-between {:justify-content :space-between}]
+    [:&.space-around {:justify-content :space-around}]
+    ;; TODO https://github.com/noprompt/garden/issueselector/127
+    #_[(selector/& :.Container (selector/> (selector/not :.Compact) (selector/+ :* :*))) {:margin-left (unit/rem 2)}]
+    [#{:&.fill :.Fill} {:box-sizing :border-box
+                       :flex       1
+                       :min-width  0
+                       :min-height 0
+                       :height     (unit/percent 100)
+                       :width      (unit/percent 100)}]
+    [:&.inline {:display :inline-flex}]
+    [:&.rounded {:border-radius (unit/rem 1)}]
+    [:&.raised {:box-shadow [[0 (unit/rem 0.2) (unit/rem 0.3) (color/rgba [35 35 35 0.2])]]
+                :overflow   :hidden}]]])
 
 
-(spec/def ::direction #{"horizontally" "vertically"})
-(spec/def ::align #{"start" "end" "center" "stretch"})
-(spec/def ::justify #{"start" "end" "center" "space-between" "space-around"})
-(spec/def ::compact boolean?)
-(spec/def ::no-gap boolean?)
-(spec/def ::fill boolean?)
-(spec/def ::content vector?)
+;; Parameter specifications
+(spec/def ::background string?)
+(spec/def ::compact? boolean?)
+(spec/def ::fill? boolean?)
+(spec/def ::gap? boolean?)
+(spec/def ::inline? boolean?)
+(spec/def ::raised? boolean?)
+(spec/def ::rounded? boolean?)
+(spec/def ::wrap? boolean?)
+(spec/def ::align (spec/coll-of ::alignment :min-count 1 :max-count 2))
+(spec/def ::alignment #{:start :end :center})
+(spec/def ::layout #{:horizontally :vertically})
+(spec/def ::space #{:between :around :none})
+(spec/def ::variable-content (spec/* (or vector? string?)))
 
 
+;; Consolidated parameters
+(spec/def ::container-params
+  (spec/keys :opt-un [::compact? ::fill? ::gap? ::inline? ::raised? ::rounded? ::wrap?
+                      ::layout ::background ::align ::space]))
+
+;; Full arguments specifications
 (spec/def ::container-args
-  (spec/keys
-   :req-un [::content]
-   :opt-un [::direction ::align ::justify ::compact ::no-gap ::fill]))
+  (spec/cat :params (spec/? ::container-params)
+            :content ::variable-content))
 
 
-(spec/fdef container :args ::container-args :ret vector?)
-;; (spec/describe ::container-args)
-;; (spec/exercise-fn container 3)
+(defn container [& args]
+  (let [{:keys [params content]} (u/conform-or-fail ::container-args args)
+        ui-params                (mapv (comp keyword name) (last (spec/form ::container-params)))
+        params                   (merge {:gap?  true
+                                         :wrap? true
+                                         :align [:start :start]} params)
+        class                    (str/trim (->> params (keep u/param->class) (str/join " ")
+                                                (str (or (:class params) "") " ")))]
+    (into [:div.Container (merge {:class class} (apply dissoc params (conj ui-params :class)))] content)))
 
 
 (defn sidebar
@@ -77,10 +92,10 @@
    [sidebar {} sidebar-content main-content])
   ([{:keys [locked open backdrop ontop to-the on-click-outside] :as params} sidebar-content main-content]
    (fn [{:keys [locked open backdrop ontop to-the on-click-outside]} sidebar-content main-content]
-     (let [classes (names->str [(when (true? open) :Open)
-                                (when (true? ontop) :Ontop)
-                                (when (true? locked) :Locked)
-                                (if (not= "right" to-the) :Align-left :Align-right)])]
+     (let [classes (u/names->str [(when (true? open) :Open)
+                                  (when (true? ontop) :Ontop)
+                                  (when (true? locked) :Locked)
+                                  (if (not= "right" to-the) :Align-left :Align-right)])]
        [:div.Sidebar {:class classes}
         [:div.Slider
          (when (not= "right" to-the)
@@ -100,10 +115,6 @@
 (spec/def ::to-the #{"left" "right"})
 (spec/def ::sidebar-args (spec/keys :opt-un [::open ::ontop ::locked ::backdrop ::to-the ::on-click-outside]))
 
-;; (spec/fdef sidebar :args ::sidebar-args :ret vector?)
-;; (spec/describe ::sidebar-args)
-;; (spec/exercise-fn sidebar 3)
-
 
 (defn card
   "
@@ -114,7 +125,7 @@
   (if-not (map? params)
     [card {} params content]
     (fn []
-      (let [classes (concat [] (when (not-empty (:class params)) (:class params)) [:Card])
+      (let [classes     (concat [] (when (not-empty (:class params)) (:class params)) [:Card])
             params-list (merge params {:class classes})]
         [container params-list
          (map-indexed #(with-meta %2 {:key (str "card-" %1)}) content)]))))

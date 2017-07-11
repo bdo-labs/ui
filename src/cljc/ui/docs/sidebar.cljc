@@ -36,21 +36,21 @@
     [element/article
      "# Sidebar
      "
-     [layout/vertically {:fill true}
-      [element/checkbox {:checked? open?
+     [layout/vertically {:fill? true}
+      [element/checkbox {:checked  open?
                          :on-click toggle-open} "Open?"]
-      [element/checkbox {:checked? backdrop?
+      [element/checkbox {:checked  backdrop?
                          :on-click toggle-backdrop} "Backdrop?"]
-      [element/checkbox {:checked? ontop?
+      [element/checkbox {:checked  ontop?
                          :on-click toggle-ontop} "Ontop?"]
       [:span
        [:label {:for :to-the} "To the "]
        [:select#to-the {:defaultValue "left" :on-change set-to-the}
         [:option {:value "left"} "Left"]
         [:option {:value "right"} "Right"]]]
-      [layout/vertically {:class [:demo]}
-       [element/sidebar {:open open? :backdrop backdrop? :ontop ontop? :to-the to-the}
-        [layout/vertically
+      [layout/vertically {:class "demo" :fill? true}
+       [element/sidebar {:open open? :backdrop backdrop? :ontop ontop? :to-the to-the :fill true}
+        [layout/vertically {:fill? true}
          [:h3 "Sidebar content"]]
-        [layout/vertically
+        [layout/vertically {:fill? true}
          [:h3 "Main content"]]]]]]))

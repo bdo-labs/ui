@@ -5,21 +5,21 @@
             [re-frame.core :refer [subscribe dispatch reg-sub reg-event-db]]))
 
 
-(reg-event-db ::open? u/toggle)
+(reg-event-db ::show? u/toggle)
 
 
-(reg-sub ::open? u/extract)
+(reg-sub ::show? u/extract-or-false)
 
 
 (defn documentation []
-  (let [open?      @(subscribe [::open?])
-        on-click   #(dispatch [::open?])
-        on-confirm #(dispatch [::open? false])]
+  (let [show?      @(subscribe [::show?])
+        on-click   #(dispatch [::show?])
+        on-confirm #(dispatch [::show? false])]
     [element/article
      "# Dialog
       Think, quick feedback!
      "
-     [element/button {:on-click on-click} "Open dialog"]
-     [element/dialog {:open    open?
-                      :confirm on-confirm}
+     [element/button {:on-click on-click} "Show dialog"]
+     [element/confirm-dialog {:show?      show?
+                              :on-confirm on-confirm}
       "Are you sure you would like to proceed?"]]))

@@ -50,7 +50,7 @@
         title-row        ["Segment" "Units-Sold" "Manufacturing" "Sales-Price" "Date"]
         body             (mapv vec (map first (drop 49 (spec/exercise ::fixture (+ rows 50)))))
         uniqs            (map-indexed #(do {:id %1 :text %2}) (distinct (mapv first body)))
-        b                (map #(assoc-in % [0] ^{:type :string
+        b                (map #(assoc-in % [0] ^{:type       :string
                                                  :sort-value (first %)} [element/auto-complete {:placeholder (first %)
                                                                                                 :items       uniqs}]) body)
         data             (into [title-row] b)]

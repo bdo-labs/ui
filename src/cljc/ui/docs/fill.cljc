@@ -18,17 +18,17 @@
     [element/article
      "# Fill
      Fill the void in whatever direction it's parent decides"
-     [layout/vertically {:fill true}
+     [layout/vertically {:fill? true}
       ;; TODO Replace with Radio-buttons
-      [element/checkbox {:checked?  horizontally?
+      [element/checkbox {:checked   horizontally?
                          :on-change toggle-horizontally}
        (if horizontally?
          "Horizontally"
          "Vertically")]
       (if horizontally?
-        [layout/horizontally {:class [:demo] :fill true}
+        [layout/horizontally {:class "demo" :fill? true}
          [layout/fill]
          [:div.Demo-box "Box"]]
-        [layout/vertically {:class [:demo] :fill true}
+        [layout/vertically {:class "demo" :fill? true}
          [layout/fill]
          [:div.Demo-box "Box"]])]]))
