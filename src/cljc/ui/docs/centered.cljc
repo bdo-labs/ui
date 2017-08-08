@@ -14,7 +14,7 @@
 (defn documentation
   []
   [element/article
-   "# Centered
+   "### Centered
 
      As the name suggests, this layout will center it's children  
      vertically and horizontally dead-center.

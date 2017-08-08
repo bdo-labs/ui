@@ -4,7 +4,7 @@
 
 (defn documentation []
   [element/article
-   "# Button  
+   "### Button  
    Create Actionable Items of Different Flavours
 
    "
@@ -13,10 +13,12 @@
     [element/button {:class "primary"} [:span "Bar"]]
     [element/button {:class "secondary" :rounded? true} "Baz"]
     [element/button {:rounded? true :flat? true} "Qux"]
-    [element/button {}
-     [element/icon {:font "ion"} "ionic"]]
+    [element/button {:class    "secondary"}
+     [element/icon {:font "ion"} "ios-settings"]
+     "Settings"]
     [element/button {:flat?     true
-                     :circular? true}
+                     :circular? true
+                     :title "Un-lock"}
      [element/icon {:font "material-icons"} "fingerprint"]]]
    [:p
     [:em

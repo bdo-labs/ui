@@ -10,9 +10,9 @@
         make-progress #(re-frame/dispatch [:set-progress (+ @progress-bar 10)])
         on-change #(set-progress-bar (:min %))]
     [element/article
-     "# Progress
+     "### Progress
 
-     There are a few flavors when it comes to showing of progression
+     There are a few flavors when it comes to showing progression
 
      ### Progress-bar
 
@@ -21,11 +21,10 @@
 
      Mess with the clamp to make some progress 🤓
      "
-     ;; TODO Replace with the clamp-element ones it's working
      [element/clamp {:id "progress-clamp"
-                     :labels? true
-                     :range :upper
-                     :on-change on-change} (range 100)]
-     "# Spinner
+                     :labels? false
+                     :range :lower
+                     :on-change on-change} (range 101)]
+     "### Spinner
      "
      [element/spinner]]))

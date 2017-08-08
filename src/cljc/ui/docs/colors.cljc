@@ -39,7 +39,7 @@
         set-primary   #(re-frame/dispatch [::set-primary %])
         set-secondary #(re-frame/dispatch [::set-secondary %])]
     [article
-     "# Color-picker
+     "### Color-picker
       Pick and choose colors that can easily be persisted as a theme "
      [layout/vertically {:rounded? true
                          :raised?  true

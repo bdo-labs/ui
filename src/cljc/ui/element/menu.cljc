@@ -30,7 +30,8 @@
 
 
 (spec/def ::open? boolean?)
-(spec/def ::variable-content (spec/* (or vector? string?)))
+(spec/def ::content-type (spec/or :nil nil? :str string? :vec vector?))
+(spec/def ::variable-content (spec/* ::content-type))
 (spec/def ::origins #{:top :bottom :left :right :center})
 
 (spec/def ::origin
@@ -56,4 +57,4 @@
                                          :class    (str "Dropdown "
                                                         (if open? "open " "not-open ")
                                                         (when origin (str "origin-" (str/join origin))))} (apply dissoc params ui-params))]
-    (into [container params] content)))
+    (into [container params] (map last content))))

@@ -13,10 +13,7 @@
 (re-frame/reg-event-db ::set-query (fn [db [_ dt]] (assoc db ::set-query dt)))
 (re-frame/reg-event-db ::set-open (fn [db [_ open?]] (assoc db ::open? open?)))
 (re-frame/reg-sub ::open? (fn [db] ^boolean (::open? db)))
-(re-frame/reg-sub
- ::query
- (fn [db [_ dt]]
-   (or (::query db) dt)))
+(re-frame/reg-sub ::query (fn [db [_ dt]] (or (::query db) dt)))
 
 
 ;; TODO Enable free-editing of text-field

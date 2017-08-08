@@ -35,7 +35,7 @@
 (defn documentation []
   (let [period @(re-frame/subscribe [::period])]
     [element/article
-     "# Date-picker
+     "## Date-picker
      Our date-picker expands out of a regular text-input upon focus.
      Within the calendar you can click on a certain date or you can
      enable ranges within the month you display.

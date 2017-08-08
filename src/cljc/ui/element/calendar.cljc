@@ -111,7 +111,7 @@
         on-next     #(do (re-frame/dispatch [::set-position more])
                          (when (fn? on-click) (on-click more))
                          #?(:cljs (.focus (.getElementById js/document id))))]
-    [container {:direction "row" :align "center" :justify "space-between" :class [:calendar-nav]}
+    [container {:layout :horizontally :align [:center :center] :space :between :class [:calendar-nav]}
      ^{:key "previous-month"} [button {:disabled (minimum? less) :on-click on-previous :flat true} "<"]
      ^{:key "current-month"} [:h3 (fmt/unparse (fmt/formatter "MMMM yyyy") position)]
      ^{:key "next-month"} [button {:disabled (maximum? more) :on-click on-next :flat true} ">"]]))

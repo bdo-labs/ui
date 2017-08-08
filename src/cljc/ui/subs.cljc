@@ -6,17 +6,7 @@
             [ui.util :as u]))
 
 
-(defn extract
-  "Extracts [key] from [db]"
-  [db [key]]
-  (-> db key))
-
-
-(reg-sub :active-doc-item extract)
-(reg-sub :active-panel extract)
-(reg-sub :icon-font extract)
-
-
-(reg-sub :progress
-         (fn [db [key]]
-           (or (-> db key) 0)))
+(reg-sub :active-doc-item u/extract)
+(reg-sub :active-panel u/extract)
+(reg-sub :icon-font u/extract)
+(reg-sub :progress [u/extract (fn [progress] (or progress 0))])

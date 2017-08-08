@@ -5,7 +5,10 @@
 (defn app-routes []
 
   (secretary/defroute "/" []
+    (re-frame/dispatch [:set-active-panel :marketing-panel]))
+
+  (secretary/defroute "/docs" []
     (re-frame/dispatch [:set-active-panel :doc-panel]))
 
-  (secretary/defroute "/:item" [item]
+  (secretary/defroute "/docs/:item" [item]
     (re-frame/dispatch [:set-active-doc-item (keyword item)])))

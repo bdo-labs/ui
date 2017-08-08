@@ -8,7 +8,6 @@
             #?(:cljs [cljs.core :refer [random-uuid]])))
 
 
-
 (defn extract
   "Extracts [key] from [db]"
   [db [key]]
@@ -207,3 +206,6 @@
     (:bottom :right) :end
     :center))
 
+
+(defn route [& fragments]
+  (str/join "/" fragments))

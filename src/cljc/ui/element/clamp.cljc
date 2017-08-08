@@ -169,11 +169,13 @@
          upper-knob      @(re-frame/subscribe [::upper-knob id])
          ;; Events
          set-active-knob #(re-frame/dispatch [::set-active-knob id %])
-         mouse-within    #(when-not (nil? active-knob)
-                            (let [x (.-mousePercentX %)]
-                              (re-frame/dispatch [::move-knob id x])
-                              (on-change {:min lower-value
-                                          :max upper-value})))
+         mouse-within    #(do
+                            (u/log active-knob)
+                            (when-not (nil? active-knob)
+                              (let [x (.-mousePercentX %)]
+                                (re-frame/dispatch [::move-knob id x])
+                                (on-change {:min lower-value
+                                            :max upper-value}))))
          mouse-up        #(re-frame/dispatch [::unset-active-knob id])
          mouse-down      (fn [knob] #(set-active-knob knob))]
      [:div.Clamp {:id  id
@@ -186,13 +188,14 @@
       ;; Wrap the slider in a boundary that exposes a relative clientX-stream
       [boundary {:on-mouse-within mouse-within
                  :on-mouse-up     mouse-up
+                 :on-mouse-levave mouse-up
                  :offset          {:top  (unit/rem 1)
                                    :left (unit/rem 3)}}
        [:div.Slider {}
         (when-not (= (:range params) :lower)
           [:div.Knob {:on-mouse-down (mouse-down ::lower-knob)
-                      :data-value    (str lower-value)
                       :class         (if (not= lower-knob 0) "Dirty" "")
+                      :data-value    (str lower-value)
                       :style         {:left (str lower-knob "%")}}])
         (when-not (= (:range params) :upper)
           [:div.Knob {:on-mouse-down (mouse-down ::upper-knob)

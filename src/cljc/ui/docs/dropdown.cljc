@@ -7,9 +7,13 @@
   (let [!open? (atom false)]
     (fn []
       [element/article
-       "# Dropdown"
+       "### Dropdown
+       "
        [layout/vertically
-        [element/button {:on-click #(reset! !open? (not @!open?))} "Open"]
+        [element/button {:class "secondary"
+                         :on-click #(reset! !open? (not @!open?))}
+         [element/icon {:font "ion"} (str "android-arrow-drop" (if @!open? "up" "down"))]
+         "Open"]
         [element/dropdown {:open? @!open?
                            :origin [:top :left]
                            :style {:width "360px"}}

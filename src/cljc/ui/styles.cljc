@@ -13,6 +13,7 @@
             [ui.element.button :as button]
             [ui.element.clamp :as clamp]
             [ui.element.progress-bar :as progress-bar]
+            [ui.element.modal :as modal]
             [ui.element.loaders :as loaders]))
 
 
@@ -59,14 +60,27 @@
              :positive (color/rgb [34 192 100])
              :negative (color/rgb [232 83 73])
              :font-weight 100
-             :font-scale (unit/rem 1.8)}})
+             :font-base (unit/rem 1.8)
+             :font-scale :augmented-fourth}})
 
 
-(defn- golden [x] (* (/ x 16) 9))
+(def scales
+  {:minor-second     (/ 16 15)
+   :major-second     (/ 9 8)
+   :minor-third      (/ 6 5)
+   :major-third      (/ 5 4)
+   :perfect-fourth   (/ 4 3)
+   :augmented-fourth (/ 1.411 1)
+   :perfect-fifth    (/ 3 2)
+   :golden           (/ 1.61803 1)})
 
 
-(defn- base [theme]
-  [[:ul {:list-style-position :inside}]])
+(defn- base [{:keys [primary secondary positive negative]
+          :as theme}]
+  [[:ul {:list-style-position :inside}]
+   [:.face-primary {:color primary}]
+   [:.face-secondary {:color secondary}]
+   ])
 
 
 (defn- structure [theme]
@@ -121,7 +135,7 @@
                :position    :absolute
                :top 0
                :z-index     9
-               :line-height (unit/rem 3)}]
+               :line-height 2}]
     [:main {:width              (unit/percent 100)
             :overflow           :auto
             :overflow-scrolling :touch
@@ -168,10 +182,11 @@
            :border-radius (unit/percent 50)}]]])
 
 
-(defn- card [theme]
+(defn- card [{:keys [font-scale]
+          :as theme}]
   [[:.Card
     {:min-width  (unit/rem 26)
-     :min-height (unit/rem (golden 26))}
+     :min-height (unit/rem (* (get scales font-scale) 26))}
     {:border-radius (unit/rem 0.3)
      :overflow      :hidden}]])
 
@@ -183,15 +198,21 @@
         (card theme)]))
 
 
-(defn- typography [{:keys [font-scale font-weight]
-                :or   {font-scale  (unit/em 1.8)
+(defn- typography [{:keys [font-base font-weight font-scale]
+                :or   {font-base   (unit/em 1.8)
                        font-weight 100}}]
   [[:html {:font-size   (unit/percent 62.5)
-                  :font-weight font-weight
-                  :font-family [:Roboto [:Helvetica :Neue] :Helvetica]}]
-   [#{:body :input} {:font-size font-scale}]
-   [#{:h1 :h2 :h3 :h4 :h5 :h6} {:font-weight :normal}]
-   [:p {:line-height (unit/em 1.55) :margin-bottom (unit/em 3.1)}]
+           :font-weight font-weight
+           :font-family [:Roboto [:Helvetica :Neue] :Helvetica]}]
+   [#{:body} {:line-height 1.45}]
+   [#{:body :input} {:font-size font-base}]
+   [#{:h1 :h2 :h3 :h4 :h5 :h6} {:font-weight :normal
+                               :line-height 1.2}]
+   (for [n (range 1 6)]
+     (let [size  (* (Math/abs (- n 6)) 0.5)
+           scale (get scales font-scale)]
+       [(keyword (str "h" n)) {:font-size (unit/em (* size scale))}]))
+   [:p {:margin-bottom (unit/em 1.3)}]
    [:.Copy {:max-width (unit/rem 65)}]
    [:.Newspaper {:text-align :justify}]
    [:.Legal {:font-size (unit/em 0.7)}
@@ -203,14 +224,27 @@
   [:to {:background (u/gray 220)}])
 
 
+(defkeyframes fade-up
+  [:from {:opacity 0
+          :transform (translateY (unit/percent 25))}]
+  [:to {:opacity 1
+        :transform (translateY 0)}])
+
+
 (defkeyframes fade
   [:from {:opacity 0}]
   [:to {:opacity 1}])
 
 
+(defkeyframes up
+  [:from {:transform (translateY (unit/percent 50))}]
+  [:to {:transform (translateY 0)}])
+
 (defn- animations [theme]
   [pulse-color]
-  [fade])
+  [fade]
+  [up]
+  [fade-up])
 
 
 (defn- forms [{:keys [primary secondary]}]
@@ -473,35 +507,6 @@
                 :padding   (unit/em 0.5)}]]]))
 
 
-(defn- tmp [{:keys [primary secondary background]}]
-  [[:.Dialog {:position :fixed
-              :left     0
-              :top      0
-              :height   (unit/percent 100)
-              :width    (unit/percent 100)
-              :margin   [[0 :!important]]
-              :z-index  10}
-    ;; [(selector/& (selector/not :.Open)) {:display :none}]
-    [:&.open
-     [:.Backdrop {:opacity   1
-                  :animation [[:fade :200ms :ease]]
-                  :z-index   10}]]]
-   [:.Dialog-content {:background    :white
-                      :border-radius (unit/rem 0.8)
-                      :position      :absolute
-                      :left          (unit/percent 50)
-                      :top           (unit/percent 50)
-                      :transform     [[(translateY (unit/percent -50)) (translateX (unit/percent -50))]]
-                      :z-index       12}]
-   [:body {:background-color background}]
-   [:menu [:a {:display :block}]]
-   [:a {:color           secondary
-        :text-decoration :none}
-    [:&.primary {:color primary}]
-    [:&:hover {:color (color/darken secondary 30)}
-     [:&.primary {:color primary}]]]])
-
-
 (defn- in-doc [{:keys [primary]}]
   (let [contrast (u/gray 240)
         triangle [(linear-gradient (unit/deg 45)
@@ -510,7 +515,12 @@
                                    [:transparent (unit/percent 75)]
                                    [contrast (unit/percent 75)]
                                    contrast)]]
-    [[:.Container
+    [[:.Marketing {:background (linear-gradient (unit/deg 45) (color/rgb [64 60 82]) (color/rgb [34 25 50]))
+                   :color (color/rgb [240 240 240])}
+      [:.raised {:color (color/rgb [50 50 50])}]
+      [:section {:margin-top (unit/rem 5)
+                 :margin-bottom (unit/rem 5)}]]
+     [:.Container
       [:&.demo {:background          (vec (repeat 2 triangle))
                 :background-position [[0 0] [(unit/px 10) (unit/px 10)]]
                 :background-size     [[(unit/px 20) (unit/px 20)]]
@@ -561,7 +571,7 @@
                         (button/style theme)
                         (menu/style theme)
                         (checkbox/style theme)
-                        (tmp theme)
+                        (modal/style theme)
                         (clamp/style theme)
                         (boundary/style theme)
                         (progress-bar/style theme)

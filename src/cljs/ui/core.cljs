@@ -3,7 +3,7 @@
   (:require [goog.events :as events]
             [goog.history.EventType :as EventType]
             [re-frame.core :as re-frame]
-            [re-frisk.core :refer [enable-re-frisk!]]
+            ;[re-frisk.core :refer [enable-re-frisk!]]
             [reagent.core :as reagent]
             [secretary.core :as secretary]
             [ui.config :as config]
@@ -18,7 +18,7 @@
 (defn dev-setup []
   (when config/debug?
     (enable-console-print!)
-    (enable-re-frisk!)
+    ;(enable-re-frisk!)
     (println "dev mode")))
 
 

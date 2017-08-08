@@ -16,11 +16,14 @@
               :user-select    :none
               :min-width      (unit/rem 8)
               :text-transform :uppercase
+              :padding        [[(unit/rem 0.25) (unit/rem 1)]]
               :transition     [[:background-color :200ms :ease]]
               :line-height    2.5}
     [:&:hover {:background-color (u/gray 240)}]
     [:&.circular {:border-radius (unit/percent 50)
-                  :min-width     (unit/rem 3.5)}]
+                  :padding       (unit/rem 0.25)
+                  :min-width     (unit/rem 3.5)}
+     [:.Icon {:margin-right 0}]]
     [:&.secondary {:background-color secondary
                    :border-color     secondary
                    :color            (if (u/dark? secondary) :white :black)}
@@ -36,10 +39,11 @@
     [:&.flat {:background-color :transparent
               :border           [[:solid (unit/em 0.1) :inherit]]}]
     [:&.rounded {:border-radius (unit/em 2)}]
-    [:.Icon {:font-size   (unit/rem 2)
+    [:.Icon {:font-size      (unit/rem 2)
              :vertical-align :middle
-             :min-width   (unit/rem 1)
-             :line-height 0}]]])
+             :margin-right   (unit/rem 1)
+             :min-width      (unit/rem 1)
+             :line-height    0}]]])
 
 
 (spec/def ::flat? boolean?)

@@ -12,14 +12,17 @@
 
 
 (defn documentation []
-  (let [show?      @(subscribe [::show?])
-        on-click   #(dispatch [::show?])
-        on-confirm #(dispatch [::show? false])]
+  (let [show?    @(subscribe [::show?])
+        on-click #(dispatch [::show?])
+        cancel   #(dispatch [::show? false])]
     [element/article
-     "# Dialog
+     "### Dialog
       Think, quick feedback!
      "
-     [element/button {:on-click on-click} "Show dialog"]
-     [element/confirm-dialog {:show?      show?
-                              :on-confirm on-confirm}
-      "Are you sure you would like to proceed?"]]))
+     [element/button {:class "secondary"
+                      :on-click on-click} "Show dialog"]
+     [element/dialog {:show?               show?
+                      :backdrop?           true
+                      :cancel              cancel
+                      :cancel-on-backdrop? false}
+      [:h4 "Are you sure you would like to proceed?"]]]))

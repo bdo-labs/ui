@@ -8,8 +8,8 @@
 
 (defn style [theme]
   [[:.Flex {:flex 1}]
-   #_[".Container:not(.Vertically):not(.Compact) > * + *" {:margin-left (unit/rem 1)}]
-   #_[".Container.Vertically:not(.Compact) > * + *" {:margin-top (unit/rem 1)}]
+   #_[".Container:not(.layout-vertically):not(.Compact) > * + *" {:margin-left (unit/rem 1)}]
+   #_[".Container.layout-vertically:not(.Compact) > * + *" {:margin-top (unit/rem 1)}]
    [:.Container {:flex-grow   1
                  :flex-shrink 0
                  :flex-basis  :auto
@@ -18,7 +18,7 @@
     [:&.hide {:display :none}]
     [:&.gap {:padding (unit/rem 2)}]
     [:&.wrap {:flex-wrap :wrap}]
-    ;; [(selector/& (selector/not :.Vertically)) {:flex-direction :row}]
+    ;; [(selector/& (selector/not :.layout-vertically)) {:flex-direction :row}]
     ;; [(selector/& (selector/not :.No-wrap)) {:flex-wrap :wrap}]
     ;; [(selector/& (selector/not :.No-gap)) {:padding (unit/rem 2)}]
     ;; [(selector/& (selector/not (selector/attr-contains :class "Align"))) {:align-items :flex-start}]
@@ -59,13 +59,17 @@
 (spec/def ::alignment #{:start :end :center})
 (spec/def ::layout #{:horizontally :vertically})
 (spec/def ::space #{:between :around :none})
-(spec/def ::variable-content (spec/* (or vector? string?)))
+(spec/def ::content-type (spec/or :nil nil? :fn fn? :str string? :vec vector?))
+(spec/def ::variable-content (spec/* ::content-type))
+(spec/def ::width
+  (spec/or :flex int?
+           :width string?))
 
 
 ;; Consolidated parameters
 (spec/def ::container-params
   (spec/keys :opt-un [::compact? ::fill? ::gap? ::inline? ::raised? ::rounded? ::wrap?
-                      ::layout ::background ::align ::space]))
+                      ::layout ::background ::align ::space ::width]))
 
 ;; Full arguments specifications
 (spec/def ::container-args
@@ -74,14 +78,20 @@
 
 
 (defn container [& args]
-  (let [{:keys [params content]} (u/conform-or-fail ::container-args args)
-        ui-params                (mapv (comp keyword name) (last (spec/form ::container-params)))
-        params                   (merge {:gap?  true
-                                         :wrap? true
-                                         :align [:start :start]} params)
-        class                    (str/trim (->> params (keep u/param->class) (str/join " ")
-                                                (str (or (:class params) "") " ")))]
-    (into [:div.Container (merge {:class class} (apply dissoc params (conj ui-params :class)))] content)))
+  (let [{:keys [params content]}         (u/conform-or-fail ::container-args args)
+        ui-params                        (mapv (comp keyword name) (last (spec/form ::container-params)))
+        params                           (merge {:gap?  true
+                                                 :wrap? true
+                                                 :align [:start :start]} params)
+        {:keys [style background width]} params
+        background                       {:background background}
+        class                            (u/params->classes (dissoc params :width :background))
+        style                            (merge style width background)]
+    (into [:div.Container
+           (merge {:class class}
+                  (apply dissoc params (conj ui-params :class))
+                  {:style style})]
+          (map last content))))
 
 
 (defn sidebar

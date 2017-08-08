@@ -20,8 +20,8 @@
                  [org.clojure/core.async "0.3.443"]
                  ;; [org.clojure/spec.alpha "0.1.123"]
                  [re-frame "0.9.4"]
-                 [re-frisk "0.4.5" :scope "test"]
-                 [reagent "0.6.2"]
+                 ; [re-frisk "0.4.5" :scope "test"]
+                 [reagent "0.7.0"]
                  [secretary "1.2.3"]
                  [tongue "0.2.2"]
 
@@ -126,22 +126,24 @@
 
 (deftask dev
   "Interactive development-build"
-  [s speak? bool "Audible notification when a build is completed"]
+  [s speak? bool "Audible notification when a build is completed"
+   n notify? bool "Visual notification when a build is completed"]
   (comp ;(git-pull :branch "origin" "master")
    (pre-requisits)
    (readme)
    (serve)
    (watch)
    (if speak? (speak) identity)
+   (if notify? (notify) identity)
    (cljs-devtools)
    (reload :on-jsload 'ui.core/mount-root)
    (styles)
+   (asset-fingerprint :skip true)
    (cljs :ids #{"ui"}
          :optimizations :none
          :source-map true
          :compiler-options {:parallel-build true
                             :preloads       '[devtools.preload]})
-   (asset-fingerprint :verbose true :skip true)
    (target)))
 
 

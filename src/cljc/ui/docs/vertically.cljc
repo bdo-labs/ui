@@ -6,7 +6,7 @@
 (defn documentation
   []
   [element/article
-   "# Vertically"
+   "### Vertically"
    [layout/vertically {:fill? true :gap? false}
     [layout/vertically {:class "demo" :fill? true}
      [:div.Demo-box "Box"]

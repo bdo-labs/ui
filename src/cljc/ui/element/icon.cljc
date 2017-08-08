@@ -45,15 +45,16 @@
 
 (defn icon
   [& args]
-  (let [{:keys [params icon]}       (spec/conform ::icon-args args)
+  (let [{:keys [params icon]}            (spec/conform ::icon-args args)
         {:keys [font size] :or {size 2}} params
         style                            {:font-size (str size "rem")}
-        params                           (dissoc params :size :font)
+        class                            (:class params)
+        params                           (dissoc params :size :font :class)
         font                             (apply hash-map font)]
     (if-let [font-name (:font-name font)]
-      [:i.Icon (merge {:class font-name :style style} params) icon]
+      [:i.Icon (merge {:class (str font-name " " class) :style style} params) icon]
       (let [font-prefix (:font-prefix font)
-            class       (str/join " " [font-prefix (str font-prefix "-" icon)])]
+            class       (str/join " " (conj [font-prefix (str font-prefix "-" icon)] class))]
         [:i.Icon (merge {:class class :style style} params)]))))
 
 

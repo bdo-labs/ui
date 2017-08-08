@@ -12,7 +12,8 @@
 (spec/def ::alignment #{:start :end :center})
 (spec/def ::horizontal-alignment #{:left :right :center})
 (spec/def ::vertical-alignment #{:top :bottom :middle})
-(spec/def ::variable-content (spec/* (or vector? string?)))
+(spec/def ::content-type (spec/or :nil nil? :fn fn? :str string? :vec vector?))
+(spec/def ::variable-content (spec/* ::content-type))
 
 (spec/def ::layout-params
   (spec/keys :opt-un [::aligned]))
@@ -28,7 +29,7 @@
                                   (u/aligned->align (or (-> params :aligned :y) :top))]
         params                   (merge {:layout layout :align align}
                                         (dissoc params :aligned))]
-    (apply element/container (into [params] content))))
+    (apply element/container (into [params] (map last content)))))
 
 
 (defn horizontally [& args]

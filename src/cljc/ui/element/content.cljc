@@ -1,6 +1,7 @@
 (ns ui.element.content
   (:require [ui.util :as u]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [clojure.spec :as spec]))
 
 
 (defn markdown
@@ -23,9 +24,30 @@
 
 
 ;; TODO Add parameters
+
+(spec/def ::class string?)
+
+
+(spec/def ::article-params
+  (spec/keys :opt-un [::class]))
+
+
+(spec/def ::content
+  (spec/or :str string?
+           :vec vector?
+           :nil nil?))
+
+
+(spec/def ::article
+  (spec/cat :params (spec/? ::article-params)
+            :content (spec/* ::content)))
+
 (defn article
-  ([& content]
-   (into [:article {:role :article}] (map section content))))
+  [& args]
+  (let [{:keys [params content]} (u/conform-or-fail ::article args)]
+    (into [:article (merge {:role :article} params)]
+          (->> (map last content)
+               (map section)))))
 
 
 (defn vr [] [:div.Vertical-rule])

@@ -16,7 +16,7 @@
   (let [horizontally?       @(re-frame/subscribe [::horizontally?])
         toggle-horizontally #(re-frame/dispatch [::toggle-horizontally?])]
     [element/article
-     "# Fill
+     "### Fill
      Fill the void in whatever direction it's parent decides"
      [layout/vertically {:fill? true}
       ;; TODO Replace with Radio-buttons

@@ -14,7 +14,7 @@ in 2.0, but at-least our upgrade-path is way easier now.
 
 
 /* Dialog */
-.Dialog:not(.open) { display: none; }
+/* .Dialog:not(.open) { display: none; } */
 
 
 /* Drop-down */

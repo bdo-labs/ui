@@ -23,7 +23,7 @@
              through for validation against the application-state."}
   interceptors
   [
-   ;; check-spec
+   ;check-spec
    re-frame/trim-v])
 
 (re-frame/reg-event-db :initialize-db (fn  [_ _] db/default-db))

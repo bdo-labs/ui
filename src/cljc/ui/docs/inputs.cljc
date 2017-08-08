@@ -78,11 +78,11 @@
 (defn documentation
   []
   [element/article
-   "# Checkbox & Toggle
+   "### Checkbox & Toggle
    Use checkboxes whenever there are multiple choices that are
    combined, whereas toggles are for switching on/off or between two
    choices.
    "
    [check-toggle]
-   "# Auto-complete"
+   "### Auto-complete"
    [completion]])
