@@ -3,20 +3,35 @@
             [re-frame.core :as re-frame]
             [ui.elements :as element]
             [ui.layout :as layout]
-            [ui.util :as u]))
+            [ui.util :as util]
+            [clojure.spec :as spec]))
 
+(spec/def ::id nat-int?)
+(spec/def ::text (spec/and string? #(> (count %) 3)))
+(spec/def ::item (spec/keys :req-un [::id ::text]))
+(spec/def ::items (spec/coll-of ::item))
+
+
+(re-frame/reg-event-db
+ :initialize-inputs
+ (fn [db _]
+   (let [coll (->> (spec/exercise ::items 550)
+                (drop 50)
+                (mapv first)
+                (first))]
+     (assoc db ::collection coll))))
 
 ;; Subscriptions
-(re-frame/reg-sub ::bacon? u/extract-or-false)
-(re-frame/reg-sub ::cheese? u/extract-or-false)
-(re-frame/reg-sub ::ketchup? u/extract-or-false)
-(re-frame/reg-sub ::email? u/extract-or-false)
-(re-frame/reg-sub ::collection-opened u/extract)
-(re-frame/reg-sub ::multiple? u/extract-or-false)
-(re-frame/reg-sub ::disabled? u/extract-or-false)
+(re-frame/reg-sub ::bacon? util/extract-or-false)
+(re-frame/reg-sub ::cheese? util/extract-or-false)
+(re-frame/reg-sub ::ketchup? util/extract-or-false)
+(re-frame/reg-sub ::email? util/extract-or-false)
+(re-frame/reg-sub ::collection-opened util/extract)
+(re-frame/reg-sub ::multiple? util/extract-or-false)
+(re-frame/reg-sub ::disabled? util/extract-or-false)
 
-(re-frame/reg-sub ::query u/extract)
-(re-frame/reg-sub ::collection u/extract)
+(re-frame/reg-sub ::query util/extract)
+(re-frame/reg-sub ::collection util/extract)
 (re-frame/reg-sub
  ::filtered-collection
  :<- [::collection]
@@ -28,12 +43,12 @@
 
 
 ;; Events
-(re-frame/reg-event-db ::toggle-bacon? u/toggle)
-(re-frame/reg-event-db ::toggle-cheese? u/toggle)
-(re-frame/reg-event-db ::toggle-ketchup? u/toggle)
-(re-frame/reg-event-db ::toggle-email? u/toggle)
-(re-frame/reg-event-db ::toggle-multiple? u/toggle)
-(re-frame/reg-event-db ::toggle-disabled? u/toggle)
+(re-frame/reg-event-db ::toggle-bacon? util/toggle)
+(re-frame/reg-event-db ::toggle-cheese? util/toggle)
+(re-frame/reg-event-db ::toggle-ketchup? util/toggle)
+(re-frame/reg-event-db ::toggle-email? util/toggle)
+(re-frame/reg-event-db ::toggle-multiple? util/toggle)
+(re-frame/reg-event-db ::toggle-disabled? util/toggle)
 
 
 (defn check-toggle []

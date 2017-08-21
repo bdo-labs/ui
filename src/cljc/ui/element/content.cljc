@@ -4,6 +4,7 @@
             [clojure.spec :as spec]))
 
 
+;; TODO add parameters
 (defn markdown
   "Render markdown-[text] as html"
   [text]

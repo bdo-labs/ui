@@ -10,7 +10,6 @@
                  [clj-time "0.13.0"]
                  [cljsjs/hammer "2.0.4-5"]
                  [com.andrewmcveigh/cljs-time "0.5.0"]
-                 ;; [day8.re-frame/undo "0.3.2"]
                  [day8/re-frame-tracer "0.1.1-SNAPSHOT" :scope "test"]
                  [garden "2.0.0-alpha1"]
                  [markdown-clj "0.9.99"]
@@ -18,9 +17,9 @@
                  [org.clojure/clojure "1.9.0-alpha13" :scope "provided"]
                  [org.clojure/clojurescript "1.9.293" :scope "provided"]
                  [org.clojure/core.async "0.3.443"]
-                 ;; [org.clojure/spec.alpha "0.1.123"]
-                 [re-frame "0.9.4"]
-                 ; [re-frisk "0.4.5" :scope "test"]
+                 [venantius/accountant "0.2.0"]
+                 [com.cemerick/url "0.1.1"]
+                 [re-frame "0.10.1"]
                  [reagent "0.7.0"]
                  [secretary "1.2.3"]
                  [tongue "0.2.2"]
@@ -37,7 +36,7 @@
                  [danielsz/boot-autoprefixer "0.1.0" :scope "test"]
                  [degree9/boot-npm "1.4.0" :scope "test"]
                  [degree9/boot-semgit "1.2.0" :scope "test"]
-                 [degree9/boot-semver "1.6.0" :scope "test"]
+                 [degree9/boot-semver "1.7.0" :scope "test"]
                  [funcool/boot-codeina "0.1.0-SNAPSHOT" :scope "test"]
                  [hendrick/boot-medusa "0.1.1" :scope "test"]
                  [ns-tracker "0.3.1" :scope "test"]
@@ -118,33 +117,32 @@
   requires that `postcss-cli` and `autoprefixer` is installed"
   []
   (comp (garden :output-to "css/ui.css"
-                :styles-var 'ui.styles/screen)
-        (garden :output-to "css/docs.css"
-                :styles-var 'ui.styles/docs)
-        (autoprefixer)))
+             :styles-var 'ui.styles/screen)
+     (garden :output-to "css/docs.css"
+             :styles-var 'ui.styles/docs)
+     (autoprefixer)))
 
 
 (deftask dev
   "Interactive development-build"
-  [s speak? bool "Audible notification when a build is completed"
-   n notify? bool "Visual notification when a build is completed"]
-  (comp ;(git-pull :branch "origin" "master")
-   (pre-requisits)
-   (readme)
-   (serve)
-   (watch)
-   (if speak? (speak) identity)
-   (if notify? (notify) identity)
-   (cljs-devtools)
-   (reload :on-jsload 'ui.core/mount-root)
-   (styles)
-   (asset-fingerprint :skip true)
-   (cljs :ids #{"ui"}
-         :optimizations :none
-         :source-map true
-         :compiler-options {:parallel-build true
-                            :preloads       '[devtools.preload]})
-   (target)))
+  [s speak? bool "Audible notification when a build is completed"]
+  (comp (pre-requisits)
+     (readme)
+     (serve)
+     (watch)
+     (if speak? (speak) identity)
+     (cljs-devtools)
+     (reload :on-jsload 'ui.core/mount-root)
+     (styles)
+     (asset-fingerprint :skip true)
+     (cljs :ids #{"ui"}
+           :optimizations :none
+           :source-map true
+           :compiler-options {:parallel-build true
+                              :closure-defines {"goog.DEBUG" true
+                                                "clairvoyant.core.devmode" true}
+                              :preloads       '[devtools.preload]})
+     (target)))
 
 
 (deftask prod

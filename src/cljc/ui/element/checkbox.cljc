@@ -97,7 +97,7 @@
 
 (spec/def ::checkbox-params
   (spec/keys
-   :opt-un [::id ::checked]))
+   :opt-un [::id ::checked?]))
 
 
 (spec/def ::checkbox-args
@@ -109,25 +109,25 @@
   [& args]
   (let [{:keys [params label]
          :or   {label ""}}      (u/conform-or-fail ::checkbox-args args)
-        {:keys [checked on-click id]
+        {:keys [checked? on-click id]
          :or   {id (u/gen-id)}} params]
     [:label {:for   id
-             :class (->> (u/names->str [(case checked
-                                          (true :checked) :Checked
+             :class (->> (u/names->str [(case checked?
+                                          (true :checked?) :Checked
                                           :indeterminate  :Indeterminate
-                                          :Not-Checked)
+                                          :Not-Checked?)
                                         (:class params)])
                          (str (when-not (some #(= :Toggle %) (:class params)) " Checkbox ")))}
      [:div.Shape
       [:i (when-not (some #(= :Toggle %) (:class params))
-            (case checked
-              (true :checked) {:class :ion-ios-checkmark-empty}
+            (case checked?
+              (true :checked?) {:class :ion-ios-checkmark-empty}
               :indeterminate  {:class :ion-ios-minus-empty}
               {}))]
-      [:input (merge (dissoc params :checked :id :class)
+      [:input (merge (dissoc params :checked? :id :class)
                      {:id      id
                       :type    :checkbox
-                      :checked checked})]] label]))
+                      :checked checked?})]] label]))
 
 
 (spec/fdef checkbox

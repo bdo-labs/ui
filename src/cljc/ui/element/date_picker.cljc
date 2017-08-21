@@ -3,56 +3,51 @@
   (:require [#?(:clj clj-time.coerce :cljs cljs-time.coerce) :as coerce]
             [#?(:clj clj-time.core :cljs cljs-time.core) :as t]
             [#?(:clj clj-time.format :cljs cljs-time.format) :as fmt]
+            [#?(:clj clojure.core :cljs reagent.core) :refer [atom]] 
             [re-frame.core :as re-frame]
             [clojure.core.async :as async :refer [<! #?(:clj go) timeout]]
-            [ui.element.calendar :refer [calendar]]
+            [ui.element.containers :refer [container]]
+            [ui.element.icon :refer [icon]]
+            [ui.element.calendar :as calendar]
             [ui.element.textfield :refer [textfield]]
-            [ui.util :as u]))
-
-
-(re-frame/reg-event-db ::set-query (fn [db [_ dt]] (assoc db ::set-query dt)))
-(re-frame/reg-event-db ::set-open (fn [db [_ open?]] (assoc db ::open? open?)))
-(re-frame/reg-sub ::open? (fn [db] ^boolean (::open? db)))
-(re-frame/reg-sub ::query (fn [db [_ dt]] (or (::query db) dt)))
+            [ui.util :as util]))
 
 
 ;; TODO Enable free-editing of text-field
 ;; TODO Make handlers and subscriptions unique to each picker
 (defn date-picker
-  [{:keys [on-click on-focus on-navigation value nav? calendar? placeholder selectable? weekend short-form? jump]
-    :or   {nav?        true
-           calendar?   true
-           value       (t/now)
-           placeholder "Select a date"
-           selectable? #(true? true)
-           weekend     true}
+  [{:keys [on-click on-focus on-navigation
+           selected nav? selectable?
+           show-weekend? short-form? jump]
+    :or   {nav?          true
+           jump          1
+           selected      (t/now)
+           short-form?   false
+           selectable?   true
+           show-weekend? true}
     :as   params}]
-  (let [open?             @(re-frame/subscribe [::open?])
-        query             @(re-frame/subscribe [::query value])
-        minimum           (:min params)
-        maximum           (:max params)
-        on-internal-click #(do (re-frame/dispatch [::set-query %])
+  (let [!open?            (atom false)
+        on-internal-click #(do (util/log %)
                                (when (fn? on-click) (on-click %)))]
-    [:div.Date-picker
-     [textfield {:placeholder placeholder
-                 :value       (fmt/unparse (fmt/formatter "dd. MMM. yyyy") query)
-                 :on-focus    #(do
-                                 (re-frame/dispatch [::set-open true])
-                                 (when (fn? on-focus) (on-focus %)))
-                 :on-blur     #(let [target (.-target %)]
-                                 #?(:cljs (go (<! (timeout 250))
-                                              (let [has-focus? ^boolean (= target (.-activeElement js/document))]
-                                                (when (and open? (not has-focus?))
-                                                  (re-frame/dispatch [::set-open false]))))))}]
-     (when (and open? calendar?)
-       [calendar {:value       query
-                  :on-click    on-internal-click
-                  :selectable? selectable?
-                  :short-form? short-form?
-                  :placeholder placeholder
-                  :weekend     weekend
-                  :on-navigation on-navigation
-                  :jump        jump
-                  :nav?        nav?
-                  :min         minimum
-                  :max         maximum}])]))
+    (fn []
+      [:div.Date-picker
+       [container {:layout :vertically}
+        [container {:layout :horizontally
+                    :fill?  true
+                    :align  [:center :center]}
+         [textfield {:value    (fmt/unparse (fmt/formatter "dd. MMM. yyyy") selected)
+                     :style    {:flex 1}
+                     :on-focus #(do (reset! !open? true)
+                                    (when (fn? on-focus) (on-focus %)))}]
+         [icon {:font "ion"} "ios-calendar-outline"]]
+        (when @!open? 
+          [calendar/days {:selected      selected
+                          :on-click      on-internal-click
+                          :selectable?   selectable?
+                          :short-form?   short-form?
+                          :show-weekend? show-weekend?
+                          :on-navigation on-navigation
+                          :jump          jump
+                          :nav?          nav?
+                          :min           (:min params)
+                          :max           (:min params)}])]])))

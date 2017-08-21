@@ -6,6 +6,7 @@
             [ui.util :as u]))
 
 
+(reg-sub :fragments u/extract)
 (reg-sub :active-doc-item u/extract)
 (reg-sub :active-panel u/extract)
 (reg-sub :icon-font u/extract)

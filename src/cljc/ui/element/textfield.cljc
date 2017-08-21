@@ -23,8 +23,9 @@
         id         (u/gen-id)]
     (fn [& args]
       (let [{:keys [params]}           (u/conform-or-fail ::textfield-args args)
-            {:keys [value placeholder class disabled? read-only? focus?]
+            {:keys [value style placeholder class disabled? read-only? focus?]
              :or   {disabled?  false
+                    style      {}
                     read-only? false}} params]
         (when-let [parent-el @!parent-el]
           (when focus?
@@ -32,18 +33,21 @@
         (let [classes (u/names->str [(when disabled? :disabled)
                                      (when read-only? :read-only)
                                      (when (not-empty value) :dirty)
+                                     (when-not (nil? placeholder) :placeholder)
                                      class])]
           [:div.Textfield {:class classes
-                           :ref   #(reset! !parent-el %)}
+                           :ref   #(reset! !parent-el %)
+                           :style style}
            [:input (merge
-                    (dissoc params :class :placeholder :read-only? :disabled? :focus?)
+                    (dissoc params :class :placeholder :read-only? :disabled? :focus? :style)
                     {:id            id
                      :type          :text
                      :auto-complete "off"
                      :read-only     read-only?
                      :disabled      disabled?
                      :placeholder   ""})]
-           [:label {:for id} placeholder]])))))
+           (when-not (nil? placeholder)
+             [:label {:for id} placeholder])])))))
 
 
 (spec/fdef textfield

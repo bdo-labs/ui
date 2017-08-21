@@ -16,7 +16,6 @@
             [ui.element.modal :as modal]
             [ui.element.loaders :as loaders]))
 
-
 ;;
 ;; Realizations that should be materialized
 ;;
@@ -48,21 +47,19 @@
 (defcssfn translateY)
 (defcssfn translateZ)
 
-
 #_(defpseudoelement -webkit-color-swatch-wrapper)
 #_(defpseudoelement -webkit-color-swatch)
 
-
 (def theme
   {:default {:background (color/rgb [245 245 245])
-             :primary (color/rgb [96 191 253])
-             :secondary (color/rgb [90 100 110])
+             :primary (color/rgb [46 175 164])
+             :secondary (color/rgb [12 164 226])
+             :tertiary (color/rgb [101 124 145])
              :positive (color/rgb [34 192 100])
              :negative (color/rgb [232 83 73])
              :font-weight 100
              :font-base (unit/rem 1.8)
              :font-scale :augmented-fourth}})
-
 
 (def scales
   {:minor-second     (/ 16 15)
@@ -74,23 +71,21 @@
    :perfect-fifth    (/ 3 2)
    :golden           (/ 1.61803 1)})
 
-
-(defn- base [{:keys [primary secondary positive negative]
-          :as theme}]
+(defn- base [{:keys [primary secondary tertiary positive negative]
+              :as theme}]
   [[:ul {:list-style-position :inside}]
    [:.face-primary {:color primary}]
    [:.face-secondary {:color secondary}]
-   ])
-
+   [:.face-tertiary {:color tertiary}]])
 
 (defn- structure [theme]
   [[:body {:overflow :hidden}]
    [:.hide {:display :none}]
    ;; TODO #app:first-child, really!?
    [#{:html :body :#app :#app:first-child} {:height (unit/percent 100)
-                                           :width  (unit/percent 100)}]
+                                            :width  (unit/percent 100)}]
    [#{:html :body :menu :ul} {:margin  0
-                             :padding 0}]
+                              :padding 0}]
    [:main {:height (stylesheet/calc (- (unit/vh 100) (unit/px 64)))}]
    [#{:.Vertical-rule :.Horizontal-rule} {:background-color :silver}]
    [:.Vertical-rule {:width        (unit/px 1)
@@ -108,7 +103,6 @@
               :text-align :left}
     [:section {:max-width    (unit/rem 70)
                :margin-right (unit/rem 3)}]]])
-
 
 (defn- layouts
   [{:keys [background]}]
@@ -142,27 +136,25 @@
             :position           :relative
             :height             (unit/percent 100)}]
     #_[:&.Locked
-     [:main {:width (stylesheet/calc (- (unit/percent 100) (unit/px 360)))}]]
+       [:main {:width (stylesheet/calc (- (unit/percent 100) (unit/px 360)))}]]
     #_[(selector/& (selector/not :.Locked))
-     [:.Slider {:transition [[:500ms :ease]]}]
-     [:&.Align-left
-      [:sidebar {:left (unit/px -360)}]]
-     [:&.Align-right
-      [:sidebar {:right (unit/px -360)}]]
-     [:&.Ontop
-      [:sidebar {:transition [[:500ms :ease]]}]]
-     [:&.Open
-      [:.Backdrop {:opacity 1
-                   :z-index 8}]
-      [(selector/& (selector/not :.Ontop))
-       [:&.Align-left [:.Slider {:transform (translateX (unit/px 360))}]]
-       [:&.Align-right [:.Slider {:transform (translateX (unit/px -360))}]]]
-      [:&.Ontop
-       [:sidebar {:box-shadow [[0 0 (unit/rem 6) (color/rgba [0 0 1 0.5])]]}]
-       [:&.Align-left [:sidebar {:transform (translateX (unit/px 360))}]]
-       [:&.Align-right [:sidebar {:transform (translateX (unit/px -360))}]]]]]]])
-
-
+       [:.Slider {:transition [[:500ms :ease]]}]
+       [:&.Align-left
+        [:sidebar {:left (unit/px -360)}]]
+       [:&.Align-right
+        [:sidebar {:right (unit/px -360)}]]
+       [:&.Ontop
+        [:sidebar {:transition [[:500ms :ease]]}]]
+       [:&.Open
+        [:.Backdrop {:opacity 1
+                     :z-index 8}]
+        [(selector/& (selector/not :.Ontop))
+         [:&.Align-left [:.Slider {:transform (translateX (unit/px 360))}]]
+         [:&.Align-right [:.Slider {:transform (translateX (unit/px -360))}]]]
+        [:&.Ontop
+         [:sidebar {:box-shadow [[0 0 (unit/rem 6) (color/rgba [0 0 1 0.5])]]}]
+         [:&.Align-left [:sidebar {:transform (translateX (unit/px 360))}]]
+         [:&.Align-right [:sidebar {:transform (translateX (unit/px -360))}]]]]]]])
 
 (defn- header [theme]
   [[#{:.Header :.Card} {:background-color :white}]
@@ -177,19 +169,16 @@
                :z-index 7}]
     [:&.large {:flex    [[0 0 (unit/px 128)]]
                :height  (unit/px 128)
-               :z-index 7}]
-    [:img {:max-height    (unit/px 48)
-           :border-radius (unit/percent 50)}]]])
+               :z-index 7}]]])
 
 
 (defn- card [{:keys [font-scale]
-          :as theme}]
+              :as theme}]
   [[:.Card
     {:min-width  (unit/rem 26)
      :min-height (unit/rem (* (get scales font-scale) 26))}
     {:border-radius (unit/rem 0.3)
      :overflow      :hidden}]])
-
 
 (defn- containers [theme]
   (map #(into '() %)
@@ -197,19 +186,18 @@
         (header theme)
         (card theme)]))
 
-
 (defn- typography [{:keys [font-base font-weight font-scale]
-                :or   {font-base   (unit/em 1.8)
-                       font-weight 100}}]
+                    :or   {font-base   (unit/em 1.8)
+                           font-weight 100}}]
   [[:html {:font-size   (unit/percent 62.5)
            :font-weight font-weight
            :font-family [:Roboto [:Helvetica :Neue] :Helvetica]}]
    [#{:body} {:line-height 1.45}]
    [#{:body :input} {:font-size font-base}]
    [#{:h1 :h2 :h3 :h4 :h5 :h6} {:font-weight :normal
-                               :line-height 1.2}]
+                                :line-height 1.2}]
    (for [n (range 1 6)]
-     (let [size  (* (Math/abs (- n 6)) 0.5)
+     (let [size  (* (Math/abs (- n 6)) 0.3)
            scale (get scales font-scale)]
        [(keyword (str "h" n)) {:font-size (unit/em (* size scale))}]))
    [:p {:margin-bottom (unit/em 1.3)}]
@@ -218,11 +206,9 @@
    [:.Legal {:font-size (unit/em 0.7)}
     (selector/> :*) {:margin-right (unit/rem 1)}]])
 
-
 (defkeyframes pulse-color
   [:from {:background (u/gray 240)}]
   [:to {:background (u/gray 220)}])
-
 
 (defkeyframes fade-up
   [:from {:opacity 0
@@ -230,11 +216,9 @@
   [:to {:opacity 1
         :transform (translateY 0)}])
 
-
 (defkeyframes fade
   [:from {:opacity 0}]
   [:to {:opacity 1}])
-
 
 (defkeyframes up
   [:from {:transform (translateY (unit/percent 50))}]
@@ -245,7 +229,6 @@
   [fade]
   [up]
   [fade-up])
-
 
 (defn- forms [{:keys [primary secondary]}]
   [[:.Auto-complete {:position      :relative
@@ -274,8 +257,8 @@
              :user-select   :none
              :cursor        :pointer
              :margin-right  (unit/rem 0.5)}]]
-   [:.Textfield {:position :relative
-                 :margin   [[(unit/rem 3) 0 (unit/rem 1)]]}
+   [:.Textfield {:position :relative}
+    [:&.Placeholder {:margin   [[(unit/rem 3) 0 (unit/rem 1)]]}]
     [:&.dirty
      [:label {:left             0
               :transform        [[(translateY (unit/percent -100)) (scale 0.75)]]
@@ -332,16 +315,16 @@
      [:&:hover {:background-color (color/rgba [200 200 200 0.1])}]
      [:&:last-child {:border-bottom :none}]]]])
 
-
 (defn- calendar [{:keys [primary secondary]}]
   [[:.Date-picker {:position :relative
                    :width    (unit/percent 100)}
     [:.Calendar {:background :white
                  :z-index    3}]]
-   [:.Calendar {:user-select  :none
-                :text-align   :center
-                :table-layout :fixed
-                :width        (unit/percent 100)}
+   [:.Calendar
+    [:table {:user-select  :none
+             :text-align   :center
+             :table-layout :fixed
+             :width        (unit/percent 100)}]
     [:th {:padding (unit/rem 2)}]
     [:td {:padding (unit/rem 1)}]
     [#{:.Previous :.Next} {:color (color/lighten secondary 50)}]
@@ -358,7 +341,6 @@
      [:&.selected.selectable {:color  :white
                               :cursor :default}
       (selector/> :span) {:background primary}]]]])
-
 
 (defn- numbers [theme]
   [[:.Worksheet {:width       (unit/percent 100)
@@ -410,16 +392,16 @@
       [:&:before {:border-bottom [[:solid (unit/px 1) (color/rgb [235 200 0])]]}]]]
                                         ; FIXME Replace with :not selector ones stable
     [#{:.Locked} {:cursor [[:default :!important]]
-                 :color  [[(color/rgb (doall (vec (repeat 3 120)))) :!important]]}
+                  :color  [[(color/rgb (doall (vec (repeat 3 120)))) :!important]]}
      [:&:after {:display [[:none :!important]]}]]
     [:th [:span {:display :inline-block}]]
     [:td [:span {:display :block}]]
     [#{:td :th} [:span {:overflow      :hidden
-                       :white-space   :nowrap
-                       :text-overflow :ellipsis}]
+                        :white-space   :nowrap
+                        :text-overflow :ellipsis}]
      [:&.number {:text-align :right}]
      [#{:&.index :&.Alpha} {:font-size   (unit/em 0.7)
-                           :font-weight 100}]
+                            :font-weight 100}]
      [:&.smaller {:font-size (unit/em 0.45)}]
      [#{:&.index :&.select :&.alpha} {:text-align :center}]]
     [:.Editable
@@ -463,8 +445,8 @@
       [:&.selected
        [#{:td :th} {:background-color (u/gray 245)}]]]]
     [#{:th :td} {:border-bottom [[:solid (unit/px 1) (u/gray 230)]]
-                :border-right  [[:solid (unit/px 1) (u/gray 230)]]
-                :padding       (unit/rem 1)}]
+                 :border-right  [[:solid (unit/px 1) (u/gray 230)]]
+                 :padding       (unit/rem 1)}]
     [:.Auto-complete {:margin 0}
      [:span {:display :inline}]
      [:.Collection {:background :white
@@ -478,17 +460,15 @@
         [:+ [:label {:opacity 0}]]]]
       [:input {:border :none}]]]]])
 
-
 (defn- color-picker [theme]
   (let [swatch-size {:height (unit/em 5.625)
                      :width  (unit/em 10)}]
-    [
-     [:.Swatch {:width         (unit/em 4)
+    [[:.Swatch {:width         (unit/em 4)
                 :height        (unit/em 4)
                 :border-radius (unit/percent 50)}
       ;; [(selector/& -webkit-color-swatch-wrapper) {:padding 0}]
       ;; [(selector/& -webkit-color-swatch) {:border 0}]
-      ]
+]
      [:.Color-picker {:background    :white
                       :display       :inline-block
                       :border-radius (unit/rem 0.25)
@@ -505,7 +485,6 @@
       [:.Value {:font-size (unit/em 0.7)
                 :cursor    :pointer
                 :padding   (unit/em 0.5)}]]]))
-
 
 (defn- in-doc [{:keys [primary]}]
   (let [contrast (u/gray 240)
@@ -527,14 +506,14 @@
                 :min-width           (unit/vw 50)
                 :min-height          (unit/vh 35)
                 :box-shadow          [[:inset 0 (unit/px 2) (unit/px 8) (color/rgba [0 0 1 0.3])]]}
-       [:.Fill {:background (-> theme :default :primary)
+       [:.fill {:background (-> theme :default :primary)
                 :border     [[:dashed (unit/px 1) (color/rgba [0 0 1 0.2])]]}]]]
      [#{:.Code :pre} {:background    (u/gray 250)
-                     :border-radius (unit/rem 0.3)
-                     :color         (u/gray 170)
-                     :font-family   [[:monospace]]
-                     :white-space   :pre
-                     :padding       (unit/rem 2)}]
+                      :border-radius (unit/rem 0.3)
+                      :color         (u/gray 170)
+                      :font-family   [[:monospace]]
+                      :white-space   :pre
+                      :padding       (unit/rem 2)}]
      [#{:.Code :code} {:line-height 1.8}
       [:label {:background    (color/rgb [38 189 230])
                :color         :white
@@ -550,11 +529,9 @@
      [:.Functional-hide {:position :absolute
                          :left     (unit/vw -200)}]]))
 
-
 (def docs
   (let [theme (:default theme)]
     (map #(into '() %) [(in-doc theme)])))
-
 
 (def screen
   (let [theme (:default theme)]

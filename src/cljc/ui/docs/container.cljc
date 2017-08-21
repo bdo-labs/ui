@@ -40,7 +40,7 @@
           last-title   @(subscribe [::last-title "Baz"])
           fill         @(subscribe [::fill])]
       [layout/vertically
-       [:header.Fill {:role :banner}
+       [:header.fill {:role :banner}
         [:h1 "Container"]
         [:p.Copy
          (str "The container-element is what's used behind the scenes for most of the layout's."

@@ -3,7 +3,8 @@
             [#?(:clj clj-time.format :cljs cljs-time.format) :as fmt]
             [re-frame.core :as re-frame]
             [ui.elements :as element]
-            [ui.util :as u]))
+            [ui.util :as u]
+            [ui.util :as util]))
 
 
 (re-frame/reg-event-db ::set-date (fn [db [_ date]] (assoc db ::date date)))
@@ -20,20 +21,17 @@
 
 (defn datepicker []
   (let [date        @(re-frame/subscribe [::date])
-        short-form? @(re-frame/subscribe [::short-form?])
-        jump        @(re-frame/subscribe [::jump])
-        on-click #(re-frame/dispatch [::set-date %])]
+        on-click    #(re-frame/dispatch [::set-date %])]
     [element/date-picker
-     {:value         date
+     {:selected      date
       :nav?          true
       :on-click      on-click
-      :short-form?   short-form?
-      :jump          jump
       :on-navigation #(re-frame/dispatch [::set-date (t/first-day-of-the-month %)])}]))
 
 
 (defn documentation []
-  (let [period @(re-frame/subscribe [::period])]
+  (let [period @(re-frame/subscribe [::period])
+        date   @(re-frame/subscribe [::date])]
     [element/article
      "## Date-picker
      Our date-picker expands out of a regular text-input upon focus.

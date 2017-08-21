@@ -7,18 +7,18 @@
             [ui.util :as u]))
 
 
-(defn style [{:keys [primary secondary positive negative]}]
-  [[:.Button {:appearance     :none
-              :background     (u/gray 230)
-              :border-radius  (unit/rem 0.5)
-              :border         [[:solid (unit/em 0.1) (u/gray 215)]]
-              :outline        :none
-              :user-select    :none
-              :min-width      (unit/rem 8)
-              :text-transform :uppercase
-              :padding        [[(unit/rem 0.25) (unit/rem 1)]]
-              :transition     [[:background-color :200ms :ease]]
-              :line-height    2.5}
+(defn style [{:keys [primary secondary tertiary positive negative]}]
+  [[:.Button {:appearance    :none
+              :background    (u/gray 230)
+              :border-radius (unit/rem 0.5)
+              :border        [[:solid (unit/em 0.1) (u/gray 215)]]
+              :cursor        :pointer
+              :outline       :none
+              :user-select   :none
+              :min-width     (unit/rem 8)
+              :padding       [[(unit/rem 0.25) (unit/rem 1)]]
+              :transition    [[:background-color :200ms :ease]]
+              :line-height   2.5}
     [:&:hover {:background-color (u/gray 240)}]
     [:&.circular {:border-radius (unit/percent 50)
                   :padding       (unit/rem 0.25)
@@ -32,6 +32,10 @@
                  :border-color     primary
                  :color            (if (u/dark? primary) :white :black)}
      [:&:hover {:background-color (color/lighten primary 10)}]]
+    [:&.tertiary {:background-color primary
+                  :border-color     tertiary
+                  :color            (if (u/dark? tertiary) :white :black)}
+     [:&:hover {:background-color (color/lighten tertiary 10)}]]
     [:&.positive {:background-color positive
                   :border-color     positive}]
     [:&.negative {:background-color negative
@@ -40,12 +44,14 @@
               :border           [[:solid (unit/em 0.1) :inherit]]}]
     [:&.rounded {:border-radius (unit/em 2)}]
     [:.Icon {:font-size      (unit/rem 2)
+             :color          :inherit
              :vertical-align :middle
              :margin-right   (unit/rem 1)
              :min-width      (unit/rem 1)
              :line-height    0}]]])
 
 
+(spec/def ::fill? boolean?)
 (spec/def ::flat? boolean?)
 (spec/def ::rounded? boolean?)
 (spec/def ::circular? boolean?)
@@ -55,6 +61,7 @@
 
 (spec/def ::params
   (spec/keys :opt-un [::flat?
+                      ::fill?
                       ::rounded?
                       ::circular?]))
 

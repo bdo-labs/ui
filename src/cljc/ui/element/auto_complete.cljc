@@ -60,14 +60,14 @@
                                             (<= scroll-top scroll-height))
                                    (set! (.-scrollTop element) (+ scroll-top jump))))))))]
           (let [on-key-down #(case (u/code->key (.-which %))
-                               "down"                                                                                                                                                                                                                                                     (do (reset! select (min (dec (count items)) (inc @select)))
-                                                                                                                                                                                                                                                                                              (scroll inc))
-                               "up"                                                                                                                                                                                                                                                       (do (reset! select (max 0 (dec @select)))
-                                                                                                                                                                                                                                                                                              (scroll dec))
-                               "enter"                                                                                                                                                                                                                                                    (let [selected (nth items @select)]
-                                                                                                                                                                                                                                                                                            (reset! query (:text selected))
-                                                                                                                                                                                                                                                                                            (when (fn? on-select) (on-select selected))
-                                                                                                                                                                                                                                                                                            false) true)]
+                               "down"           (do (reset! select (min (dec (count items)) (inc @select)))
+                                                    (scroll inc))
+                               "up"             (do (reset! select (max 0 (dec @select)))
+                                                    (scroll dec))
+                               "enter"          (let [selected (nth items @select)]
+                                                  (reset! query (:text selected))
+                                                  (when (fn? on-select) (on-select selected))
+                                                  false) true)]
             [:div.Auto-complete {:class (u/names->str [(when disabled? :Disabled)
                                                        (when read-only? :Read-only)])}
              ;; Input-handling
@@ -101,6 +101,6 @@
                                 ^{:key (:id lbl)} [label (merge lbl {:on-key-down on-key-down})]))])]))))))
 
 
-(spec/fdef auto-complete
+#_(spec/fdef auto-complete
         :args ::auto-complete-args
         :ret vector?)

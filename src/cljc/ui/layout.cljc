@@ -7,12 +7,14 @@
   (:require [ui.elements :as element]
             #_[clojure.test.check.generators :as gen]
             [clojure.spec :as spec]
-            [ui.util :as u]))
+            [ui.util :as util]))
 
+(spec/def ::aligned (spec/or :x ::horizontal-alignment
+                             :y ::vertical-alignment))
 (spec/def ::alignment #{:start :end :center})
 (spec/def ::horizontal-alignment #{:left :right :center})
 (spec/def ::vertical-alignment #{:top :bottom :middle})
-(spec/def ::content-type (spec/or :nil nil? :fn fn? :str string? :vec vector?))
+(spec/def ::content-type (spec/or :nil nil? :fn fn? :seq seq? :str string? :vec vector?))
 (spec/def ::variable-content (spec/* ::content-type))
 
 (spec/def ::layout-params
@@ -24,11 +26,13 @@
 
 
 (defn- layout [layout & args]
-  (let [{:keys [params content]} (u/conform-or-fail ::layout-args args)
-        align                    [(u/aligned->align (or (-> params :aligned :x) :left))
-                                  (u/aligned->align (or (-> params :aligned :y) :top))]
+  (let [{:keys [params content]} (util/conform-or-fail ::layout-args args)
+        aligned                  (apply hash-map (-> params :aligned))
+        align                    [(util/aligned->align (or (-> aligned :x) :left))
+                                  (util/aligned->align (or (-> aligned :y) :top))]
+        align                    (if (= layout :vertically) [(last align) (first align)] align)
         params                   (merge {:layout layout :align align}
-                                        (dissoc params :aligned))]
+                                        (dissoc params))]
     (apply element/container (into [params] (map last content)))))
 
 
@@ -41,8 +45,8 @@
 
 
 (defn centered [& args]
-  (let [{:keys [params content]} (u/conform-or-fail ::layout-args args)
+  (let [{:keys [params content]} (util/conform-or-fail ::layout-args args)
         params                   (merge {:align [:center :center]} params)]
     (apply layout :horizontally params content)))
 
-(defn fill [] [:span.Fill])
+(defn fill [] [:span.fill])

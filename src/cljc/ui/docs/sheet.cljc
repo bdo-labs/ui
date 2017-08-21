@@ -6,7 +6,9 @@
             [ui.layout :as layout]
             [tongue.core :as tongue]
             [ui.util :as u]
-            #?(:cljs [reagent.core :refer [atom]])))
+            #?(:cljs [reagent.core :refer [atom]])
+            [re-frame.core :as re-frame]
+            [ui.util :as util]))
 
 
 (spec/def ::segment #{"Government" "Midmarket" "Enterprise" "Small Business" "Channel Partners"})
@@ -26,6 +28,7 @@
   (str/replace ((tongue/number-formatter {:group  " "
                                           :decimal "," }) n) #"(,..).+" "$1"))
 
+
 (def inst-strings-en
   { :weekdays-narrow ["S" "M" "T" "W" "T" "F" "S"]
     :weekdays-short  ["Sun" "Mon" "Tue" "Wed" "Thu" "Fri" "Sat"]
@@ -42,18 +45,28 @@
    (tongue/inst-formatter "{day}. {month-short}, {year}" inst-strings-en))
 
 
+(re-frame/reg-sub ::collection util/extract)
+
+
+(re-frame/reg-event-db
+ :init-sheet
+ (fn [db [k]]
+   (let [rows             199
+         body             (mapv vec (map first (drop 49 (spec/exercise ::fixture 199))))
+         uniqs            (map-indexed #(do {:id %1 :text %2}) (distinct (mapv first body)))
+         coll                (map #(assoc-in % [0] ^{:type       :string
+                                                     :sort-value (first %)}
+                                             [element/auto-complete {:placeholder (first %)
+                                                                     :items       uniqs}]) body)]
+     (assoc db ::collection coll))))
+
+
 (defn documentation []
   (let [!caption?        (atom false)
         !column-heading? (atom false)
         !row-heading?    (atom false)
-        rows             199
         title-row        ["Segment" "Units-Sold" "Manufacturing" "Sales-Price" "Date"]
-        body             (mapv vec (map first (drop 49 (spec/exercise ::fixture (+ rows 50)))))
-        uniqs            (map-indexed #(do {:id %1 :text %2}) (distinct (mapv first body)))
-        b                (map #(assoc-in % [0] ^{:type       :string
-                                                 :sort-value (first %)} [element/auto-complete {:placeholder (first %)
-                                                                                                :items       uniqs}]) body)
-        data             (into [title-row] b)]
+        coll             (re-frame/subscribe [::collection])]
     (fn []
       [layout/vertically
        [layout/horizontally
@@ -70,7 +83,8 @@
                        :locked           (vec (conj (repeat (dec (count title-row)) true) false))
                        :column-heading   (if @!column-heading? :alpha :hidden)
                        :row-heading      (if @!row-heading? :numeric :hidden)
-                       :editable?        true} data]])))
+                       :editable?        true}
+        (into [title-row] @coll)]])))
 
 
 ;; (spec/def ::point nat-int?)

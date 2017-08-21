@@ -34,10 +34,10 @@
                 :transform [[(translateY (unit/percent -50)) (translateX (unit/percent -50))]]
                 :z-index   102}
      [:.Container {:animation [[:fade-up :200ms :ease]]
-                   :padding   [[(unit/rem 2.5) (unit/rem 5)]]
                    :position  :relative
                    :z-index   103}]]]
    [:.Close {:position :absolute
+             :cursor :pointer
              :top 0
              :right (unit/rem 1)
              :z-index 104}]
@@ -51,22 +51,6 @@
      [:&.primary {:color primary}]]]])
 
 
-#_(spec/def ::open? boolean?)
-#_(spec/def ::confirm fn?)
-#_(spec/def ::cancel-on-backdrop? boolean?)
-#_(spec/def ::confirm-text (spec/and string? not-empty))
-#_(spec/def ::cancel-text (spec/and string? not-empty))
-#_(spec/def ::dialog-params
-  (spec/keys :opt-un [::open?
-                   ::confirm
-                   ::cancel-on-backdrop?
-                   ::confirm-text
-                   ::cancel-text]))
-#_(spec/def ::dialog-body
-  (spec/or :string string?
-        :formatted vector?))
-
-
 (spec/def ::stub
   (spec/with-gen fn?
     (gen/return (constantly nil))))
@@ -76,6 +60,7 @@
 (spec/def ::backdrop? boolean?)
 (spec/def ::close-button? boolean?)
 (spec/def ::cancel-on-backdrop? boolean?)
+(spec/def ::cancel fn?)
 (spec/def ::hide ::stub)
 
 
@@ -83,7 +68,8 @@
   (spec/keys :opt-un [::show?
                       ::close-button?
                       ::backdrop?
-                      ::cancel-on-backdrop?]))
+                      ::cancel-on-backdrop?
+                      ::cancel]))
 
 
 (spec/def ::content (spec/* (spec/or :str string? :vec vector?)))
@@ -94,7 +80,6 @@
             :content ::content))
 
 
-;; TODO Improve animation
 (defn dialog [& args]
   (let [{:keys [params content]}           (u/conform-or-fail ::args args)
         {:keys [show? backdrop? cancel-on-backdrop? close-button? cancel]
@@ -109,12 +94,13 @@
                  [:div.Content
                   (when close-button?
                     [icon {:font     "ion"
-                           :size     4
+                           :size     3
                            :class    "Close"
                            :on-click cancel} "ios-close-empty"])
                   (into [container {:raised?  true
                                     :rounded? true
                                     :inline?  true
+                                    :gap?     false
                                     :layout   :vertically
                                     :style    {:background :white}}]
                         (mapv last content))]

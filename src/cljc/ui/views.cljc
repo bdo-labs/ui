@@ -15,18 +15,19 @@
             [ui.docs.dialog :as dialog]
             [ui.docs.dropdown :as dropdown]
             [ui.docs.inputs :as inputs]
+            [ui.docs.boundary :as boundary]
             [ui.docs.date-picker :as date-picker]
-            #_[ui.docs.sheet :as sheet]
-            #_[ui.docs.sidebar :as sidebar]
-            ))
+            [ui.docs.sheet :as sheet]
+            #_[ui.docs.sidebar :as sidebar]))
 
 
 (defn- menu-item []
   (let [active-doc-item (re-frame/subscribe [:active-doc-item])]
     (fn [item]
-      [:a {:key (str "menu-item-" (name item))
-           :class (if (= @active-doc-item item) "Primary" "")
-           :href (str "./#/docs/" (name item))}
+      [:a {:key      (str "menu-item-" (name item))
+           :on-click #(re-frame/dispatch [:navigate :docs (name item)])
+           :class    (if (= @active-doc-item item) "face-primary" "face-tertiary")
+           :href     (str "./docs/" (name item))}
        (name item)])))
 
 
@@ -49,6 +50,7 @@
   [item-name]
   (case item-name
     ;; Virtuals
+    :boundary [boundary/documentation]
 
     ;; Layouts
     :centered [centered/documentation]
@@ -65,7 +67,7 @@
     :icons [icons/documentation]
     :inputs [inputs/documentation]
     :progress [progress/documentation]
-    ;; :sheet [sheet/documentation]
+    :sheet [sheet/documentation]
     ;; :sidebar [sidebar/documentation]
     [intro]))
 
@@ -75,57 +77,60 @@
   (let [active-item @(re-frame/subscribe [:active-doc-item])
         virtuals    [:boundary]
         layouts     [:centered :horizontally :vertically :fill]
-        elements    [:buttons :colors :date-picker :dialog :dropdown :icons :inputs :progress]]
+        elements    [:buttons :colors :date-picker :dialog :dropdown :icons :inputs :progress :sheet]]
     [element/sidebar {:locked true}
      [layout/vertically {:role :navigation}
       [:menu [menu-item :ui]]
-      (into [:menu [:h5 "layout/"]] (for [l layouts] [menu-item l])) [:br]
-      (into [:menu [:h5 "elements/"]] (for [elem elements] [menu-item elem])) [:br]
-      #_(into [:menu [:h5 "virtuals/"]] (for [v virtuals] [menu-item v])) [:br]]
+      (into [:menu [:h4 "layout/"]] (for [l layouts] [menu-item l])) [:br]
+      (into [:menu [:h4 "elements/"]] (for [elem elements] [menu-item elem])) [:br]
+      (into [:menu [:h4 "virtuals/"]] (for [v virtuals] [menu-item v])) [:br]]
      [doc-item active-item]]))
 
 
 (defn marketing-panel
   []
-  [layout/vertically {:class "Marketing"}
-   [layout/centered
-    [layout/centered {:raised? true
-                      :style   {:background :white}}
-     [element/article
-      "
+  [layout/centered {:class "Marketing"
+                    :fill? true
+                    :style {:height "100vh"}}
+   [layout/centered {:raised? true
+                     :style   {:background :white}}
+    [element/article
+     "
       # UI
-
-      ### Hi there! If your looking for a crazy good library for writing front-end `ui`'s, you've come to the right place. 
-
+      ### A Straight-Forward Library for Composing User-Interfaces
       "
-      [element/button {:class    "primary"
-                       :rounded? true} "Get Started"]]]
+     [element/button {:class    "primary"
+                      :on-click #(re-frame/dispatch [:navigate :docs])
+                      :rounded? true} "Get Started"]
 
-    [layout/centered
-     [element/article
-      "
-      We've packaged a dozen elements and layouts that will allow you to create production-grade applications without tearing your hair off.
+     "
 
 
-      There's a few things that are quite different about `ui` to other such libraries.
+      #### Why UI?
+      - Great interactive documentation
+      - Self-aware elements for quick prototyping
+      - Describe layouts naturally through verbs
+      - Have a say!
+      "]]])
 
-      - There's a layer of guidance both in the docs and in development-mode
-      - Layouts are described with verbs. Ex: `layout/vertically`
-      - All components are aware of how to generate themselves, so you can quickly create prototypes without having any data on-hand
-      "]]]])
+
+(defn- not-found-panel []
+  [:h1 "Not found"])
 
 
 (defn- panels [panel-name]
   (case panel-name
     :doc-panel [doc-panel]
     :marketing-panel [marketing-panel]
+    :not-found [not-found-panel]
     [:div]))
 
 
 (defn main-panel []
-  (let [active-panel (re-frame/subscribe [:active-panel])
-        progress     (re-frame/subscribe [:progress])]
-    (fn []
-      [:div {:style {:height "100%"}}
-       [element/progress-bar {:progress @progress}]
-       [panels @active-panel]])))
+  (let [active-panel @(re-frame/subscribe [:active-panel])
+        progress     @(re-frame/subscribe [:progress])
+        fragments    @(re-frame/subscribe [:fragments])]
+    [:div {:style {:height "100vh"
+                   :width  "100vw"}}
+     [element/progress-bar {:progress progress}]
+     [panels active-panel]]))

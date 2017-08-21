@@ -123,12 +123,14 @@
             :numeric (map #(do [:th.Index.Column-heading
                                 {:key (str "Column-index" %)}
                                 [:button.Dropdown-origin {:on-click (toggle-column-menu %)} "›"]
-                                [column-menu sheet-ref %]]) col-refs)
+                                ;[column-menu sheet-ref %]
+                                ]) col-refs)
             :alpha   (map #(do [:th.Alpha.Column-heading
                                 {:key (str "Column-alpha" %)}
                                 %
                                 [:button.Dropdown-origin {:on-click (toggle-column-menu %)} "›"]
-                                [column-menu sheet-ref %]]) col-refs))])
+                                ;[column-menu sheet-ref %]
+                                ]) col-refs))])
        ;; Caption
        ;; REVIEW Are there any valid reasons why we should use a real caption-element?
        (when (or caption?
@@ -165,7 +167,8 @@
                                                  (= row-num 0))
                                         [:span
                                          [:button.Dropdown-origin {:on-click (toggle-column-menu (u/col-ref (:cell-ref title)))} "›"]
-                                         [column-menu sheet-ref (u/col-ref (:cell-ref title))]])]) row)]))))]]]))
+                                         ;[column-menu sheet-ref (u/col-ref (:cell-ref title))]
+                                         ])]) row)]))))]]]))
 
 
 (defn body
@@ -235,7 +238,7 @@
                                               (fn [el] (.remove (.-classList el) "Duplicate")))))]
     (when-not initialized?
       (dispatch [:initialize-sheet sheet-ref data]))
-    [:div.Worksheet.Fill {:ref           set-worksheet-ref
+    [:div.Worksheet.fill {:ref           set-worksheet-ref
                           :on-mouse-down set-mouse-down
                           :on-mouse-up   set-mouse-up
                           :class         (u/names->str (into [(when editable? :editable)

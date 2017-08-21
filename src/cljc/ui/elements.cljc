@@ -9,7 +9,7 @@
             [ui.element.progress-bar :as progress-bar]
             [ui.element.loaders :as loaders]
             [ui.element.textfield :as textfield]
-            ;; [ui.element.boundary :as boundary]
+            [ui.element.boundary :as boundary]
             [ui.element.collection :as collection]
             [ui.element.label :as label]
             [ui.element.checkbox :as checkbox]
@@ -22,7 +22,8 @@
             ;; [ui.element.timeline :as timeline]
             [ui.element.color-swatch :as color-swatch]
             [ui.element.color-picker :as color-picker]
-            [ui.element.numbers.views :as numbers]))
+            [ui.element.numbers.views :as numbers]
+            ))
 
 (def dropdown menu/dropdown)
 
@@ -61,10 +62,11 @@
 (def textfield textfield/textfield)
 (def auto-complete auto-complete/auto-complete)
 (def clamp clamp/clamp)
-(def calendar calendar/calendar)
+(def days calendar/days)
+(def months calendar/months)
+(def years calendar/years)
 (def date-picker date-picker/date-picker)
 ;(def timeline timeline/timeline)
-
 
 
 (def dialog modal/dialog)
@@ -76,5 +78,5 @@
 
 
 ;; Virtuals
-; (def boundary boundary/boundary)
+(def boundary boundary/boundary)
 

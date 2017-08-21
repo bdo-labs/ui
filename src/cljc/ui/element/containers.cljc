@@ -3,7 +3,7 @@
             [clojure.string :as str]
             [garden.units :as unit]
             [garden.color :as color]
-            [ui.util :as u]))
+            [ui.util :as util]))
 
 
 (defn style [theme]
@@ -23,22 +23,35 @@
     ;; [(selector/& (selector/not :.No-gap)) {:padding (unit/rem 2)}]
     ;; [(selector/& (selector/not (selector/attr-contains :class "Align"))) {:align-items :flex-start}]
     ;; [(selector/& (selector/not (selector/attr-contains :class "Justify"))) {:justify-content :flex-start}]
-    [:&.layout-vertically {:flex-direction :column}]
-    [:&.align-start-start {:align-items     :flex-start
-                           :justify-content :flex-start}]
-    [:&.align-end-end {:align-items     :flex-end
-                       :justify-content :flex-end}]
-    [:&.align-center-center {:align-items     :center
-                             :justify-content :center}]
+    [:&.layout-vertically {:flex-direction :column}
+     [:&.fill {:height (unit/percent 100)}]]
+    [:&.align-start-start {:justify-content :flex-start
+                           :align-items     :flex-start}]
+    [:&.align-start-end {:justify-content :flex-start
+                         :align-items     :flex-end}]
+    [:&.align-start-center {:justify-content :flex-start
+                            :align-items     :center}]
+    [:&.align-end-end {:justify-content :flex-end
+                       :align-items     :flex-end}]
+    [:&.align-end-start {:justify-content :flex-end
+                         :align-items     :flex-start}]
+    [:&.align-end-center {:justify-content :flex-end
+                          :align-items     :center}]
+    [:&.align-center-center {:justify-content :center
+                             :align-items     :center}]
+    [:&.align-center-start {:justify-content :center
+                            :align-items     :flex-start}]
+    [:&.align-center-end {:justify-content :center
+                          :align-items     :flex-end}]
     [:&.space-between {:justify-content :space-between}]
     [:&.space-around {:justify-content :space-around}]
+    [:&.space-none {:align-items :stretch}]
     ;; TODO https://github.com/noprompt/garden/issueselector/127
     #_[(selector/& :.Container (selector/> (selector/not :.Compact) (selector/+ :* :*))) {:margin-left (unit/rem 2)}]
-    [#{:&.fill :.Fill} {:box-sizing :border-box
+    [#{:&.fill :.fill} {:box-sizing :border-box
                        :flex       1
                        :min-width  0
                        :min-height 0
-                       :height     (unit/percent 100)
                        :width      (unit/percent 100)}]
     [:&.inline {:display :inline-flex}]
     [:&.rounded {:border-radius (unit/rem 1)}]
@@ -47,7 +60,8 @@
 
 
 ;; Parameter specifications
-(spec/def ::background string?)
+(spec/def ::background (spec/or :str string?
+                                :key keyword?))
 (spec/def ::compact? boolean?)
 (spec/def ::fill? boolean?)
 (spec/def ::gap? boolean?)
@@ -59,7 +73,7 @@
 (spec/def ::alignment #{:start :end :center})
 (spec/def ::layout #{:horizontally :vertically})
 (spec/def ::space #{:between :around :none})
-(spec/def ::content-type (spec/or :nil nil? :fn fn? :str string? :vec vector?))
+(spec/def ::content-type (spec/or :nil nil? :seq seq? :fn fn? :str string? :vec vector?))
 (spec/def ::variable-content (spec/* ::content-type))
 (spec/def ::width
   (spec/or :flex int?
@@ -78,14 +92,15 @@
 
 
 (defn container [& args]
-  (let [{:keys [params content]}         (u/conform-or-fail ::container-args args)
+  (let [{:keys [params content]}         (util/conform-or-fail ::container-args args)
         ui-params                        (mapv (comp keyword name) (last (spec/form ::container-params)))
         params                           (merge {:gap?  true
                                                  :wrap? true
                                                  :align [:start :start]} params)
         {:keys [style background width]} params
-        background                       {:background background}
-        class                            (u/params->classes (dissoc params :width :background))
+        background                       (if-not (nil? background) {:background (last background)} {})
+        class                            (util/params->classes (dissoc params :width :background))
+        width                            (apply hash-map width)
         style                            (merge style width background)]
     (into [:div.Container
            (merge {:class class}
@@ -102,7 +117,7 @@
    [sidebar {} sidebar-content main-content])
   ([{:keys [locked open backdrop ontop to-the on-click-outside] :as params} sidebar-content main-content]
    (fn [{:keys [locked open backdrop ontop to-the on-click-outside]} sidebar-content main-content]
-     (let [classes (u/names->str [(when (true? open) :Open)
+     (let [classes (util/names->str [(when (true? open) :Open)
                                   (when (true? ontop) :Ontop)
                                   (when (true? locked) :Locked)
                                   (if (not= "right" to-the) :Align-left :Align-right)])]
