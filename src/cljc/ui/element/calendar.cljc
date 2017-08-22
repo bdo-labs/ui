@@ -144,7 +144,7 @@
         (for [year years] [button {:fill? true} (str year)])])]))
 
 
-(spec/def ::every (spec/and pos-int? #(int? (/ 12 %)) #(>= % 6)))
+(spec/def ::every (spec/and pos-int? #(int? (/ 12 %)) #(<= % 6)))
 (spec/def ::selected inst?)
 (spec/def ::on-click ::stub)
 (spec/def ::months-params
@@ -161,12 +161,13 @@
         {:keys [every
                 on-click
                 selected]
-         :or   {every    1
-                selected (t/now)}} params
+         :or   {selected (t/now)}} params
         !model                     (atom selected)
         group-every                (if (= every 1) 3 every)]
-    (fn []
-      (let [year (int (fmt/unparse (fmt/formatter "yyyy") @!model))
+    (fn [{:keys [params]}]
+      (let [{:keys [every]
+             :or   {every 1}} params
+            year (int (fmt/unparse (fmt/formatter "yyyy") @!model))
             rows (->> (range 1 13)
                       (map #(t/date-time year % 1))
                       (partition group-every))]

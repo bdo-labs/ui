@@ -3,7 +3,7 @@
             [#?(:clj clj-time.format :cljs cljs-time.format) :as fmt]
             [re-frame.core :as re-frame]
             [ui.elements :as element]
-            [ui.util :as u]
+            [ui.layout :as layout]
             [ui.util :as util]))
 
 
@@ -19,14 +19,70 @@
 (re-frame/reg-sub ::period (fn [db] (::period db)))
 
 
+
+
+(re-frame/reg-sub
+ ::show-dialog
+ (fn [db _] (or (::show-dialog db) false)))
+
+
+(re-frame/reg-sub
+ ::picker
+ util/extract)
+
+
+(re-frame/reg-event-db
+ ::toggle-dialog
+ (fn [db _] (update db ::show-dialog not)))
+
+
+(re-frame/reg-event-db
+ ::close-dialog
+ (fn [db _] (assoc db ::show-dialog false)))
+
+
+(re-frame/reg-event-db
+ ::set-picker
+ (fn [db [_ picker]] (assoc db ::picker picker)))
+
+
 (defn datepicker []
-  (let [date        @(re-frame/subscribe [::date])
-        on-click    #(re-frame/dispatch [::set-date %])]
-    [element/date-picker
-     {:selected      date
-      :nav?          true
-      :on-click      on-click
-      :on-navigation #(re-frame/dispatch [::set-date (t/first-day-of-the-month %)])}]))
+  (let [show-dialog    @(re-frame/subscribe [::show-dialog])
+        toggle-dialog  #(re-frame/dispatch [::toggle-dialog])
+        close-dialog   #(re-frame/dispatch [::close-dialog])
+        picker         @(re-frame/subscribe [::picker])
+        date           @(re-frame/subscribe [::date])
+        formatted-date (fmt/unparse (fmt/formatter "dd. MMM. yyyy") date)
+        set-date       #(do (re-frame/dispatch [::set-date %])
+                            (close-dialog))]
+    [layout/vertically
+     [layout/horizontally
+      [element/textfield {:read-only? true
+                          :value      formatted-date
+                          :style      {:flex 1}
+                          :on-click   toggle-dialog}]
+      [element/icon {:font "ion"} "ios-calendar-outline"]]
+     [element/dialog {:show?  show-dialog
+                      :cancel close-dialog}
+      [layout/vertically  {:fill? true}
+       [layout/horizontally
+        [element/button {:on-click #(re-frame/dispatch [::set-picker :months])} "months"]
+        [element/button {:on-click #(re-frame/dispatch [::set-picker :two-months])} "2 months"]
+        ]
+       (case picker
+         (:months :two-months) [element/months {:every    (case picker
+                                                            :two-months 2
+                                                            :quarter    3
+                                                            :tertial    4
+                                                            1)
+                                                :on-click #(set-date (t/first-day-of-the-month %))}]
+         [element/years {:on-click set-date}])]]]
+
+    #_[element/date-picker
+       {:selected      date
+        :nav?          true
+        :on-click      on-click
+        :on-navigation #(re-frame/dispatch [::set-date (t/first-day-of-the-month %)])}]))
 
 
 (defn documentation []
