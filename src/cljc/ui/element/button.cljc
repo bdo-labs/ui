@@ -4,22 +4,24 @@
             [clojure.string :as str]
             [garden.units :as unit]
             [garden.color :as color]
+            [garden.selectors :as selectors]
             [ui.util :as u]))
 
 
 (defn style [{:keys [primary secondary tertiary positive negative]}]
   [[:.Button {:appearance    :none
-              :background    (u/gray 230)
+              :background    (u/gray 245)
               :border-radius (unit/rem 0.5)
-              :border        [[:solid (unit/em 0.1) (u/gray 215)]]
+              :border        [[:solid (unit/em 0.1) (u/gray 240)]]
               :cursor        :pointer
               :outline       :none
               :user-select   :none
+              :min-heigt     (unit/rem 3)
               :min-width     (unit/rem 8)
               :padding       [[(unit/rem 0.25) (unit/rem 1)]]
               :transition    [[:background-color :200ms :ease]]
               :line-height   2.5}
-    [:&:hover {:background-color (u/gray 240)}]
+    [:&:hover {:background-color (u/gray 250)}]
     [:&.circular {:border-radius (unit/percent 50)
                   :padding       (unit/rem 0.25)
                   :min-width     (unit/rem 3.5)}
@@ -32,7 +34,7 @@
                  :border-color     primary
                  :color            (if (u/dark? primary) :white :black)}
      [:&:hover {:background-color (color/lighten primary 10)}]]
-    [:&.tertiary {:background-color primary
+    [:&.tertiary {:background-color tertiary
                   :border-color     tertiary
                   :color            (if (u/dark? tertiary) :white :black)}
      [:&:hover {:background-color (color/lighten tertiary 10)}]]
@@ -48,7 +50,12 @@
              :vertical-align :middle
              :margin-right   (unit/rem 1)
              :min-width      (unit/rem 1)
-             :line-height    0}]]])
+             :line-height    0}]
+    [:&.Tab {:background    :transparent
+             :border        :none
+             :border-bottom [[:solid (unit/px 2) :transparent]]
+             :border-radius 0}
+     [:&.active {:border-color primary}]]]])
 
 
 (spec/def ::fill? boolean?)

@@ -9,8 +9,6 @@
             [ui.subs]))
 
 
-
-
 (defn- dev-setup []
   (when config/debug?
     (enable-console-print!)
@@ -25,5 +23,4 @@
 (defn ^:export init []
   (dev-setup)
   (routes/init)
-  (mount-root)
-  (routes/dispatch))
+  (mount-root))

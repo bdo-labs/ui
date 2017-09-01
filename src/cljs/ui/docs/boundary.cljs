@@ -1,6 +1,6 @@
 (ns ui.docs.boundary
-  (:require [#?(:clj clojure.core :cljs reagent.core) :refer [atom]]
-            [ui.elements :as element]
+  (:require [ui.elements :as element]
+            [ui.virtuals :as virtual]
             [ui.layout :as layout]))
 
 

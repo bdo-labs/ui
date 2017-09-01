@@ -12,5 +12,5 @@
    (let [encoded (->> fragments
                       (map #(if (keyword? %) (name %) (str %)))
                       (map url-encode))
-         url     (str "/#/" (str/join "/" encoded))]
+         url     (str "/" (str/join "/" encoded))]
      (accountant/navigate! url))))

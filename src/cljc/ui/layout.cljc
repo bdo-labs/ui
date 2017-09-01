@@ -31,8 +31,7 @@
         align                    [(util/aligned->align (or (-> aligned :x) :left))
                                   (util/aligned->align (or (-> aligned :y) :top))]
         align                    (if (= layout :vertically) [(last align) (first align)] align)
-        params                   (merge {:layout layout :align align}
-                                        (dissoc params))]
+        params                   (merge {:layout layout :align align} (dissoc params))]
     (apply element/container (into [params] (map last content)))))
 
 

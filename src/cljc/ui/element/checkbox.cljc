@@ -10,10 +10,11 @@
 (defcssfn linear-gradient)
 (defcssfn scale)
 (defcssfn translateX)
+(defcssfn translateY)
 
 
 (defn style
-  [{:keys [primary positive]}]
+  [{:keys [primary primary]}]
   [[:.Shape {:display        :inline-flex
              :position       :relative
              :flex-direction :column}]
@@ -53,19 +54,20 @@
          :border-radius   (unit/percent 50)}]
     [:&.checked
      [:i {:transform (translateX (unit/rem 1.75))}]
-     [:input {:background   (linear-gradient (unit/deg 45) (color/lighten positive 5) (color/darken positive 5))
-              :border-color (color/darken positive 10)}]]]
+     [:input {:background   (linear-gradient (unit/deg 45) (color/lighten primary 5) (color/darken primary 5))
+              :border-color (color/darken primary 10)}]]]
    [:.Checkbox {:display     :flex
+                :align-items :baseline
                 :user-select :none
                 :position    :relative}
     [:.Shape {:margin-right (unit/rem 0.5)}]
     [:input {:position :relative}]
     [:i {:position         :absolute
          :left             (unit/percent 50)
-         :top              (unit/rem -0.3)
+         ;; :top              (unit/rem -0.3)
          :font-size        (unit/rem 2.5)
          :transform-origin [[:center :center]]
-         :transform        [[(scale 0) (translateX (unit/percent -50))]]
+         :transform        [[(scale 0) (translateX (unit/percent -50)) (translateY (unit/percent -15))]]
          :transition       [[:100ms :ease]]
          :z-index          2}]
     [:&.indeterminate
@@ -74,7 +76,7 @@
      [:input {:background   primary
               :border-color (color/darken primary 10)}]]
     [:&.checked
-     [:i {:transform [[(scale 1) (translateX (unit/percent -50))]]}]
+     [:i {:transform [[(scale 1) (translateX (unit/percent -50)) (translateY (unit/percent -15))]]}]
      [:input {:background   primary
               :border-color (color/darken primary 10)}]]
     [:input {:-webkit-appearance :none
@@ -109,25 +111,25 @@
   [& args]
   (let [{:keys [params label]
          :or   {label ""}}      (u/conform-or-fail ::checkbox-args args)
-        {:keys [checked? on-click id]
+        {:keys [checked on-click id]
          :or   {id (u/gen-id)}} params]
     [:label {:for   id
-             :class (->> (u/names->str [(case checked?
-                                          (true :checked?) :Checked
+             :class (->> (u/names->str [(case checked
+                                          (true :checked) :Checked
                                           :indeterminate  :Indeterminate
-                                          :Not-Checked?)
+                                          :Not-Checked)
                                         (:class params)])
                          (str (when-not (some #(= :Toggle %) (:class params)) " Checkbox ")))}
      [:div.Shape
       [:i (when-not (some #(= :Toggle %) (:class params))
-            (case checked?
-              (true :checked?) {:class :ion-ios-checkmark-empty}
+            (case checked
+              (true :checked) {:class :ion-ios-checkmark-empty}
               :indeterminate  {:class :ion-ios-minus-empty}
               {}))]
-      [:input (merge (dissoc params :checked? :id :class)
+      [:input (merge (dissoc params :checked :id :class)
                      {:id      id
                       :type    :checkbox
-                      :checked checked?})]] label]))
+                      :checked checked})]] label]))
 
 
 (spec/fdef checkbox

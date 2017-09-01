@@ -9,7 +9,6 @@
             [ui.element.progress-bar :as progress-bar]
             [ui.element.loaders :as loaders]
             [ui.element.textfield :as textfield]
-            [ui.element.boundary :as boundary]
             [ui.element.collection :as collection]
             [ui.element.label :as label]
             [ui.element.checkbox :as checkbox]
@@ -19,11 +18,11 @@
             [ui.element.clamp :as clamp]
             [ui.element.modal :as modal]
             [ui.element.menu :as menu]
-            ;; [ui.element.timeline :as timeline]
             [ui.element.color-swatch :as color-swatch]
             [ui.element.color-picker :as color-picker]
             [ui.element.numbers.views :as numbers]
             ))
+
 
 (def dropdown menu/dropdown)
 
@@ -74,9 +73,3 @@
 
 (def progress-bar progress-bar/progress-bar)
 (def spinner loaders/spinner)
-
-
-
-;; Virtuals
-(def boundary boundary/boundary)
-

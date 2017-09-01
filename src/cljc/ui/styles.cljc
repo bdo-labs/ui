@@ -6,7 +6,6 @@
             [garden.color :as color]
             [garden.selectors :as selector :refer [defpseudoelement]]
             [ui.util :as u]
-            [ui.element.boundary :as boundary]
             [ui.element.checkbox :as checkbox]
             [ui.element.containers :as containers]
             [ui.element.menu :as menu]
@@ -315,7 +314,7 @@
      [:&:hover {:background-color (color/rgba [200 200 200 0.1])}]
      [:&:last-child {:border-bottom :none}]]]])
 
-(defn- calendar [{:keys [primary secondary]}]
+(defn- calendar [{:keys [primary secondary tertiary]}]
   [[:.Date-picker {:position :relative
                    :width    (unit/percent 100)}
     [:.Calendar {:background :white
@@ -327,20 +326,21 @@
              :width        (unit/percent 100)}]
     [:th {:padding (unit/rem 2)}]
     [:td {:padding (unit/rem 1)}]
-    [#{:.Previous :.Next} {:color (color/lighten secondary 50)}]
+    [#{:.Previous :.Next} {:color (color/lighten tertiary 40)}]
     [:.Day {:pointer :not-allowed}
      [:&.selectable {:cursor :pointer}
       [:&:hover [:span {:background (color/lighten primary 30)}]]]
      [:span {:border-radius (unit/percent 50)
+             :line-height   (unit/em 1.2)
              :display       :inline-block
              :padding       (unit/rem 1)
              :height        (unit/rem 2)
              :width         (unit/rem 2)}]
      [:&.today
-      (selector/> :span) {:border [[:solid (unit/px 1) (color/darken primary 10)]]}]
+      [:span {:border [[:solid (unit/px 1) (color/darken primary 10)]]}]]
      [:&.selected.selectable {:color  :white
                               :cursor :default}
-      (selector/> :span) {:background primary}]]]])
+      [:span {:background primary}]]]]])
 
 (defn- numbers [theme]
   [[:.Worksheet {:width       (unit/percent 100)
@@ -550,6 +550,5 @@
                         (checkbox/style theme)
                         (modal/style theme)
                         (clamp/style theme)
-                        (boundary/style theme)
                         (progress-bar/style theme)
                         (loaders/style theme)])))

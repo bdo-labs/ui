@@ -30,15 +30,16 @@
 
 
 (spec/def ::open? boolean?)
-(spec/def ::content-type (spec/or :nil nil? :str string? :vec vector?))
+(spec/def ::content-type (spec/or :nil nil? :seq seq? :str string? :vec vector?))
 (spec/def ::variable-content (spec/* ::content-type))
 (spec/def ::origins #{:top :bottom :left :right :center})
-
 (spec/def ::origin
   (spec/coll-of ::origins :count 2))
 
+
 (spec/def ::dropdown-params
-  (spec/keys :req-un [::open?]))
+  (spec/keys :req-un [::open?]
+             :opt-un [::origin]))
 
 
 (spec/def ::dropdown-args
@@ -46,15 +47,17 @@
             :content ::variable-content))
 
 
-(defn dropdown [params & args]
-  (let [{:keys [params content]} (u/conform-or-fail ::dropdown-args (into [params] (vec args)))
+(defn dropdown [& args]
+  (let [{:keys [params content]} (u/conform-or-fail ::dropdown-args args)
+        {:keys [open? origin]}   params
         ui-params                (mapv (comp keyword name) (last (spec/form ::dropdown-params)))
-        {:keys [open? origin]}          params
-        params                   (merge {:layout   :vertically
-                                         :gap?     false
-                                         :raised?  true
-                                         :rounded? true
-                                         :class    (str "Dropdown "
-                                                        (if open? "open " "not-open ")
-                                                        (when origin (str "origin-" (str/join origin))))} (apply dissoc params ui-params))]
+        classes                  (str "Dropdown "
+                                      (if open? "open " "not-open ")
+                                      (when origin (str "origin-" (str/join origin))))
+        container-params         {:layout   :vertically
+                                  :gap?     false
+                                  :raised?  true
+                                  :rounded? true
+                                  :class    classes}
+        params                   (merge container-params (apply dissoc params ui-params))]
     (into [container params] (map last content))))

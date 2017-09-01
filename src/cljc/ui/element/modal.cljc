@@ -60,16 +60,16 @@
 (spec/def ::backdrop? boolean?)
 (spec/def ::close-button? boolean?)
 (spec/def ::cancel-on-backdrop? boolean?)
-(spec/def ::cancel fn?)
+(spec/def ::on-cancel ::stub)
 (spec/def ::hide ::stub)
 
 
 (spec/def ::params
-  (spec/keys :opt-un [::show?
+  (spec/keys :req-un [::on-cancel]
+             :opt-un [::show?
                       ::close-button?
                       ::backdrop?
-                      ::cancel-on-backdrop?
-                      ::cancel]))
+                      ::cancel-on-backdrop?]))
 
 
 (spec/def ::content (spec/* (spec/or :str string? :vec vector?)))
@@ -82,7 +82,7 @@
 
 (defn dialog [& args]
   (let [{:keys [params content]}           (u/conform-or-fail ::args args)
-        {:keys [show? backdrop? cancel-on-backdrop? close-button? cancel]
+        {:keys [show? backdrop? cancel-on-backdrop? close-button? on-cancel]
          :or   {backdrop?           true
                 cancel-on-backdrop? true
                 close-button?       true}} params
@@ -96,7 +96,7 @@
                     [icon {:font     "ion"
                            :size     3
                            :class    "Close"
-                           :on-click cancel} "ios-close-empty"])
+                           :on-click on-cancel} "ios-close-empty"])
                   (into [container {:raised?  true
                                     :rounded? true
                                     :inline?  true
@@ -105,20 +105,19 @@
                                     :style    {:background :white}}]
                         (mapv last content))]
                  (when backdrop?
-                   [:div.Backdrop (when cancel-on-backdrop? {:on-click cancel})])])))
+                   [:div.Backdrop (when cancel-on-backdrop? {:on-click on-cancel})])])))
 
 
 (spec/def ::confirm-label string?)
 (spec/def ::cancel-label string?)
 (spec/def ::on-confirm ::stub)
-(spec/def ::on-cancel ::stub)
 
 
 (spec/def ::confirm-params
   (spec/keys :opt-un [::confirm-label
-                      ::cancel-label
-                      ::on-cancel]
-             :req-un [::on-confirm]))
+                      ::cancel-label]
+             :req-un [::on-confirm
+                      ::on-cancel]))
 
 
 (spec/def ::confirm-args
@@ -128,20 +127,17 @@
 
 (defn confirm-dialog [& args]
   (let [{:keys [params content]} (u/conform-or-fail ::confirm-args args)
-        {:keys [on-cancel on-confirm cancel-label confirm-label]
+        {:keys [on-confirm on-cancel cancel-label confirm-label]
          :or {cancel-label "No"
-              confirm-label "Yes"
-              on-cancel #(u/log "Cancel")}} params
+              confirm-label "Yes"}} params
         ui-params (u/keys-from-spec ::confirm-params)
-        params (apply dissoc params ui-params)]
-    [:div
-     [:pre (pr-str params)]
-     [dialog params
-      [container {:layout :vertically}
-       [:p (map last content)]
-       [container {:layout :horizontally}
-        [button {:on-click on-confirm} confirm-label]
-        [button {:on-click on-cancel} cancel-label]]]]]))
+        params (assoc (apply dissoc params ui-params) :on-cancel on-cancel)]
+    [dialog params
+     [container {:layout :vertically}
+      [:p (map last content)]
+      [container {:layout :horizontally}
+       [button {:on-click on-confirm} confirm-label]
+       [button {:on-click on-cancel} cancel-label]]]]))
 
 
 (defn alert-dialog [& args]
@@ -152,29 +148,3 @@
      [:h3 (map last content)]
      [container {:layout :centered}
       [button {:on-click on-cancel} alert-label]]]))
-
-
-#_(defn dialog
-  [{:keys [confirm confirm-text cancel-text open cancel-on-backdrop?]
-    :or   {confirm            false
-           confirm-text       "Yes"
-           cancel-text        "No"
-           open               false
-           cancel-on-backdrop? true}
-    :as   params} content]
-  (let [classes (u/names->str (concat [(when (true? open) :Open)]
-                                      (:class params)))]
-    [:div.Dialog {:class classes}
-     [:div.Backdrop {:on-click #(confirm false)}]
-     #_[container {:raised? true
-                 :background "white"
-                 :rounded? true
-                 :layout :vertically}
-      [:h3 "Dialog"]]]))
-
-(spec/fdef dialog
-        :args (spec/cat :params ::dialog-params
-                     :body ::dialog-body)
-        :ret vector?
-        :fn dialog)
-

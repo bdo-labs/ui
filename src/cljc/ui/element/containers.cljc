@@ -46,6 +46,8 @@
     [:&.space-between {:justify-content :space-between}]
     [:&.space-around {:justify-content :space-around}]
     [:&.space-none {:align-items :stretch}]
+    [:&.scrollable {:min-height :min-content
+                    :overflow   :auto}]
     ;; TODO https://github.com/noprompt/garden/issueselector/127
     #_[(selector/& :.Container (selector/> (selector/not :.Compact) (selector/+ :* :*))) {:margin-left (unit/rem 2)}]
     [#{:&.fill :.fill} {:box-sizing :border-box

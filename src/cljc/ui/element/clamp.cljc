@@ -5,7 +5,6 @@
             [garden.units :as unit]
             [garden.color :as color]
             [re-frame.core :as re-frame]
-            [ui.element.boundary :refer [boundary]]
             [ui.util :as u]))
 
 
@@ -186,7 +185,7 @@
                       :lower lower-value
                       (str lower-value " - " upper-value))])
       ;; Wrap the slider in a boundary that exposes a relative clientX-stream
-      [boundary {:on-mouse-within mouse-within
+      #_[boundary {:on-mouse-within mouse-within
                  :on-mouse-up     mouse-up
                  :on-mouse-levave mouse-up
                  :offset          {:top  (unit/rem 1)

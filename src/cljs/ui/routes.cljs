@@ -14,24 +14,18 @@
 
 
 (defroute "/docs/:item" [item]
-  #_(cond
-    (= (keyword item) :inputs) (re-frame/dispatch-sync [:initialize-inputs])
-    (= (keyword item) :sheet)  (re-frame/dispatch-sync [:init-sheet]))
   (re-frame/dispatch [:set-active-doc-item (keyword item)]))
 
 
-;; TODO Figure out why the bottom route is always executed
-#_(defroute "*" []
+(defroute "*" []
   (re-frame/dispatch [:set-active-panel :not-found]))
 
 
 (defn init []
+  (secretary/set-config! :prefix "#")
   (re-frame/dispatch-sync [:initialize-db])
   (re-frame/clear-subscription-cache!)
-  (secretary/set-config! :prefix "#")
   (accountant/configure-navigation!
-   {:nav-handler  (fn [path] (secretary/dispatch! path))
-    :path-exists? (fn [path] (secretary/locate-route path))}))
-
-
-(def dispatch accountant/dispatch-current!)
+   {:nav-handler  secretary/dispatch!
+    :path-exists? secretary/locate-route})
+  (accountant/dispatch-current!))
