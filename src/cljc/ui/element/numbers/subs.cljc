@@ -35,14 +35,20 @@
          (fn [[_ sheet-ref col-ref]]
            (subscribe [:column sheet-ref col-ref]))
          (fn [column]
-           (let [uniq (->> (:rows column)
+           (let [values  (->> (:rows column)
                            (remove :title-row?)
-                           (map :value)
+                           (map :value))
+                 sort-values (->> values
+                                  (map #(if-not (nil? (meta %))
+                                          (:sort-value (meta %))
+                                          %)))
+                 uniq (->> sort-values
                            (distinct)
                            (sort <))]
-             (if (vector? (first uniq))
+             #_(if (vector? (first uniq))
                (map #(:sort-value (meta %)) uniq)
-               uniq))))
+               uniq)
+             uniq)))
 
 
 ;; Filtering
@@ -60,7 +66,10 @@
                                  (if-let [filters (vals (nth filter-fns col-num))]
                                    ((complement not-any?) true?
                                     (map (fn [filter-fn]
-                                           (filter-fn (:value col))) filters))
+                                           (let [value (:value col)]
+                                             (if-not (nil? (meta value))
+                                               (filter-fn (:sort-value (meta value)))
+                                               (filter-fn value)))) filters))
                                    true))
                                %)))))))
 
@@ -130,7 +139,9 @@
              (if (nil? sorted-column)
                filtered-rows
                (->> filtered-rows
-                    (sort-by (comp :value #(nth % (u/col-num sorted-column)))
+                    (sort-by (comp #(if-not (nil? (meta (:value %)))
+                                   (:sort-value (meta (:value %)))
+                                   (:value %)) #(nth % (u/col-num sorted-column)))
                              sort-fn))))))
 
 

@@ -1,19 +1,22 @@
 (ns ui.element.numbers.events
   (:require [re-frame.core :refer [reg-event-db reg-event-fx]]
-            #_[clojure.test.check.generators :as gen]
             [clojure.spec :as spec]
             [ui.util :as u]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [ui.util :as util]))
 
+
+(def numbers-only #"^[0-9]+$")
 
 
 (spec/def ::name (spec/and string? not-empty))
-(spec/def ::title (spec/and string? #(not (str/starts-with? % "http"))))
+(spec/def ::title (spec/and string? #(not (str/starts-with? % "http")) #(not (re-matches numbers-only %))))
 (spec/def ::titles (spec/coll-of ::title))
 (spec/def ::column-heading #{:alpha :numeric :hidden})
 (spec/def ::row-heading #{:alpha :numeric :select :hidden})
 (spec/def ::type #{:number :inst :string})
 
+(spec/def ::hide-column (spec/coll-of boolean?))
 (spec/def ::locked (spec/coll-of boolean?))
 
 (spec/def ::col-ref (spec/with-gen
@@ -70,7 +73,7 @@
 
 (spec/def ::column
   (spec/keys :req-un [::type ::col-ref ::rows]
-             :opt-un [::min ::max ::freeze? ::editable? ::sortable? ::filterable? ::locked]))
+             :opt-un [::min ::max ::freeze? ::editable? ::sortable? ::filterable? ::locked ::hide-column]))
 
 
 (spec/def ::columns
@@ -159,12 +162,12 @@
 ;; Handlers
 (defn initialize-sheet
   [{:keys [db]} [_ sheet-ref d]]
-  (if-let [data (spec/conform ::data d)]
-    (let [columns (->columns data)]
-      {:db (assoc db sheet-ref {:columns      columns
-                                :initialized? true})})
-    {:db (assoc db sheet-ref {:columns      []
-                              :initialized? false})}))
+  {:db (if-let [data (util/conform-or-fail ::data d)]
+         (let [columns (->columns data)]
+           (assoc db sheet-ref {:columns      columns
+                                :initialized? true}))
+         (assoc db sheet-ref {:columns      []
+                              :initialized? false}))})
 
 
 (reg-event-fx :initialize-sheet initialize-sheet)

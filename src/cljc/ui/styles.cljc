@@ -345,6 +345,11 @@
 (defn- numbers [theme]
   [[:.Worksheet {:width       (unit/percent 100)
                  :user-select :none}
+    [:.Row
+     [#{:input :label} {:max-width (unit/percent 100)
+                       :text-overflow :ellipsis
+                       :white-space :nowrap
+                       :overflow :hidden}]]
     [:.Table {:border-bottom [[:solid (unit/px 1) (u/gray 230)]]
               :width         (unit/percent 100)}]
     [:.Arrow {:color         (u/gray 150)
@@ -354,6 +359,10 @@
     [:.Column-headings {:background :white}
      [#{:th :td} {:border-top [[:solid (unit/px 1) (u/gray 230)]]}]]
     [#{:th} {:position :relative}
+     [:.Dropdown {:background :white
+                  :position   :absolute
+                  :right      0
+                  :padding    (unit/em 1)}]
      [:.Dropdown-origin {:opacity    0
                          :transform  [[(translateY (unit/percent -50)) (rotateZ (unit/deg 90))]]
                          :transition [[:200ms :ease]]
@@ -392,16 +401,16 @@
       [:&:before {:border-bottom [[:solid (unit/px 1) (color/rgb [235 200 0])]]}]]]
                                         ; FIXME Replace with :not selector ones stable
     [#{:.Locked} {:cursor [[:default :!important]]
-                  :color  [[(color/rgb (doall (vec (repeat 3 120)))) :!important]]}
+                 :color  [[(color/rgb (doall (vec (repeat 3 120)))) :!important]]}
      [:&:after {:display [[:none :!important]]}]]
     [:th [:span {:display :inline-block}]]
     [:td [:span {:display :block}]]
     [#{:td :th} [:span {:overflow      :hidden
-                        :white-space   :nowrap
-                        :text-overflow :ellipsis}]
+                       :white-space   :nowrap
+                       :text-overflow :ellipsis}]
      [:&.number {:text-align :right}]
      [#{:&.index :&.Alpha} {:font-size   (unit/em 0.7)
-                            :font-weight 100}]
+                           :font-weight 100}]
      [:&.smaller {:font-size (unit/em 0.45)}]
      [#{:&.index :&.select :&.alpha} {:text-align :center}]]
     [:.Editable
@@ -445,8 +454,8 @@
       [:&.selected
        [#{:td :th} {:background-color (u/gray 245)}]]]]
     [#{:th :td} {:border-bottom [[:solid (unit/px 1) (u/gray 230)]]
-                 :border-right  [[:solid (unit/px 1) (u/gray 230)]]
-                 :padding       (unit/rem 1)}]
+                :border-right  [[:solid (unit/px 1) (u/gray 230)]]
+                :padding       (unit/rem 1)}]
     [:.Auto-complete {:margin 0}
      [:span {:display :inline}]
      [:.Collection {:background :white
