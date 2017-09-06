@@ -119,8 +119,7 @@
         sort-ascending?    @(subscribe [:sort-ascending? sheet-ref] {})
         sorted-column      @(subscribe [:sorted-column sheet-ref])
         toggle-column-menu (fn [col-ref] #(dispatch [:show-column-menu sheet-ref col-ref]))
-        hide-column        (subvec (vec (flatten (conj (repeat (count columns) false) hide-column))) 0 (inc (count columns)))
-        locked             (subvec (vec (flatten (conj (repeat (count columns) false) locked))) 0 (inc (count columns)))]
+        hide-column        (subvec (vec (flatten (conj (repeat (count columns) false) hide-column))) 0 (inc (count columns)))]
     [:div.Headers
      [table
       [colgroup "headers"
