@@ -1,7 +1,7 @@
 (ns ui.element.collection
   (:require [clojure.spec :as spec]
             [clojure.string :as str]
-            [ui.util :as u :refer [=i]]))
+            [ui.util :as util :refer [=i]]))
 
 
 (spec/def ::collection-params
@@ -21,13 +21,16 @@
   [{:keys [on-click on-mouse-enter predicate]}]
   (fn [{:keys [items show class select]} element]
     (let [items (->> items
-                     (sort #(compare (last %1) (last %2))))]
-      [:div {:class (u/names->str class)}
+                     (sort #(compare (last %1) (last %2))))
+          bold-match #(if (=i % show) [:strong %] [:span %])]
+      [:div {:class (util/names->str class)}
        [:ul.Collection {:ref #(reset! element %)}
         (when (not-empty items)
           (map-indexed (fn [n {:keys [id text] :as item}]
                          (let [text (if-not (= "" show)
-                                      (str/replace text (re-pattern (str "(?iu)" show)) #(str ":" %1 ":"))
+                                      (let [pattern #?(:clj (re-pattern (str "(?iu)" (str/lower-case show)))
+                                                       :cljs (js/RegExp. (str/lower-case show) "ig"))]
+                                        (str/replace text pattern #(str ":" %1 ":")))
                                       text)]
                            (into [:li {:key            (str "item-" n)
                                        :value          id
@@ -36,7 +39,7 @@
                                        :on-click       #(when (fn? on-click)
                                                           (on-click item))}]
                                  (->> (str/split text #":")
-                                      (map #(if (=i % show) [:strong %] [:span %]))))))
+                                      (map bold-match)))))
                        items))]])))
 
 

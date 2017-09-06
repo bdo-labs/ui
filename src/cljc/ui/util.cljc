@@ -8,6 +8,14 @@
             #?(:cljs [cljs.core :refer [random-uuid]])))
 
 
+(defn log
+  "Log all inputs to console or REPL, the input is returned for further manipulation"
+  [& in]
+  (do
+    (apply #?(:clj println :cljs js/console.log) in)
+    in))
+
+
 (defn extract
   "Extracts [key] from [db]"
   [db [key]]
@@ -31,7 +39,8 @@
 (defn =i
   "Case-Insensitive string comparison"
   [& strs]
-  (apply = (map #(str/upper-case %) strs)))
+  (log (mapv str/upper-case strs))
+  (apply = (mapv str/upper-case strs)))
 
 
 (defn xor
@@ -46,14 +55,6 @@
   []
   #?(:clj (str (java.util.UUID/randomUUID))
      :cljs (random-uuid)))
-
-
-(defn log
-  "Log all inputs to console or REPL, the input is returned for further manipulation"
-  [& in]
-  (do
-    (apply #?(:clj println :cljs js/console.log) in)
-    in))
 
 
 (defn exception
