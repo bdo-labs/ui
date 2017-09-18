@@ -95,7 +95,7 @@
 
 (defn container [& args]
   (let [{:keys [params content]}         (util/conform-or-fail ::container-args args)
-        ui-params                        (mapv (comp keyword name) (last (spec/form ::container-params)))
+        ui-params                        (util/keys-from-spec ::container-params)
         params                           (merge {:gap?  true
                                                  :wrap? true
                                                  :align [:start :start]} params)

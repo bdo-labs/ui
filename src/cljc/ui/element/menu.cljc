@@ -1,7 +1,7 @@
 (ns ui.element.menu
   #?(:cljs (:require-macros [garden.def :refer [defcssfn]]))
   (:require #?(:clj [garden.def :refer [defcssfn]])
-            [ui.util :as u]
+            [ui.util :as util]
             [clojure.string :as str]
             [clojure.spec :as spec]
             [garden.units :as unit]
@@ -48,12 +48,12 @@
 
 
 (defn dropdown [& args]
-  (let [{:keys [params content]} (u/conform-or-fail ::dropdown-args args)
+  (let [{:keys [params content]} (util/conform-or-fail ::dropdown-args args)
         {:keys [open? origin]}   params
-        ui-params                (mapv (comp keyword name) (last (spec/form ::dropdown-params)))
         classes                  (str "Dropdown "
                                       (if open? "open " "not-open ")
                                       (when origin (str "origin-" (str/join origin))))
+        ui-params                (util/keys-from-spec ::dropdown-params)
         container-params         {:layout   :vertically
                                   :gap?     false
                                   :raised?  true
@@ -61,3 +61,4 @@
                                   :class    classes}
         params                   (merge container-params (apply dissoc params ui-params))]
     (into [container params] (map last content))))
+

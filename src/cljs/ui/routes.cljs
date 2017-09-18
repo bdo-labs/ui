@@ -14,8 +14,6 @@
 
 
 (defroute "/docs/:item" [item]
-  (if (= (keyword item) :sheet)
-    (re-frame/dispatch-sync [:init-sheet]))
   (re-frame/dispatch [:set-active-doc-item (keyword item)]))
 
 

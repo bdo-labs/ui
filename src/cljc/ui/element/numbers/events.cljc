@@ -6,11 +6,13 @@
             [ui.util :as util]))
 
 
-(def numbers-only #"^[0-9]+$")
+(def numbers-only #"^[\d,\.]+$")
 
 
 (spec/def ::name (spec/and string? not-empty))
-(spec/def ::title (spec/and string? #(not (str/starts-with? % "http")) #(not (re-matches numbers-only %))))
+(spec/def ::title (spec/and string?
+                            #(not (str/starts-with? % "http"))
+                            #(nil? (re-matches numbers-only %))))
 (spec/def ::titles (spec/coll-of ::title))
 (spec/def ::column-heading #{:alpha :numeric :hidden})
 (spec/def ::row-heading #{:alpha :numeric :select :hidden})

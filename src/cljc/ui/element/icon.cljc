@@ -3,7 +3,8 @@
             [clojure.spec :as spec]
             [clojure.string :as str]
             [clojure.string :as str]
-            [ui.util :as u]))
+            [ui.util :as util]
+            [re-frame.core :as re-frame]))
 
 
 (spec/def ::font-prefix
@@ -43,14 +44,33 @@
    :icon ::icon-name))
 
 
+(re-frame/reg-event-fx
+ :init-icons
+ (fn [{:keys [db]}]
+   {:dispatch [:ui/icon-font "ion"]
+    :db db}))
+
+
+(re-frame/reg-event-db
+ :ui/icon-font
+ (fn [db [k font]]
+   (let [font (apply hash-map (util/conform-or-fail ::font font))]
+     (assoc db k font))))
+
+
+(re-frame/reg-sub :ui/icon-font util/extract)
+
+
 (defn icon
   [& args]
-  (let [{:keys [params icon]}            (spec/conform ::icon-args args)
+  (let [{:keys [params icon]}            (util/conform-or-fail ::icon-args args)
         {:keys [font size] :or {size 2}} params
         style                            {:font-size (str size "rem")}
         class                            (:class params)
         params                           (dissoc params :size :font :class)
-        font                             (apply hash-map font)]
+        font                             (if (nil? font)
+                                           @(re-frame/subscribe [:ui/icon-font])
+                                           (apply hash-map font))]
     (if-let [font-name (:font-name font)]
       [:i.Icon (merge {:class (str font-name " " class) :style style} params) icon]
       (let [font-prefix (:font-prefix font)

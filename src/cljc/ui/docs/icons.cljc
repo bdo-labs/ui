@@ -10,20 +10,24 @@
 
    `ui` is compatible with most icon-fonts available through the same  
    construct. You give it a font-name and an icon-name and it will  
-   find out how to render it.  
-        
-   Note that you can set a default icon-font for your entire project  
-   by dispatching `icon-font` with the name of your font.  
+   find out how to render it. You will also need to include the  
+   icon-font in your projects `index.html`.  
+     
+     
+   *Note that you can set a default icon-font for your entire project by dispatching `icon-font` with the name of your font. Specifying a font directly will override the global one*
+     
         
    Ex.  
    ```clojure
+   (ns your.namespace
+     (:require [ui.main :as ui]))
+
    (ui/dispatch [:icon-font \"ion\"])
    [element/icon {:size 15} \"happy-outline\"]
-   [element/icon {:size 10} \"coffee\"]
+   [element/icon {:font \"material-icons\"  
+                  :size 16} \"face\"]
    ```
    "
    [layout/centered
-    [element/icon {:font "ion"
-                   :size 15} "happy-outline"]
-    [element/icon {:font "ion"
-                   :size 10} "coffee"]]])
+    [element/icon {:size 15} "happy-outline"]
+    [element/icon {:font "material-icons" :size 16} "face"]]])

@@ -43,7 +43,10 @@
  :set-active-doc-item
  [interceptors]
  (fn [{:keys [db]} [doc-item]]
-   {:dispatch [:set-active-panel :doc-panel]
+   {:dispatch-n (list (when (= doc-item :sheet) [:init-sheet])
+                      (when (= doc-item :icons) [:init-icons])
+                      (when (= doc-item :inputs) [:init-inputs])
+                      [:set-active-panel :doc-panel])
     :db (assoc db :active-doc-item doc-item)}))
 
 

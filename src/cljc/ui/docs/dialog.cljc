@@ -16,8 +16,8 @@
 
 (defn documentation []
   (let [show         @(re-frame/subscribe [::show])
-        dialog-props {:backdrop?          true
-                      :cancel-on-backdrop true}
+        dialog-props {:backdrop?           true
+                      :cancel-on-backdrop? true}
         show-dialog  (fn [n] #(re-frame/dispatch [::set-show n]))]
     [element/article
      "### Dialog
@@ -30,19 +30,19 @@
       [element/button {:class    "secondary"
                        :on-click (show-dialog 3)}
        "Show confirmation"]]
-     [element/dialog (-> {:show?  (= show 1)
+     [element/dialog (-> {:show?     (= show 1)
                           :on-cancel #(re-frame/dispatch [::set-show false])}
                          (merge  dialog-props))
       [layout/vertically
        [:h2 "Are you sure you would like to proceed?"]
        [element/button {:on-click #(re-frame/dispatch [::set-show 2])} "Show dialog 2"]]]
-     [element/dialog (-> {:show?  (= show 2)
+     [element/dialog (-> {:show?     (= show 2)
                           :on-cancel #(re-frame/dispatch [::set-show 1])}
                          (merge dialog-props))
       [layout/vertically
        [:h2 "You did in-fact proceed :)"]
        [element/button {:on-click #(re-frame/dispatch [::set-show 1])} "Show dialog 1"]]]
-     [element/confirm-dialog {:show? (= show 3)
+     [element/confirm-dialog {:show?      (= show 3)
                               :on-confirm #(util/log "Yay")
-                              :on-cancel #(re-frame/dispatch [::set-show false])}
+                              :on-cancel  #(re-frame/dispatch [::set-show false])}
       "Are you sure?"]]))

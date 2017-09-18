@@ -39,7 +39,6 @@
 (defn =i
   "Case-Insensitive string comparison"
   [& strs]
-  (log (mapv str/upper-case strs))
   (apply = (mapv str/upper-case strs)))
 
 

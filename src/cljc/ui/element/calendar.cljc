@@ -188,19 +188,21 @@
 
 
 (defn years [& args]
-  (let [{:keys [params]} (util/conform-or-fail ::years-args args)
+  (let [{:keys [params]}   (util/conform-or-fail ::years-args args)
         {:keys [on-click]} params
-        current-year (inc (util/parse-int (fmt/unparse (fmt/formatter "yyyy") (time/now))))
-        rows         (->> (range (- current-year 4) current-year)
-                          (partition 2))]
+        current-year       (inc (util/parse-int (fmt/unparse (fmt/formatter "yyyy") (time/now))))
+        rows               (->> (range (- current-year 4) current-year)
+                                (partition 2))]
     [container {:layout :vertically
-                :fill? true}
+                :fill?  true}
      (for [years rows]
-       [container {:layout :horizontally
-                   :fill? true
-                   :gap? false}
+       [container {:key (str "year-row-" (str/join "-" years))
+                   :layout :horizontally
+                   :fill?  true
+                   :gap?   false}
         (for [year years]
-          [button {:fill?    true
+          [button {:key      (str "year-button-" year)
+                   :fill?    true
                    :on-click #(on-click [(fmt/parse (fmt/formatter "yyyy-MM-dd") (str year "-01-01"))
                                          (time/last-day-of-the-month (fmt/parse (fmt/formatter "yyyy-MM-dd") (str year "-12-01")))])}
            (str year)])])]))

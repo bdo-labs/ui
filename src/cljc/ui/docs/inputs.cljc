@@ -13,7 +13,7 @@
 
 
 (re-frame/reg-event-db
- :initialize-inputs
+ :init-inputs
  (fn [db _]
    (let [coll (->> (spec/exercise ::items 550)
                 (drop 50)
@@ -29,9 +29,10 @@
 (re-frame/reg-sub ::collection-opened util/extract)
 (re-frame/reg-sub ::multiple? util/extract-or-false)
 (re-frame/reg-sub ::disabled? util/extract-or-false)
-
 (re-frame/reg-sub ::query util/extract)
 (re-frame/reg-sub ::collection util/extract)
+
+
 (re-frame/reg-sub
  ::filtered-collection
  :<- [::collection]
@@ -85,6 +86,8 @@
       [element/checkbox {:checked   disabled?
                          :on-change #(re-frame/dispatch [::toggle-disabled?])} "Disabled?"]
       [element/auto-complete {:placeholder "Randomly generated strings"
+                              :on-focus    #(.select (.-target %))
+                              :value       "foo"
                               :items       filtered-collection
                               :multiple?   multiple?
                               :disabled?   disabled?}]]]))
@@ -101,3 +104,4 @@
    [check-toggle]
    "### Auto-complete"
    [completion]])
+

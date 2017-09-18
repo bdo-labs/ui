@@ -5,7 +5,7 @@
             [garden.units :as unit]
             [garden.color :as color]
             [re-frame.core :as re-frame]
-            [ui.util :as u]))
+            [ui.util :as util]))
 
 
 (defcssfn attr)
@@ -169,7 +169,7 @@
          ;; Events
          set-active-knob #(re-frame/dispatch [::set-active-knob id %])
          mouse-within    #(do
-                            (u/log active-knob)
+                            (util/log active-knob)
                             (when-not (nil? active-knob)
                               (let [x (.-mousePercentX %)]
                                 (re-frame/dispatch [::move-knob id x])

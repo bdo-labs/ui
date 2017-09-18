@@ -7,12 +7,13 @@
             [ui.element.collection :refer [collection]]
             [ui.element.label :refer [label]]
             [ui.element.textfield :refer [textfield]]
-            [ui.util :as u :refer [=i]]))
+            [ui.util :as util :refer [=i]]))
 
 
 (spec/def ::auto-complete-params
   (spec/merge (spec/keys :req-un [::items]
-                         :opt-un [::multiple? ::close-on-select?])
+                         :opt-un [::multiple?
+                                  ::close-on-select?])
               ::textfield-params))
 
 
@@ -21,17 +22,18 @@
 
 
 (defn auto-complete
-  [{:keys [on-change on-select on-remove predicate]
+  [{:keys [on-focus on-blur on-change on-select on-key-up on-remove predicate value]
     :or   {predicate str/starts-with?}}]
   (let [!coll-el           (clojure.core/atom nil)
         open?              (atom false)
-        query              (atom "")
+        query              (atom (or value ""))
         select             (atom -1)
         selected           (atom {})
         on-textfield-click #(reset! open? true)
         on-mouse-enter     #(reset! select %)
-        on-blur            #(go (<! (timeout 200))
-                                (when @open? (reset! open? false)))]
+        on-internal-blur   #(go (<! (timeout 200))
+                                (when @open? (do (reset! open? false)
+                                                 (when (fn? on-blur) (on-blur %)))))]
     (fn [{:keys [items placeholder multiple? disabled? focus? read-only? close-on-select?]
          :or   {multiple? false disabled? false read-only? false focus? false}}]
       (let [filter-fn          #(predicate (str/upper-case %) (str/upper-case @query))
@@ -59,25 +61,27 @@
                                  (when (and (>= scroll-top 0)
                                             (<= scroll-top scroll-height))
                                    (set! (.-scrollTop element) (+ scroll-top jump))))))))]
-          (let [on-key-down #(case (u/code->key (.-which %))
-                               "down"           (do (reset! select (min (dec (count items)) (inc @select)))
-                                                    (scroll inc))
-                               "up"             (do (reset! select (max 0 (dec @select)))
-                                                    (scroll dec))
-                               "enter"          (let [selected (nth items @select)]
-                                                  (reset! query (:text selected))
-                                                  (when (fn? on-select) (on-select selected))
-                                                  false) true)]
-            [:div.Auto-complete {:class (u/names->str [(when disabled? :Disabled)
-                                                       (when read-only? :Read-only)])}
+          (let [on-key-down #(case (util/code->key (.-which %))
+                               "down"                             (do (reset! select (min (dec (count items)) (inc @select)))
+                                                                      (scroll inc))
+                               "up"                               (do (reset! select (max 0 (dec @select)))
+                                                                      (scroll dec))
+                               "enter"                            (let [selected (nth items @select)]
+                                                                    (reset! query (:text selected))
+                                                                    (when (fn? on-select) (on-select selected))
+                                                                    false) true)]
+            [:div.Auto-complete {:class (util/names->str [(when disabled? :Disabled)
+                                                          (when read-only? :Read-only)])}
              ;; Input-handling
              [textfield {:placeholder placeholder
                          :value       @query
                          :focus?      focus?
                          :disabled?   disabled?
                          :read-only?  read-only?
+                         :on-focus    on-focus
+                         :on-key-up   on-key-up
                          :on-key-down on-key-down
-                         :on-blur     on-blur
+                         :on-blur     on-internal-blur
                          :on-change   on-internal-change
                          :on-click    on-textfield-click}]
              ;; Filtered list of items

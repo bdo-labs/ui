@@ -24,6 +24,6 @@
                                :space :around
                                :fill? true}
           [element/icon {:font "ion"
-                         :size "medium"} "ios-information-outline"]
+                         :size 2} "ios-information-outline"]
           [:small (str "Some information for you")]
           [:small (str "1 min ago")]]]]])))

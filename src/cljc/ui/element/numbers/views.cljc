@@ -235,13 +235,13 @@
                                                                                                          (nth locked x)) :Locked)])}
                                                              (when editable? {:title cell-ref}))]
                                                       (cond
-                                                        (number? value) [:td.Cell.Number k [:span (number-formatter value)]]
-                                                        (inst? value)   [:td.Cell.Date k [:span (inst-formatter value)]]
-                                                        (vector? value) [:td.Cell.Custom k value]
-                                                        (fn? value)     [:td.Cell.Custom k (value {:row      row
+                                                        (number? value) [:td.Cell.number k [:span (number-formatter value)]]
+                                                        (inst? value)   [:td.Cell.date k [:span (inst-formatter value)]]
+                                                        (vector? value) [:td.Cell.custom k value]
+                                                        (fn? value)     [:td.Cell.custom k (value {:row      row
                                                                                                    :editable (and editable? (not (nth locked x)))
                                                                                                    :cell-ref cell-ref})]
-                                                        :else           [:td.Cell.String k
+                                                        :else           [:td.Cell.string k
                                                                          (if (str/starts-with? value "http")
                                                                            [:a {:href value} value]
                                                                            [:span value])]))))))]))))]]]))
@@ -262,16 +262,17 @@
                                                    (.querySelectorAll @!worksheet)
                                                    (.call js/Array.prototype.slice))
                                               (fn [el] (.remove (.-classList el) "Duplicate")))))]
-    (fn []
-      (if-not @initialized?
-        (dispatch [:initialize-sheet sheet-ref data])
-        (if @initialized?
-          [:div.Worksheet.fill {:ref           set-worksheet-ref
-                                :on-mouse-down set-mouse-down
-                                :on-mouse-up   set-mouse-up
-                                :class         (u/names->str (into [(when editable? :editable)
-                                                                    (when caption? :caption)] (:class params)))}
-           [:div.Table
-            [headings sheet-ref params]
-            [body sheet-ref params]]])))))
+    (fn [{:keys [editable? caption?]
+         :or   {editable? false}
+         :as   params} data]
+      (dispatch [:initialize-sheet sheet-ref data])
+      (if @initialized?
+        [:div.Worksheet.fill {:ref           set-worksheet-ref
+                              :on-mouse-down set-mouse-down
+                              :on-mouse-up   set-mouse-up
+                              :class         (u/names->str (into [(when editable? :editable)
+                                                                  (when caption? :caption)] (:class params)))}
+         [:div.Table
+          [headings sheet-ref params]
+          [body sheet-ref params]]]))))
 

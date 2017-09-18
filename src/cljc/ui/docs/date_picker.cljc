@@ -67,7 +67,7 @@
                           :on-click   toggle-dialog}]
       [element/icon {:font "ion"} "ios-calendar-outline"]]
      [element/dialog {:show?  show-dialog
-                      :cancel close-dialog}
+                      :on-cancel close-dialog}
       [layout/vertically  {:fill? true
                            :style {:min-width "390px"}}
        [layout/horizontally {:gap?     false
