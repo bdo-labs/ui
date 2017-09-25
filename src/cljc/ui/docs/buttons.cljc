@@ -1,6 +1,7 @@
 (ns ui.docs.buttons
   (:require [ui.elements :as element]
-            [ui.layout :as layout]))
+            [ui.layout :as layout]
+            [clojure.spec :as spec]))
 
 (defn documentation []
   [element/article
@@ -14,13 +15,18 @@
     [element/button {:class "primary"} [:span "Bar"]]
     [element/button {:class "secondary" :rounded? true} "Baz"]
     [element/button {:rounded? true :flat? true} "Qux"]
-    [element/button {:class    "secondary"}
+    [element/button {:class "secondary"}
      [element/icon {:font "ion"} "ios-settings"]
      "Settings"]
     [element/button {:flat?     true
                      :circular? true
-                     :title "Un-lock"}
+                     :title     "Un-lock"}
      [element/icon {:font "material-icons"} "fingerprint"]]]
+   (let [specs (apply hash-map (rest (spec/form :ui.element.button/params)))]
+     [:pre (pr-str (:req-un specs))]
+     [:pre (pr-str (zipmap (map name (:opt-un specs))
+                           (map (comp name spec/form)
+                                (:opt-un specs))))])
    [:p
     [:em
      [:small

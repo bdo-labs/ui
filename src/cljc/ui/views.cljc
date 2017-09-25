@@ -17,8 +17,7 @@
             [ui.docs.inputs :as inputs]
             #?(:cljs [ui.docs.boundary :as boundary])
             [ui.docs.date-picker :as date-picker]
-            [ui.docs.sheet :as sheet]
-            #_[ui.docs.sidebar :as sidebar]))
+            [ui.docs.sheet :as sheet]))
 
 
 (defn- menu-item []
