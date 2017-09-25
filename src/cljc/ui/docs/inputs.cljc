@@ -7,18 +7,100 @@
             [clojure.spec :as spec]))
 
 (spec/def ::id nat-int?)
-(spec/def ::text (spec/and string? #(> (count %) 3)))
+(spec/def ::text (spec/with-gen (spec/and string? #(> (count %) 2))
+                   #(spec/gen #{"Eddard (Ned) Stark"
+                                "Robert Baratheon"
+                                "Jaime Lannister"
+                                "Catelyn Stark"
+                                "Cersei Lannister"
+                                "Daenerys Targaryen"
+                                "Jorah Mormont"
+                                "Petyr (Littlefinger) Baelish"
+                                "Viserys Targaryen"
+                                "Jon Snow"
+                                "Sansa Stark"
+                                "Arya Stark"
+                                "Robb Stark"
+                                "Theon Greyjoy"
+                                "Bran Stark"
+                                "Joffrey Baratheon"
+                                "Sandor (The Hound) Clegane"
+                                "Tyrion Lannister"
+                                "Khal Drogo"
+                                "Tywin Lannister"
+                                "Davos Seaworth"
+                                "Samwell Tarly"
+                                "Margaery Tyrell"
+                                "Stannis Baratheon"
+                                "Melisandre"
+                                "Jeor Mormont"
+                                "Bronn"
+                                "Varys"
+                                "Shae"
+                                "Ygritte"
+                                "Talisa Maegyr"
+                                "Gendry"
+                                "Tormund Giantsbane"
+                                "Gilly"
+                                "Brienne of Tarth"
+                                "Ramsay Bolton"
+                                "Ellaria Sand"
+                                "Daario Naharis"
+                                "Missandei"
+                                "Jaqen H'ghar"
+                                "Tommen Baratheon"
+                                "Roose Bolton"
+                                "Grand Maester Pycelle"
+                                "Meryn Trant"
+                                "Hodor"
+                                "Grenn"
+                                "Osha"
+                                "Rickon Stark"
+                                "Ros"
+                                "Gregor Clegane"
+                                "Janos Slynt"
+                                "Lancel Lannister"
+                                "Myrcella Baratheon"
+                                "Rodrik Cassel"
+                                "Maester Luwin"
+                                "Irri"
+                                "Doreah"
+                                "Kevan Lannister"
+                                "Barristan Selmy"
+                                "Rast"
+                                "Maester Aemon"
+                                "Pypar"
+                                "Alliser Thorne"
+                                "Othell Yarwyck"
+                                "Loras Tyrell"
+                                "Hot Pie"
+                                "Beric Dondarrion"
+                                "Podrick Payne"
+                                "Eddison Tollett"
+                                "Yara Greyjoy"
+                                "Selyse Florent"
+                                "Little Sam"
+                                "Grey Worm"
+                                "Qyburn"
+                                "Olenna Tyrell"
+                                "Shireen Baratheon"
+                                "Meera Reed"
+                                "Jojen Reed"
+                                "Thoros of Myr"
+                                "Olly"
+                                "Mace Tyrell"
+                                "The Waif"})))
 (spec/def ::item (spec/keys :req-un [::id ::text]))
 (spec/def ::items (spec/coll-of ::item))
-
 
 (re-frame/reg-event-db
  :init-inputs
  (fn [db _]
    (let [coll (->> (spec/exercise ::items 550)
-                (drop 50)
-                (mapv first)
-                (first))]
+                   (drop 50)
+                   (mapv first)
+                   (filterv #(distinct? (:text %)))
+                   (first))]
      (assoc db ::collection coll))))
 
 ;; Subscriptions
@@ -32,7 +114,6 @@
 (re-frame/reg-sub ::query util/extract)
 (re-frame/reg-sub ::collection util/extract)
 
-
 (re-frame/reg-sub
  ::filtered-collection
  :<- [::collection]
@@ -42,7 +123,6 @@
      (filter (fn [item] (str/index-of item query)) coll)
      coll)))
 
-
 ;; Events
 (re-frame/reg-event-db ::toggle-bacon? util/toggle)
 (re-frame/reg-event-db ::toggle-cheese? util/toggle)
@@ -50,7 +130,6 @@
 (re-frame/reg-event-db ::toggle-email? util/toggle)
 (re-frame/reg-event-db ::toggle-multiple? util/toggle)
 (re-frame/reg-event-db ::toggle-disabled? util/toggle)
-
 
 (defn check-toggle []
   (let [bacon?         @(re-frame/subscribe [::bacon?])
@@ -73,7 +152,6 @@
       [element/toggle {:checked   email?
                        :on-change toggle-email} "Eat here?"]]]))
 
-
 (defn completion
   []
   (let [multiple?           @(re-frame/subscribe [::multiple?])
@@ -85,13 +163,11 @@
                          :on-change #(re-frame/dispatch [::toggle-multiple?])} "Multiple?"]
       [element/checkbox {:checked   disabled?
                          :on-change #(re-frame/dispatch [::toggle-disabled?])} "Disabled?"]
-      [element/auto-complete {:placeholder "Randomly generated strings"
-                              :on-focus    #(.select (.-target %))
-                              :value       "foo"
+      [element/auto-complete {:id "game-of-thrones"
+                              :placeholder "Name a Character from Game of Thrones"
                               :items       filtered-collection
                               :multiple?   multiple?
                               :disabled?   disabled?}]]]))
-
 
 (defn documentation
   []
