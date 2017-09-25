@@ -2,7 +2,6 @@
 (def +description+ "A Straight-Forward Library for Composing User-Interfaces")
 (def +url+ "https://github.com/bdo-labs/ui")
 
-
 (set-env!
  :source-paths #{"src/cljc" "src/cljs"}
  :resource-paths #{"resources" "src/cljc" "src/cljs"}
@@ -48,7 +47,6 @@
                  [tolitius/boot-check "0.1.4" :scope "test"]
                  [weasel "0.7.0"  :scope "test"]])
 
-
 (require '[adzerk.boot-cljs :refer [cljs]]
          '[adzerk.boot-cljs-repl :refer [cljs-repl]]
          '[adzerk.boot-reload :refer [reload]]
@@ -66,7 +64,6 @@
          '[tolitius.boot-check :as check]
          '[pandeiro.boot-http :refer [serve]]
          '[afrey.boot-asset-fingerprint :refer [asset-fingerprint]])
-
 
 (task-options!
  apidoc {:title          (name +title+)
@@ -88,17 +85,15 @@
  test-cljs {:js-env :phantom}
  autoprefixer {:exec-path "target/node_modules/postcss-cli/bin/postcss"
                :files ["ui.css" "docs.css"]
-               :browsers ">= 50%"})
-
+               :browsers "last 2 major versions"})
 
 (deftask pre-requisits
   "Install pre-requisits"
   []
   (comp (npm :install {:postcss-cli  "latest"
-                    :autoprefixer "latest"}
-          :cache-key ::cache)
-     (target)))
-
+                       :autoprefixer "latest"}
+             :cache-key ::cache)
+        (target)))
 
 (deftask readme
   "Generate a Clojure-common file from the README to be consumed
@@ -110,76 +105,70 @@
       (spit content))
     identity))
 
-
-
 (deftask styles
   "Compile garden-styles and add browser-prefixes. Note that this
   requires that `postcss-cli` and `autoprefixer` is installed"
   []
   (comp (garden :output-to "css/ui.css"
-             :styles-var 'ui.styles/screen)
-     (garden :output-to "css/docs.css"
-             :styles-var 'ui.styles/docs)
-     (autoprefixer)))
-
+                :styles-var 'ui.styles/screen)
+        (garden :output-to "css/docs.css"
+                :styles-var 'ui.styles/docs)
+        (autoprefixer)))
 
 (deftask dev
   "Interactive development-build"
   [s speak? bool "Audible notification when a build is completed"]
   (comp (pre-requisits)
-     (readme)
-     (serve)
-     (watch)
-     (if speak? (speak) identity)
-     (cljs-devtools)
-     (reload :on-jsload 'ui.core/mount-root)
-     (styles)
-     (asset-fingerprint :skip true)
-     (cljs :ids #{"ui"}
-           :optimizations :none
-           :source-map true
-           :compiler-options {:parallel-build true
-                              :closure-defines {"goog.DEBUG" true
-                                                "clairvoyant.core.devmode" true}
-                              :preloads       '[devtools.preload]})
-     (target)))
-
+        (readme)
+        (serve)
+        (watch)
+        (if speak? (speak) identity)
+        (cljs-devtools)
+        (reload :on-jsload 'ui.core/mount-root)
+        (styles)
+        (asset-fingerprint :skip true)
+        (cljs-repl)
+        (cljs :ids #{"ui"}
+              :optimizations :none
+              :source-map true
+              :compiler-options {:parallel-build true
+                                 :closure-defines {"goog.DEBUG" true
+                                                   "clairvoyant.core.devmode" true}
+                                 :preloads       '[devtools.preload]})
+        (target)))
 
 (deftask prod
   "Static production-build"
   [s speak? bool "Notify when the build is completed"]
   (comp (pre-requisits)
-     (readme)
-     (if speak? (speak) identity)
-     (styles)
-     (cljs :ids #{"ui"}
-           :optimizations :advanced
-           :compiler-options {:closure-defines    {"goog.DEBUG" false}
-                              :pretty-print       false
-                              :static-fns         true
-                              :parallel-build     true
-                              :optimize-constants true})
-     (asset-fingerprint :extensions [".css" ".html"]
-                        :asset-host "https://bdo-labs.github.com/ui/")
-     (target)))
-
+        (readme)
+        (if speak? (speak) identity)
+        (styles)
+        (cljs :ids #{"ui"}
+              :optimizations :advanced
+              :compiler-options {:closure-defines    {"goog.DEBUG" false}
+                                 :pretty-print       false
+                                 :static-fns         true
+                                 :parallel-build     true
+                                 :optimize-constants true})
+        (asset-fingerprint :extensions [".css" ".html"]
+                           :asset-host "https://bdo-labs.github.com/ui/")
+        (target)))
 
 (deftask test-once
   "Run tests once. Typically used by the CI-runner"
   [s speak? bool "Notify when the build is completed"]
   (merge-env! :source-paths #{"test"})
   (comp (if speak? (speak) identity)
-     (test-cljs)))
-
+        (test-cljs)))
 
 (deftask test-auto
   "Run tests continuously"
   [s speak? bool "Notify when the build is completed"]
   (merge-env! :source-paths #{"test"})
   (comp (watch)
-     (if speak? (speak) identity)
-     (test-cljs)))
-
+        (if speak? (speak) identity)
+        (test-cljs)))
 
 (deftask check-src []
   "Linting & other code-conformance tests"
@@ -189,7 +178,6 @@
    (check/with-eastwood)
    (check/with-kibit)
    (check/with-bikeshed)))
-
 
 (deftask deploy
   "Bump version and push to Github. Accepted pull-requests are
