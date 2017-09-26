@@ -161,6 +161,7 @@
   (-> (cond
         (vector? v)  (str (name k) "-" (str/join "-" (map name v)))
         (keyword? v) (str (name k) "-" (name v))
+        (string? v)  (name k)
         (true? v)    (name k)
         :else        "")
       (str/replace #"\?" "")))

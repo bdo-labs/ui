@@ -1,23 +1,71 @@
 (ns ui.element.collection
-  (:require [clojure.spec :as spec]
+  (:require [#?(:clj clojure.core :cljs reagent.core) :refer [atom]]
+            [clojure.spec :as spec]
+            [clojure.test.check.generators :as gen]
             [clojure.string :as str]
-            [ui.util :as util :refer [=i]]))
+            [ui.util :as util]))
 
 
-(spec/def ::collection-params
-  (spec/keys :req-un [::items]
-             :opt-un [::show? ::select?]))
+;; Specification ----------------------------------------------------------
 
 
-(spec/def ::element instance?)
+(spec/def ::maybe-fn
+  (spec/with-gen fn?
+    (gen/return (constantly nil))))
 
 
-(spec/def ::collection-args
-  (spec/cat :params ::collection-params
-            :element ::element))
+(spec/def ::qualified-string (spec/and string? not-empty))
+
+
+;; When navigating using a keyboard, this is the item in focus
+(spec/def ::intended ::id)
+
+
+;; Substring to emphasize in the item-labels
+(spec/def ::emphasize string?)
+
+
+;; These are attributes of an item
+;; Label will equal value if it's not explicitly set
+(spec/def ::id (spec/or :str ::qualified-string :num nat-int?))
+(spec/def ::value ::qualified-string)
+(spec/def ::label ::qualified-string)
+(spec/def ::item
+  (spec/or
+   :without-label (spec/cat :id ::id
+                            :value ::value)
+   :with-label (spec/cat :id ::id
+                         :value ::value
+                         :label ::label)
+   :qualified (spec/keys :req-un [::id ::value]
+                         :opt-un [::label])))
+
+
+;; The list of items should always be distinct, so you would probably
+;; pass it a `set`
+(spec/def ::items (spec/coll-of ::item :distinct true))
+
+
+(spec/def ::params
+  (spec/keys :opt-un [::intended
+                      ::emphasize]))
+
+
+(spec/def ::args
+  (spec/cat :params ::params :items ::items))
 
 
 (defn collection
+  [& args]
+  (let [{:keys [params items]} (util/conform-or-fail ::args args)]
+    [:ul.Collection
+     (for [{:keys [id value label]
+            :or {label value}} items]
+       [:li {:key (str "item-" id)}
+        label])]))
+
+
+#_(defn collection
   [{:keys [on-click on-mouse-enter predicate]}]
   (fn [{:keys [items show class select]} element]
     (let [items (->> items
@@ -43,7 +91,7 @@
                        items))]])))
 
 
-(spec/fdef collection
-        :args ::collection-args
+#_(spec/fdef collection
+        :args ::args
         :ret vector?)
 

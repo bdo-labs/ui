@@ -6,6 +6,7 @@
             [ui.element.containers :as containers]
             [ui.element.content :as content]
             [ui.element.auto-complete :as auto-complete]
+            [ui.element.chooser :as chooser]
             [ui.element.progress-bar :as progress-bar]
             [ui.element.loaders :as loaders]
             [ui.element.textfield :as textfield]
@@ -60,6 +61,7 @@
 (def toggle toggle/toggle)
 (def textfield textfield/textfield)
 (def auto-complete auto-complete/auto-complete)
+(def chooser chooser/chooser)
 (def clamp clamp/clamp)
 (def days calendar/days)
 (def months calendar/months)

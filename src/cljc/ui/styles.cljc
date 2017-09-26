@@ -230,9 +230,9 @@
   [fade-up])
 
 (defn- forms [{:keys [primary secondary]}]
-  [[:.Auto-complete {:position      :relative
-                     :width         (unit/percent 100)
-                     :margin-bottom (unit/rem 1)}
+  [[:.Chooser {:position      :relative
+               :width         (unit/percent 100)
+               :margin-bottom (unit/rem 1)}
     [:&.read-only [:* {:cursor :default}]]
     [:.Textfield {:margin-bottom 0}]]
    [:.Labels
@@ -257,7 +257,7 @@
              :cursor        :pointer
              :margin-right  (unit/rem 0.5)}]]
    [:.Textfield {:position :relative}
-    [:&.Placeholder {:margin   [[(unit/rem 3) 0 (unit/rem 1)]]}]
+    [:&.placeholder {:margin [[(unit/rem 3) 0 (unit/rem 1) 0 :!important]]}]
     [:&.dirty
      [:label {:left             0
               :transform        [[(translateY (unit/percent -100)) (scale 0.75)]]
@@ -269,14 +269,18 @@
              :margin     0
              :display    :inline-block
              :width      (unit/percent 100)}]
-    [:label {:position   :absolute
-             :color      :silver
-             :transition [[:all :200ms :ease]]
-             :transform  (translateZ 0)
-             :left       0
-             :cursor     :text
-             :top        (unit/rem 0.5)
-             :z-index    1}]
+    [:label {:position      :absolute
+             :color         :silver
+             :transition    [[:all :200ms :ease]]
+             :transform     (translateZ 0)
+             :left          0
+             :cursor        :text
+             :overflow      :hidden
+             :text-overflow :ellipsis
+             :white-space   :nowrap
+             :width         (unit/percent 100)
+             :top           (unit/rem 0.5)
+             :z-index       1}]
     [:input {:background    :transparent
              :border        :none
              :border-bottom [[(unit/px 1) :solid :silver]]
@@ -456,7 +460,7 @@
     [#{:th :td} {:border-bottom [[:solid (unit/px 1) (u/gray 230)]]
                 :border-right  [[:solid (unit/px 1) (u/gray 230)]]
                 :padding       (unit/rem 1)}]
-    [:.Auto-complete {:margin 0}
+    [:.Chooser {:margin 0}
      [:span {:display :inline}]
      [:.Collection {:background :white
                     :border     [[:solid (unit/px 1) :silver]]}]
