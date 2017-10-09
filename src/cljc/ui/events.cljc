@@ -68,3 +68,17 @@
      {:navigate-to fragments
       :db          (assoc db :fragments fragments)})))
 
+
+(re-frame/reg-event-db
+ :key-pressed
+ [interceptors]
+ (fn [db [key]]
+   (assoc db :key-pressed key)))
+
+
+(re-frame/reg-event-db
+ :no-key-pressed
+ [interceptors]
+ (fn [db _]
+   (dissoc db :key-pressed)))
+

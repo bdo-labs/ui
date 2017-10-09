@@ -1,5 +1,6 @@
 (ns ui.element.textfield
-  (:require [clojure.spec :as spec]
+  (:require [#?(:clj clojure.core :cljs reagent.core) :refer [atom]]
+            [clojure.spec :as spec]
             [clojure.test.check.generators :as gen]
             [ui.util :as util]
             [clojure.string :as str]))
@@ -20,15 +21,17 @@
 
 ;; Parameters
 (spec/def ::id (spec/and string? #(re-find #"(?i)(\w+)" %)))
-(spec/def ::placeholder string?)
+(spec/def ::placeholder #(or (string? %) (nil? %)))
+(spec/def ::label string?)
 (spec/def ::value string?)
 (spec/def ::disabled boolean?)
 (spec/def ::read-only boolean?)
 (spec/def ::focus boolean?)
 (spec/def ::params
-  (spec/keys :req-un [::id]
-             :opt-un [::value
+  (spec/keys :opt-un [::id
+                      ::value
                       ::placeholder
+                      ::label
                       ::disabled
                       ::read-only
                       ::focus
@@ -43,22 +46,31 @@
 
 
 (defn textfield
-  [{:keys [id]}]
+  [{:keys [id]
+    :or   {id (util/gen-id)}}]
   (fn [& args]
-    (let [{:keys [params]}   (util/conform-or-fail ::args args)
-          {:keys [style placeholder focus]
-           :or   {style {}}} params
-          ui-params          (util/keys-from-spec ::params)
-          class              (util/params->classes params)]
+    (let [{:keys [params]}            (util/conform-or-fail ::args args)
+          {:keys [style
+                  placeholder
+                  label
+                  focus
+                  value]
+           :or   {style       {}
+                  placeholder ""}} params
+          ui-params                   (util/keys-from-spec ::params)
+          class                       (str/join " " [(util/params->classes params)
+                                                     (when (or (not (empty? value))
+                                                               (not (empty? placeholder))) "dirty")])]
       [:div.Textfield {:key   (str "textfield-" id)
                        :style style
                        :class class}
        [:input (merge
                 (dissoc params :class :style :placeholder)
                 {:type          :text
+                 :placeholder   placeholder
                  :auto-complete "off"})]
-       (when-not (empty? placeholder)
-         [:label {:for id} placeholder])])))
+       (when-not (empty? label)
+         [:label {:for id} label])])))
 
 
 (spec/fdef textfield

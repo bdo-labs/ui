@@ -1,9 +1,10 @@
 (ns ui.docs.sheet
   (:require [clojure.test.check.generators :as gen]
+            [#?(:clj clojure.core :cljs reagent.core) :refer [atom]]
             [clojure.spec :as spec]
             [clojure.string :as str]
             [ui.elements :as element]
-            [ui.element.auto-complete :refer [auto-complete]]
+            [ui.element.chooser :refer [chooser]]
             [ui.layout :as layout]
             [tongue.core :as tongue]
             [re-frame.core :as re-frame]
@@ -29,17 +30,18 @@
 (re-frame/reg-event-fx
  :init-sheet
  (fn [{:keys [db]} [k]]
-   (let [rows  199
-         body  (mapv vec (map first (drop 49 (spec/exercise ::fixture 199))))
-         ;; uniqs (->> body
-         ;;            (map first)
-         ;;            (distinct)
-         ;;            (map-indexed (fn [n text] {:id n :text text})))
-         ;; coll (->> body
-         ;;           (map #(assoc-in % [0] [auto-complete {:placeholder (first %)
-         ;;                                                 :items       uniqs}])))
-         ]
-     {:db (assoc db ::collection body)})))
+   (let [rows   199
+         body   (mapv vec (map first (drop 49 (spec/exercise ::fixture 199))))
+         uniqs  (->> body
+                     (map first)
+                     (distinct)
+                     (map-indexed (fn [n text] {:id n :value text})))
+         coll   (->> body
+                     (map #(assoc-in % [0]
+                                     [chooser {:label      (first %)
+                                               :searchable true
+                                               :items      uniqs}])))]
+     {:db (assoc db ::collection coll)})))
 
 
 (defn documentation []
@@ -47,5 +49,7 @@
         coll            @(re-frame/subscribe [::collection])
         content         (into [title-row] coll)]
     [layout/vertically
-     [element/sheet {:name "Worksheet"} content]]))
+     [element/sheet {:name "Worksheet"
+                     :hide-column (repeat (count title-row) false)}
+      content]]))
 

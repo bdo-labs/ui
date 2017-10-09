@@ -62,6 +62,7 @@
 (def textfield textfield/textfield)
 (def auto-complete auto-complete/auto-complete)
 (def chooser chooser/chooser)
+(def collection collection/collection)
 (def clamp clamp/clamp)
 (def days calendar/days)
 (def months calendar/months)

@@ -234,7 +234,11 @@
                :width         (unit/percent 100)
                :margin-bottom (unit/rem 1)}
     [:&.read-only [:* {:cursor :default}]]
-    [:.Textfield {:margin-bottom 0}]]
+    [:.Textfield {:margin-bottom 0}]
+    [:.Dropdown {:border-top-left-radius  0
+                 :border-top-right-radius 0
+                 :max-height              (unit/rem 25)
+                 :width                   (unit/percent 100)}]]
    [:.Labels
     [:.Label:first-child {:margin-left 0}]
     [:.Label:last-child {:margin-right 0}]]
@@ -257,7 +261,7 @@
              :cursor        :pointer
              :margin-right  (unit/rem 0.5)}]]
    [:.Textfield {:position :relative}
-    [:&.placeholder {:margin [[(unit/rem 3) 0 (unit/rem 1) 0 :!important]]}]
+    [:&.label {:margin [[(unit/rem 3) 0 (unit/rem 1) 0]]}]
     [:&.dirty
      [:label {:left             0
               :transform        [[(translateY (unit/percent -100)) (scale 0.75)]]
@@ -301,10 +305,7 @@
     [:.Ghost {:color    (color/rgba [0 0 1 0.3])
               :position :absolute
               :top      (unit/rem 0.5)}]]
-   [:.Collection {:background         (color/rgba [254 254 255 0.85])
-                  :box-shadow         [[0 (unit/rem 0.1) (unit/rem 0.2) (color/rgba [0 0 1 0.2])]]
-                  :max-height         (unit/rem 30)
-                  :position           :absolute
+   [:.Collection {:background         :white
                   :width              (unit/percent 100)
                   :overflow-scrolling :touch
                   :overflow           :auto
@@ -314,8 +315,8 @@
     ;; TODO Make it an immediate child selector
     [:li {:border-bottom [[:solid (unit/rem 0.1) (color/rgba [150 150 150 0.1])]]
           :padding       [[(unit/rem 1) (unit/rem 2)]]}
-     [:&.Selected {:background (color/rgba [0 0 1 0.02])}]
-     [:&:hover {:background-color (color/rgba [200 200 200 0.1])}]
+     [:&.selected {:background (color/rgba [0 0 0 0.02])}]
+     [:&.intended {:background-color (color/rgba [0 0 0 0.04])}]
      [:&:last-child {:border-bottom :none}]]]])
 
 (defn- calendar [{:keys [primary secondary tertiary]}]
@@ -364,7 +365,7 @@
      [#{:th :td} {:border-top [[:solid (unit/px 1) (u/gray 230)]]}]]
     [#{:th} {:position :relative}
      [:.Dropdown {:background :white
-                  :position   :absolute
+                  :position   [[:absolute :!important]]
                   :right      0
                   :padding    (unit/em 1)}]
      [:.Dropdown-origin {:opacity    0
@@ -462,8 +463,6 @@
                 :padding       (unit/rem 1)}]
     [:.Chooser {:margin 0}
      [:span {:display :inline}]
-     [:.Collection {:background :white
-                    :border     [[:solid (unit/px 1) :silver]]}]
      [:.Textfield {:margin  0
                    :padding 0}
       [:&.dirty

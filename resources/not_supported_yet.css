@@ -47,3 +47,7 @@ in 2.0, but at-least our upgrade-path is way easier now.
 
 /* Buttons */
 .Button[disabled] { opacity: 0.1; }
+
+
+.Dialog > .Content { z-index: 102; }
+.Dialog > .Content > .Container { z-index: 103; }

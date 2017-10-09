@@ -61,12 +61,13 @@
                             (close-dialog))]
     [layout/vertically
      [layout/horizontally {:fill? true}
-      [element/textfield {:read-only? true
-                          :value      formatted-date
-                          :style      {:flex 1}
-                          :on-click   toggle-dialog}]
+      [element/textfield {:id        "date-field"
+                          :read-only true
+                          :value     formatted-date
+                          :style     {:flex 1}
+                          :on-click  toggle-dialog}]
       [element/icon {:font "ion"} "ios-calendar-outline"]]
-     [element/dialog {:show?  show-dialog
+     [element/dialog {:show?     show-dialog
                       :on-cancel close-dialog}
       [layout/vertically  {:fill? true
                            :style {:min-width "390px"}}

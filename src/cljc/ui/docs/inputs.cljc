@@ -8,88 +8,88 @@
 
 
 (def characters
-  #{"Eddard (Ned) Stark"
-   "Robert Baratheon"
-   "Jaime Lannister"
+  #{"Alliser Thorne"
+   "Arya Stark"
+   "Barristan Selmy"
+   "Beric Dondarrion"
+   "Bran Stark"
+   "Brienne of Tarth"
+   "Bronn"
    "Catelyn Stark"
    "Cersei Lannister"
-   "Daenerys Targaryen"
-   "Jorah Mormont"
-   "Petyr (Littlefinger) Baelish"
-   "Viserys Targaryen"
-   "Jon Snow"
-   "Sansa Stark"
-   "Arya Stark"
-   "Robb Stark"
-   "Theon Greyjoy"
-   "Bran Stark"
-   "Joffrey Baratheon"
-   "Sandor (The Hound) Clegane"
-   "Tyrion Lannister"
-   "Khal Drogo"
-   "Tywin Lannister"
-   "Davos Seaworth"
-   "Samwell Tarly"
-   "Margaery Tyrell"
-   "Stannis Baratheon"
-   "Melisandre"
-   "Jeor Mormont"
-   "Bronn"
-   "Varys"
-   "Shae"
-   "Ygritte"
-   "Talisa Maegyr"
-   "Gendry"
-   "Tormund Giantsbane"
-   "Gilly"
-   "Brienne of Tarth"
-   "Ramsay Bolton"
-   "Ellaria Sand"
    "Daario Naharis"
-   "Missandei"
-   "Jaqen H'ghar"
-   "Tommen Baratheon"
-   "Roose Bolton"
-   "Grand Maester Pycelle"
-   "Meryn Trant"
-   "Hodor"
-   "Grenn"
-   "Osha"
-   "Rickon Stark"
-   "Ros"
-   "Gregor Clegane"
-   "Janos Slynt"
-   "Lancel Lannister"
-   "Myrcella Baratheon"
-   "Rodrik Cassel"
-   "Maester Luwin"
-   "Irri"
+   "Daenerys Targaryen"
+   "Davos Seaworth"
    "Doreah"
-   "Kevan Lannister"
-   "Barristan Selmy"
-   "Rast"
-   "Maester Aemon"
-   "Pypar"
-   "Alliser Thorne"
-   "Othell Yarwyck"
-   "Loras Tyrell"
-   "Hot Pie"
-   "Beric Dondarrion"
-   "Podrick Payne"
+   "Eddard (Ned) Stark"
    "Eddison Tollett"
-   "Yara Greyjoy"
-   "Selyse Florent"
-   "Little Sam"
+   "Ellaria Sand"
+   "Gendry"
+   "Gilly"
+   "Grand Maester Pycelle"
+   "Gregor Clegane"
+   "Grenn"
    "Grey Worm"
-   "Qyburn"
-   "Olenna Tyrell"
-   "Shireen Baratheon"
-   "Meera Reed"
+   "Hodor"
+   "Hot Pie"
+   "Irri"
+   "Jaime Lannister"
+   "Janos Slynt"
+   "Jaqen H'ghar"
+   "Jeor Mormont"
+   "Joffrey Baratheon"
    "Jojen Reed"
-   "Thoros of Myr"
-   "Olly"
+   "Jon Snow"
+   "Jorah Mormont"
+   "Kevan Lannister"
+   "Khal Drogo"
+   "Lancel Lannister"
+   "Little Sam"
+   "Loras Tyrell"
    "Mace Tyrell"
-   "The Waif"})
+   "Maester Aemon"
+   "Maester Luwin"
+   "Margaery Tyrell"
+   "Meera Reed"
+   "Melisandre"
+   "Meryn Trant"
+   "Missandei"
+   "Myrcella Baratheon"
+   "Olenna Tyrell"
+   "Olly"
+   "Osha"
+   "Othell Yarwyck"
+   "Petyr (Littlefinger) Baelish"
+   "Podrick Payne"
+   "Pypar"
+   "Qyburn"
+   "Ramsay Bolton"
+   "Rast"
+   "Rickon Stark"
+   "Robb Stark"
+   "Robert Baratheon"
+   "Rodrik Cassel"
+   "Roose Bolton"
+   "Ros"
+   "Samwell Tarly"
+   "Sandor (The Hound) Clegane"
+   "Sansa Stark"
+   "Selyse Florent"
+   "Shae"
+   "Shireen Baratheon"
+   "Stannis Baratheon"
+   "Talisa Maegyr"
+   "The Waif"
+   "Theon Greyjoy"
+   "Thoros of Myr"
+   "Tommen Baratheon"
+   "Tormund Giantsbane"
+   "Tyrion Lannister"
+   "Tywin Lannister"
+   "Varys"
+   "Viserys Targaryen"
+   "Yara Greyjoy"
+   "Ygritte"})
 
 
 (re-frame/reg-event-db
@@ -98,7 +98,7 @@
    (let [assoc-id (fn [n character] {:id n :value character})
          items    (->> characters
                        (map-indexed assoc-id))]
-     (assoc db ::items items))))
+     (assoc db ::items (set (sort-by :value items))))))
 
 
 ;; Subscriptions
@@ -115,6 +115,16 @@
 
 (re-frame/reg-sub
  ::filtered-items
+ :<- [::items]
+ :<- [::query]
+ (fn [[coll query] _]
+   (if-not (empty? query)
+     (filter (fn [item] (str/index-of item query)) coll)
+     coll)))
+
+
+(re-frame/reg-sub
+ ::sep-filtered-items
  :<- [::items]
  :<- [::query]
  (fn [[coll query] _]
@@ -162,22 +172,30 @@
 
 (defn completion
   []
-  (let [multiple?      @(re-frame/subscribe [::multiple?])
-        disabled?      @(re-frame/subscribe [::disabled?])
-        filtered-items @(re-frame/subscribe [::filtered-items])]
+  (let [multiple?          @(re-frame/subscribe [::multiple?])
+        disabled?          @(re-frame/subscribe [::disabled?])
+        filtered-items     @(re-frame/subscribe [::filtered-items])
+        sep-filtered-items @(re-frame/subscribe [::sep-filtered-items])]
     [layout/horizontally
      [layout/vertically
       [element/checkbox {:checked   multiple?
                          :on-change #(re-frame/dispatch [::toggle-multiple?])} "Multiple?"]
       [element/checkbox {:checked   disabled?
                          :on-change #(re-frame/dispatch [::toggle-disabled?])} "Disabled?"]
-      [element/chooser {:id          "game-of-thrones"
-                        :placeholder "Name a Character from Game of Thrones"
-                        :searchable  true
-                        :items       filtered-items
+      [element/chooser {:label      "Name a Character from Game of Thrones"
+                        :searchable false
+                        :items      filtered-items
                         :predicate? smart-case-includes?
                         :multiple   multiple?
-                        :disabled   disabled?}]]]))
+                        :disabled   disabled?}]
+      [element/chooser {:label         "Name a Character from Game of Bones"
+                        :searchable    true
+                        :addable       "Add % to members"
+                        :empty-message "No results matching %"
+                        :items         sep-filtered-items
+                        :predicate?    smart-case-includes?
+                        :multiple      multiple?
+                        :disabled      disabled?}]]]))
 
 
 (defn documentation

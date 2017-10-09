@@ -6,7 +6,8 @@
             [ui.util :as util]
             [ui.events]
             [ui.effects]
-            [ui.subs]))
+            [ui.subs]
+            [re-frame.core :as re-frame]))
 
 
 (defn- dev-setup []
@@ -20,7 +21,18 @@
                   (.getElementById js/document "app")))
 
 
+(defonce event-listeners
+  (fn []
+    (letfn [(on-key-down [event]
+              (re-frame/dispatch-sync [:key-pressed (util/code->key (.-which event))]))
+            (on-key-up [event]
+              (re-frame/dispatch-sync [:no-key-pressed]))]
+      (.addEventListener js/document "keydown" on-key-down)
+      (.addEventListener js/document "keyup" on-key-up))))
+
+
 (defn ^:export init []
   (dev-setup)
   (routes/init)
+  (event-listeners)
   (mount-root))

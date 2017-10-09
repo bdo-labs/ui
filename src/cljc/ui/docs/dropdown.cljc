@@ -16,7 +16,7 @@
          [element/icon {:font "ion"} (str "android-arrow-drop" (if @!open? "up" "down"))]
          "Open"]
         [element/dropdown {:open? @!open?
-                           :origin [:top :right]
+                           :origin [:top :left]
                            :style {:width "360px"}}
          [layout/horizontally [:h5 "Notifications"]]
          [layout/horizontally {:style {:border-top "1px solid rgb(230,230,230)"
