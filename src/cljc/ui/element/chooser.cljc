@@ -72,7 +72,7 @@
       #_(when keyboard #?(:cljs (.addEventListener js/document "keydown" on-key-down)))
 
       (fn [& args]
-        (let [{:keys [params]}         (spec/conform ::args args)
+        (let [{:keys [params]}          (spec/conform ::args args)
               {:keys [items
                       close-on-select
                       multiple
@@ -88,34 +88,34 @@
                :or   {predicate?   str/includes?
                       deselectable true
                       label        ""}} params
-              filtered-items           (set/select (labels-by-predicate predicate? @query*) items)
-              textfield-params         (merge textfield-params
-                                              (when searchable {:label     label
-                                                                :on-change (fn [event]
-                                                                             (reset! query* (.-value (.-target event)))
-                                                                             (when (fn? on-change) (on-change event)))})
-                                              (when-not searchable {:label       ""
-                                                                    :placeholder label
-                                                                    :class       "read-only"
-                                                                    :read-only   true})
-                                              (when (and (false? multiple)
-                                                         (not-empty @selected*)) {:placeholder (-> (first @selected*) :value)})
-                                              {:id       (str "textfield-" id)
-                                               :value    @query*
-                                               :on-focus #(do (reset! show* true)
-                                                              (when (fn? on-focus) (on-focus %)))
-                                               :on-blur  #(go (<! (timeout 200))
-                                                              (when @show*
-                                                                (reset! show* false)
-                                                                (when (fn? on-blur) (on-blur %))))})
-              collection-params        (merge collection-params
-                                              {:emphasize    @query*
-                                               :deselectable deselectable
-                                               :on-select    (fn [items]
-                                                               (when close-on-select (reset! show* false))
-                                                               (reset! query* "")
-                                                               (reset! selected* items)
-                                                               (when (fn? on-select) (on-select items)))})]
+              filtered-items            (set/select (labels-by-predicate predicate? @query*) items)
+              textfield-params          (merge textfield-params
+                                               (when searchable {:label     label
+                                                                 :on-change (fn [event]
+                                                                              (reset! query* (.-value (.-target event)))
+                                                                              (when (fn? on-change) (on-change event)))})
+                                               (when-not searchable {:label       ""
+                                                                     :placeholder label
+                                                                     :class       "read-only"
+                                                                     :read-only   true})
+                                               (when (and (false? multiple)
+                                                          (not-empty @selected*)) {:placeholder (-> (first @selected*) :value)})
+                                               {:id       (str "textfield-" id)
+                                                :value    @query*
+                                                :on-focus #(do (reset! show* true)
+                                                               (when (fn? on-focus) (on-focus %)))
+                                                :on-blur  #(do (when (fn? on-blur) (on-blur %))
+                                                               (go (<! (timeout 200))
+                                                                   (when @show*
+                                                                     (reset! show* false))))})
+              collection-params         (merge collection-params
+                                               {:emphasize    @query*
+                                                :deselectable deselectable
+                                                :on-select    (fn [items]
+                                                                (when close-on-select (reset! show* false))
+                                                                (reset! query* "")
+                                                                (reset! selected* items)
+                                                                (when (fn? on-select) (on-select items)))})]
 
           [:div.Chooser {:id id}
            [textfield textfield-params]

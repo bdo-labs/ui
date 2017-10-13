@@ -8,7 +8,8 @@
             [ui.element.menu :as menu]
             [ui.element.containers :refer [container]]
             [ui.element.clamp :refer [clamp]]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [ui.util :as util]))
 
 
 ;; TODO Range-filter for numbers
@@ -189,11 +190,12 @@
 
 
 (defn body
-  [sheet-ref {:keys [editable? row-heading column-widths number-formatter inst-formatter locked on-double-click hide-column]
+  [sheet-ref {:keys [editable? row-heading column-widths number-formatter inst-formatter locked on-double-click hide-column empty-message]
               :or   {column-widths    []
                      row-heading      :hidden
                      number-formatter u/format-number-en
-                     inst-formatter   u/format-inst}}]
+                     inst-formatter   u/format-inst
+                     empty-message    " "}}]
   (let [columns               @(subscribe [:columns sheet-ref])
         rows                  @(subscribe [:rows sheet-ref])
         on-double-click-local (fn [m] #(on-double-click (merge m {:event %})))
@@ -205,73 +207,75 @@
        (if (= row-heading :hidden) columns (into [nil nil] columns))
        (if (= row-heading :hidden) column-widths (into [20 0] column-widths ))
        hide-column]
-      (into [:tbody]
-            (->> rows
-                 (map-indexed (fn [n row]
-                                (let [row-index (u/row-num (:cell-ref (first row)))]
-                                  (into [:tr {:key (str "Row:" row-index)}
-                                         ;; Row-heading
-                                         (when-not (= row-heading :hidden)
-                                           (case row-heading
-                                             :numeric [:td.Index {:class (if (> n 99) "Smaller" "")} (inc n)]
-                                             :select  [:td.Select [:input {:type :checkbox}]]
-                                             [:td]))
-                                         ;; Add space between row-heading and body-content
-                                         (when-not (= row-heading :hidden)
-                                           [:td.Spacer {:style {:border-top 0 :border-bottom 0}}])]
-                                        ;; Rows
-                                        (->> row
-                                             (map-indexed (fn [x {:keys [cell-ref value align fill]}]
-                                                            (when (false? (nth hide-column x))
-                                                              (let [k (merge
-                                                                       {:key             cell-ref
-                                                                        :style           (merge {}
-                                                                                                (when ((complement nil?) align) {:text-align align})
-                                                                                                (when ((complement nil?) fill) {:background fill}))
-                                                                        :on-double-click (on-double-click-local {:editable (and editable? (not (nth locked x)))
-                                                                                                                 :cell-ref cell-ref})
-                                                                        :class           (u/names->str [(when editable? :Editable)
-                                                                                                        (when (and (> (count locked) x)
-                                                                                                                   (nth locked x)) :Locked)])}
-                                                                       (when editable? {:title cell-ref}))]
-                                                                (cond
-                                                                  (number? value) [:td.Cell.number k [:span (number-formatter value)]]
-                                                                  (inst? value)   [:td.Cell.date k [:span (inst-formatter value)]]
-                                                                  (vector? value) [:td.Cell.custom k value]
-                                                                  (fn? value)     [:td.Cell.custom k (value {:row      row
-                                                                                                             :editable (and editable? (not (nth locked x)))
-                                                                                                             :cell-ref cell-ref})]
-                                                                  :else           [:td.Cell.string k
-                                                                                   (if (str/starts-with? value "http")
-                                                                                     [:a {:href value} value]
-                                                                                     [:span value])]))))))))))))]]))
+      (if (empty? rows)
+        [:tbody.empty [:tr [:td empty-message]]]
+        (into [:tbody]
+              (->> rows
+                   (map-indexed (fn [n row]
+                                  (let [row-index (u/row-num (:cell-ref (first row)))]
+                                    (into [:tr {:key (str "Row:" row-index)}
+                                           ;; Row-heading
+                                           (when-not (= row-heading :hidden)
+                                             (case row-heading
+                                               :numeric [:td.Index {:class (if (> n 99) "Smaller" "")} (inc n)]
+                                               :select  [:td.Select [:input {:type :checkbox}]]
+                                               [:td]))
+                                           ;; Add space between row-heading and body-content
+                                           (when-not (= row-heading :hidden)
+                                             [:td.Spacer {:style {:border-top 0 :border-bottom 0}}])]
+                                          ;; Rows
+                                          (->> row
+                                               (map-indexed (fn [x {:keys [cell-ref value align fill]}]
+                                                              (when (false? (nth hide-column x))
+                                                                (let [k (merge
+                                                                         {:key             cell-ref
+                                                                          :style           (merge {}
+                                                                                                  (when ((complement nil?) align) {:text-align align})
+                                                                                                  (when ((complement nil?) fill) {:background fill}))
+                                                                          :on-double-click (on-double-click-local {:editable (and editable? (not (nth locked x)))
+                                                                                                                   :cell-ref cell-ref})
+                                                                          :class           (u/names->str [(when editable? :Editable)
+                                                                                                          (when (and (> (count locked) x)
+                                                                                                                     (nth locked x)) :Locked)])}
+                                                                         (when editable? {:title cell-ref}))]
+                                                                  (cond
+                                                                    (number? value) [:td.Cell.number k [:span (number-formatter value)]]
+                                                                    (inst? value)   [:td.Cell.date k [:span (inst-formatter value)]]
+                                                                    (vector? value) [:td.Cell.custom k value]
+                                                                    (fn? value)     [:td.Cell.custom k (value {:row      row
+                                                                                                               :editable (and editable? (not (nth locked x)))
+                                                                                                               :cell-ref cell-ref})]
+                                                                    :else           [:td.Cell.string k
+                                                                                     (when-not (nil? value)
+                                                                                       (if (str/starts-with? value "http")
+                                                                                         [:a {:href value} value]
+                                                                                         [:span value]))])))))))))))))]]))
 
 
 (defn sheet
-  [{:keys [editable? caption?]
-    :or   {editable? false}
-    :as   params} data]
-  (let [!worksheet        (atom nil)
-        !mouse-down?      (atom false)
-        sheet-ref         (:name params)
-        initialized?      (subscribe [:initialized? sheet-ref])
-        set-worksheet-ref #(reset! !worksheet %)
-        set-mouse-down    #(reset! !mouse-down? true)
-        set-mouse-up      #(do (reset! !mouse-down? false)
-                               #?(:cljs (.map (->> ".Duplicate"
-                                                   (.querySelectorAll @!worksheet)
-                                                   (.call js/Array.prototype.slice))
-                                              (fn [el] (.remove (.-classList el) "Duplicate")))))]
+  [params data]
+  (let [sheet-ref  (:name params)
+        title-rows (subscribe [:title-rows sheet-ref])
+        ;; !worksheet        (atom nil)
+        ;; !mouse-down?      (atom false)
+        ;; set-worksheet-ref #(reset! !worksheet %)
+        ;; set-mouse-down    #(reset! !mouse-down? true)
+        ;; set-mouse-up      #(do (reset! !mouse-down? false)
+        ;;                        #?(:cljs (.map (->> ".Duplicate"
+        ;;                                            (.querySelectorAll @!worksheet)
+        ;;                                            (.call js/Array.prototype.slice))
+        ;;                                       (fn [el] (.remove (.-classList el) "Duplicate")))))
+        ]
+    (dispatch [:sheet sheet-ref data])
     (fn [{:keys [editable? caption?]
          :or   {editable? false}
          :as   params} data]
-      (dispatch [:initialize-sheet sheet-ref data])
-      (if @initialized?
-        [:div.Worksheet.fill {:ref           set-worksheet-ref
-                              :on-mouse-down set-mouse-down
-                              :on-mouse-up   set-mouse-up
-                              :class         (u/names->str (into [(when editable? :editable)
-                                                                  (when caption? :caption)] (:class params)))}
+      (when-not (empty? @title-rows)
+        [:div.Worksheet.fill { ;; :ref           set-worksheet-ref
+                              ;; :on-mouse-down set-mouse-down
+                              ;; :on-mouse-up   set-mouse-up
+                              :class (u/names->str (into [(when editable? :editable)
+                                                          (when caption? :caption)] (:class params)))}
          [:div.Table
           [headings sheet-ref params]
           [body sheet-ref params]]]))))

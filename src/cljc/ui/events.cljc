@@ -29,7 +29,13 @@
    re-frame/trim-v])
 
 
-(re-frame/reg-event-db :initialize-db (fn  [_ _] db/default-db))
+(re-frame/reg-event-fx
+ :initialize-db
+ (fn  [_ _]
+   {:dispatch-n (list [:init-sheet]
+                      [:init-icons]
+                      [:init-inputs])
+    :db db/default-db}))
 
 
 (re-frame/reg-event-db
@@ -43,10 +49,7 @@
  :set-active-doc-item
  [interceptors]
  (fn [{:keys [db]} [doc-item]]
-   {:dispatch-n (list (when (= doc-item :sheet) [:init-sheet])
-                      (when (= doc-item :icons) [:init-icons])
-                      (when (= doc-item :inputs) [:init-inputs])
-                      [:set-active-panel :doc-panel])
+   {:dispatch [:set-active-panel :doc-panel]
     :db (assoc db :active-doc-item doc-item)}))
 
 

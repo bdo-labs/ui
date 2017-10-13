@@ -27,8 +27,7 @@
            show-weekend? true}
     :as   params}]
   (let [!open?            (atom false)
-        on-internal-click #(do (util/log %)
-                               (when (fn? on-click) (on-click %)))]
+        on-internal-click #(when (fn? on-click) (on-click %))]
     (fn []
       [:div.Date-picker
        [container {:layout :vertically}

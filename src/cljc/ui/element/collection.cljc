@@ -131,7 +131,7 @@
 ;; TODO Scroll list upon navigating using keyboard
 ;; TODO Move keyboard-events out of the component
 ;; TODO Multiple selection using ctrl/shift
-;; TODO Allow hiccup-content in the item
+;; TODO Allow hiccup-content in the item?
 (defn collection
   [& args]
   (let [intended* ^{:doc "Items that are intermediately marked and for selection"} (atom nil)

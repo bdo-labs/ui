@@ -3,13 +3,6 @@
             [ui.util :as u]))
 
 
-(reg-sub :initialized?
-         (fn [[_ sheet-ref]]
-           (subscribe [:sheet sheet-ref]))
-         (fn [sheet _]
-           (get sheet :initialized? false)))
-
-
 (reg-sub :sheet
          (fn [db [_ sheet-ref]]
            (get db sheet-ref)))

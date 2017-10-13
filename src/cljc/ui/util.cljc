@@ -15,6 +15,13 @@
     in))
 
 
+(defn time-of [cycles f]
+  (->> f
+       (dotimes [_ cycles])
+       (time)
+       (with-out-str)))
+
+
 (defn extract
   "Extracts [key] from [db]"
   [db [key]]
@@ -111,7 +118,7 @@
 ;; TODO Figure out why the lazy version fails when used within a reagent-component
 (def col-refs
   [:A :B :C :D :E :F :G :H :I :J :L :M :N :O :P :Q :R :S :T :U :V :W :X :Y :Z]
-  ;; (let [alpha    (u/char-range \A \Z)
+  ;; (let [alpha    (range \A \Z)
   ;;       char-seq (fn [refs]
   ;;                  (let [fmt    (comp keyword str)
   ;;                        splice (fn [xs] (for [x xs y alpha] (fmt (name x) y)))]
@@ -120,18 +127,29 @@
 )
 
 
-(defn col-num [ref]
-  (let [col-ref (keyword (str/replace (str ref) #"[^A-Z]" ""))]
+(defn col-num [cell-ref]
+  (let [col-ref (keyword (str/replace (str cell-ref) #"[^A-Z]" ""))]
     (parse-int (.indexOf col-refs col-ref))))
 
 
-(defn row-num [ref]
-  (let [ref (if (keyword? ref) (name ref) (str ref))]
-    (dec (parse-int (str/replace ref #"[^0-9]" "")))))
+(defn row-num [cell-ref]
+  (let [cell-ref (if (keyword? cell-ref) (name cell-ref) (str cell-ref))]
+    (dec (parse-int (str/replace cell-ref #"[^0-9]" "")))))
 
 
-(defn col-ref [ref]
-  (keyword (str/replace (name ref) #"[^A-Z]*" "")))
+(defn col-ref [cell-ref]
+  (keyword (str/replace (name cell-ref) #"[^A-Z]*" "")))
+
+
+(defn ref->cell-ref [ref]
+  (let [cell (assoc ref :col (name (get col-refs (:col ref))))]
+    (keyword (str/join (vals cell)))))
+
+
+(defn cell-ref [ref f dir]
+  (let [cell {:col (col-num ref)
+              :row (inc (row-num ref))}]
+    (ref->cell-ref (update cell dir f))))
 
 
 ;; Note that this is just a small sub-set of available keys

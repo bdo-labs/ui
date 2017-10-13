@@ -25,31 +25,48 @@
 
 
 (re-frame/reg-sub ::collection util/extract)
+(re-frame/reg-sub ::title-row util/extract)
+(re-frame/reg-sub ::hide-column util/extract)
+
+
+(re-frame/reg-sub
+ ::content
+ :<- [::title-row]
+ :<- [::collection]
+ (fn [[title-row coll]]
+   (into [title-row] coll)))
 
 
 (re-frame/reg-event-fx
  :init-sheet
  (fn [{:keys [db]} [k]]
-   (let [rows   199
-         body   (mapv vec (map first (drop 49 (spec/exercise ::fixture 199))))
-         uniqs  (->> body
-                     (map first)
-                     (distinct)
-                     (map-indexed (fn [n text] {:id n :value text})))
-         coll   (->> body
-                     (map #(assoc-in % [0]
-                                     [chooser {:label      (first %)
-                                               :searchable true
-                                               :items      uniqs}])))]
-     {:db (assoc db ::collection coll)})))
+   (let [rows        199
+         body        (mapv vec (map first (drop 49 (spec/exercise ::fixture 199))))
+         title-row   ["Segment" "Units-Sold" "Manufacturing" "Sales-Price" "Date"]
+         hide-column (repeat (count title-row) false)
+         uniqs       (->> body
+                          (map first)
+                          (distinct)
+                          (map-indexed (fn [n text] {:id n :value text})))
+         coll        (->> body
+                          (map #(assoc-in % [0]
+                                          (fn [{:keys [cell-ref]}]
+                                            [chooser {:label      (first %)
+                                                      :on-select  (fn [event] (let [value (:value (first event))]
+                                                                               (re-frame/dispatch [:set-cell-val "Worksheet" cell-ref value])))
+                                                      :searchable true
+                                                      :items      uniqs}]))))]
+     {:db (-> db
+              (assoc ::title-row title-row)
+              (assoc ::collection coll)
+              (assoc ::hide-column hide-column))})))
 
 
 (defn documentation []
-  (let [title-row       ["Segment" "Units-Sold" "Manufacturing" "Sales-Price" "Date"]
-        coll            @(re-frame/subscribe [::collection])
-        content         (into [title-row] coll)]
+  (let [content      @(re-frame/subscribe [::content])
+        hide-columns @(re-frame/subscribe [::hide-column])]
     [layout/vertically
-     [element/sheet {:name "Worksheet"
-                     :hide-column (repeat (count title-row) false)}
+     [element/sheet {:name        "Worksheet"
+                     :hide-column hide-columns}
       content]]))
 

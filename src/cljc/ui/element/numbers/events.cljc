@@ -1,5 +1,6 @@
 (ns ui.element.numbers.events
   (:require [re-frame.core :refer [reg-event-db reg-event-fx]]
+            [#?(:clj clojure.core :cljs reagent.core) :refer [atom]]
             [clojure.spec :as spec]
             [ui.util :as u]
             [clojure.string :as str]
@@ -162,17 +163,13 @@
 
 
 ;; Handlers
-(defn initialize-sheet
-  [{:keys [db]} [_ sheet-ref d]]
-  {:db (if-let [data (util/conform-or-fail ::data d)]
-         (let [columns (->columns data)]
-           (assoc db sheet-ref {:columns      columns
-                                :initialized? true}))
-         (assoc db sheet-ref {:columns      []
-                              :initialized? false}))})
-
-
-(reg-event-fx :initialize-sheet initialize-sheet)
+(reg-event-fx
+ :sheet
+ (fn [{:keys [db]} [_ sheet-ref d]]
+   (if-let [data (util/conform-or-fail ::data d)]
+     {:db (let [columns (->columns data)]
+            (assoc db sheet-ref {:columns columns}))}
+     {:db (assoc db sheet-ref {:columns []})})))
 
 
 (reg-event-db :sort-ascending?
@@ -235,8 +232,6 @@
                                 #(if (contains? % val)
                                    (disj % val)
                                    (conj % val)))}))
-
-
 
 
 (reg-event-db :show-column-menu

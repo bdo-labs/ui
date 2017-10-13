@@ -168,13 +168,11 @@
          upper-knob      @(re-frame/subscribe [::upper-knob id])
          ;; Events
          set-active-knob #(re-frame/dispatch [::set-active-knob id %])
-         mouse-within    #(do
-                            (util/log active-knob)
-                            (when-not (nil? active-knob)
-                              (let [x (.-mousePercentX %)]
-                                (re-frame/dispatch [::move-knob id x])
-                                (on-change {:min lower-value
-                                            :max upper-value}))))
+         mouse-within    #(when-not (nil? active-knob)
+                            (let [x (.-mousePercentX %)]
+                              (re-frame/dispatch [::move-knob id x])
+                              (on-change {:min lower-value
+                                          :max upper-value})))
          mouse-up        #(re-frame/dispatch [::unset-active-knob id])
          mouse-down      (fn [knob] #(set-active-knob knob))]
      [:div.Clamp {:id  id
