@@ -43,6 +43,7 @@
                  [org.clojure/tools.nrepl "0.2.13" :scope "test"]
                  [org.martinklepsch/boot-garden "1.3.2-0" :scope "test"]
                  [pandeiro/boot-http "0.8.3" :scope "test"]
+                 [afrey/ring-html5-handler "1.1.1" :scope "test"]
                  [powerlaces/boot-cljs-devtools "0.2.0" :scope "test"]
                  [tolitius/boot-check "0.1.4" :scope "test"]
                  [weasel "0.7.0"  :scope "test"]])
@@ -91,9 +92,10 @@
   "Install pre-requisits"
   []
   (comp (npm :install {:postcss-cli  "latest"
-                       :autoprefixer "latest"}
-             :cache-key ::cache)
-        (target)))
+                    :autoprefixer "latest"}
+          :cache-key ::cache)
+     (target)
+     identity))
 
 (deftask readme
   "Generate a Clojure-common file from the README to be consumed
@@ -110,50 +112,47 @@
   requires that `postcss-cli` and `autoprefixer` is installed"
   []
   (comp (garden :output-to "css/ui.css"
-                :styles-var 'ui.styles/screen)
-        (garden :output-to "css/docs.css"
-                :styles-var 'ui.styles/docs)
-        (autoprefixer)))
+             :styles-var 'ui.styles/screen)
+     (garden :output-to "css/docs.css"
+             :styles-var 'ui.styles/docs)
+     #_(autoprefixer)
+     identity))
 
 (deftask dev
-  "Interactive development-build"
-  [s speak? bool "Audible notification when a build is completed"]
+  []
   (comp (pre-requisits)
-        (readme)
-        (serve)
-        (watch)
-        (if speak? (speak) identity)
-        (cljs-devtools)
-        (reload :on-jsload 'ui.core/mount-root)
-        (styles)
-        (asset-fingerprint :skip true)
-        (cljs-repl)
-        (cljs :ids #{"ui"}
-              :optimizations :none
-              :source-map true
-              :compiler-options {:parallel-build true
-                                 :closure-defines {"goog.DEBUG" true
-                                                   "clairvoyant.core.devmode" true}
-                                 :preloads       '[devtools.preload]})
-        (target)))
+     (readme)
+     (serve :handler 'afrey.ring-html5-handler/handler)
+     (watch)
+     (cljs-devtools)
+     (reload :on-jsload 'ui.core/mount-root)
+     (styles)
+     #_(asset-fingerprint :skip true)
+     (cljs-repl)
+     (cljs :ids #{"ui"}
+           :optimizations :none
+           :source-map true
+           :compiler-options {:parallel-build  true
+                              :closure-defines {"goog.DEBUG"               true
+                                                "clairvoyant.core.devmode" true}
+                              :preloads        '[devtools.preload]})
+     (target)))
 
 (deftask prod
-  "Static production-build"
-  [s speak? bool "Notify when the build is completed"]
+  []
   (comp (pre-requisits)
-        (readme)
-        (if speak? (speak) identity)
-        (styles)
-        (cljs :ids #{"ui"}
-              :optimizations :advanced
-              :compiler-options {:closure-defines    {"goog.DEBUG" false}
-                                 :pretty-print       false
-                                 :static-fns         true
-                                 :parallel-build     true
-                                 :optimize-constants true})
-        (asset-fingerprint :extensions [".css" ".html"]
-                           :asset-host "https://bdo-labs.github.com/ui/")
-        (target)))
+     (readme)
+     (styles)
+     (cljs :ids #{"ui"}
+           :optimizations :advanced
+           :compiler-options {:closure-defines    {"goog.DEBUG" false}
+                              :pretty-print       false
+                              :static-fns         true
+                              :parallel-build     true
+                              :optimize-constants true})
+     (asset-fingerprint :extensions [".css" ".html"]
+                        :asset-host "https://bdo-labs.github.com/ui/")
+     (target)))
 
 (deftask test-once
   "Run tests once. Typically used by the CI-runner"
