@@ -19,9 +19,6 @@
 (spec/def ::row-heading #{:alpha :numeric :select :hidden})
 (spec/def ::type #{:number :inst :string})
 
-(spec/def ::hide-column (spec/coll-of boolean?))
-(spec/def ::locked (spec/coll-of boolean?))
-
 (spec/def ::col-ref (spec/with-gen
                       (spec/and keyword? #(re-matches #"[A-Z]+" (name %)))
                       #(spec/gen #{:A :ZA :ABA :ACMK :FOO})))
@@ -30,6 +27,9 @@
 (spec/def ::cell-ref (spec/with-gen
                       (spec/and keyword? #(re-matches #"[A-Z]+[0-9]+" (str (name %))))
                       #(spec/gen #{:A1 :Z999 :AZ3 :BOBBY6 :ME2})))
+
+(spec/def ::hide-column (spec/coll-of ::col-ref :into #{}))
+(spec/def ::locked (spec/coll-of ::col-ref :into #{}))
 
 
 #_(spec/def ::rows (spec/map-of ::cell-ref any?))

@@ -450,8 +450,7 @@
     [:table {:border-collapse :separate
              :table-layout    :fixed
              :width           :inherit}]
-    [:.Titlecolumn {:background-color (u/gray 245)
-                    :text-align       :left}]
+    [:.Titlecolumn {:text-align :left}]
     [:&.Selectable
      [:tr
       [:&:hover

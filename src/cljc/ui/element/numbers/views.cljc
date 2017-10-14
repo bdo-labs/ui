@@ -1,5 +1,6 @@
 (ns ui.element.numbers.views
   (:require [#?(:clj clojure.core :cljs reagent.core) :refer [atom]]
+            [clojure.set :as set]
             [re-frame.core :refer [subscribe dispatch]]
             [ui.util :as u]
             [ui.element.numbers.events]
@@ -26,7 +27,7 @@
 
 (defn colgroup
   ""
-  [id columns column-widths hide-column]
+  [id columns column-widths hide-columns]
   (let [pad           (- (count columns)
                          (or (count column-widths) 0))
         column-widths (-> (mapv #(if (int? %) (+ % 20) :auto) column-widths)
@@ -34,7 +35,7 @@
     (into [:colgroup]
           (->> columns
                (map-indexed (fn [n column]
-                              (when (false? (nth hide-column n))
+                              (when-not (contains? hide-columns (:col-ref column))
                                 (let [width (nth column-widths n)
                                       ref   (if-not (nil? (:col-ref column)) (:col-ref column) n)]
                                   [:col {:key   (str id "-" ref)
@@ -111,22 +112,22 @@
 
 (defn headings
   "Headings include column-headings, caption and all of the title-rows"
-  [sheet-ref {:keys [caption? row-heading column-heading column-widths hide-column]
+  [sheet-ref {:keys [caption? row-heading column-heading column-widths hide-columns]
               :or   {column-heading :hidden
-                     row-heading    :hidden}}]
+                     row-heading    :hidden
+                     hide-columns   #{}}}]
   (let [col-refs           @(subscribe [:col-refs sheet-ref])
         columns            @(subscribe [:columns sheet-ref])
         title-rows         @(subscribe [:title-rows sheet-ref])
         sort-ascending?    @(subscribe [:sort-ascending? sheet-ref] {})
         sorted-column      @(subscribe [:sorted-column sheet-ref])
-        toggle-column-menu (fn [col-ref] #(dispatch [:show-column-menu sheet-ref col-ref]))
-        hide-column        (subvec (vec (flatten (conj (repeat (count columns) false) hide-column))) 0 (inc (count columns)))]
+        toggle-column-menu (fn [col-ref] #(dispatch [:show-column-menu sheet-ref col-ref]))]
     [:div.Headers
      [table
       [colgroup "headers"
        (if (= row-heading :hidden) columns (into [nil nil] columns))
        (if (= row-heading :hidden) column-widths (into [20 0] column-widths ))
-       hide-column]
+       hide-columns]
       [:thead
        ;; Column headings
        (when-not (= column-heading :hidden)
@@ -136,18 +137,16 @@
             (when-not (= row-heading :hidden) [:th {:key "Column-filler" :style {:border 0}}]))
           (when-not (= row-heading :hidden)
             [:th {:style {:border-top 0 :border-bottom 0}}])
-          (case column-heading
-            :numeric (map #(do [:th.Index.Column-heading
-                                {:key (str "Column-index" %)}
-                                [:button.Dropdown-origin {:on-click (toggle-column-menu %)} "›"]
-                                [column-menu sheet-ref %]
-                                ]) col-refs)
-            :alpha   (map #(do [:th.Alpha.Column-heading
-                                {:key (str "Column-alpha" %)}
-                                %
-                                [:button.Dropdown-origin {:on-click (toggle-column-menu %)} "›"]
-                                [column-menu sheet-ref %]
-                                ]) col-refs))])
+          (->> col-refs
+               (map #(when-not (contains? hide-columns (util/col-ref %))
+                       [:th.Column-heading
+                        {:key   (str "Column-" (name column-heading) %)
+                         :class (name column-heading)}
+                        (case column-heading
+                          :numeric (util/col-num %)
+                          :alpha   %)
+                        [:button.Dropdown-origin {:on-click (toggle-column-menu %)} "›"]
+                        [column-menu sheet-ref %]])))])
        ;; Caption
        ;; REVIEW Are there any valid reasons why we should use a real caption-element?
        (when (or caption?
@@ -159,7 +158,7 @@
           (when (and (not= column-heading :hidden)
                      (not= row-heading :hidden))
             [:th {:style {:border-left 0 :border-right 0 :border-bottom 0}}])
-          [:th {:col-span (count columns) :style {:border-left 0 :border-right 0}}
+          [:th {:col-span (- (count columns) (count hide-columns)) :style {:border-left 0 :border-right 0}}
            (when caption?
              [:h2.Caption (str sheet-ref)])]])
        ;; Title-rows
@@ -175,7 +174,7 @@
                       (when-not (= row-heading :hidden)
                         [:th {:style {:border-top 0 :border-bottom 0}}])
                       (map-indexed (fn [n title]
-                                     (when (false? (nth hide-column n))
+                                     (when-not (contains? hide-columns (util/col-ref (:cell-ref title)))
                                        [:th.Titlecolumn {:key (str "Title-" n)}
                                         [:span (:value title)]
                                         (when (= sorted-column (u/col-ref (:cell-ref title)))
@@ -190,23 +189,23 @@
 
 
 (defn body
-  [sheet-ref {:keys [editable? row-heading column-widths number-formatter inst-formatter locked on-double-click hide-column empty-message]
+  [sheet-ref {:keys [editable? row-heading column-widths number-formatter inst-formatter on-double-click empty-message hide-columns lock-columns]
               :or   {column-widths    []
                      row-heading      :hidden
                      number-formatter u/format-number-en
                      inst-formatter   u/format-inst
-                     empty-message    " "}}]
+                     empty-message    " "
+                     hide-columns #{}
+                     lock-columns #{}}}]
   (let [columns               @(subscribe [:columns sheet-ref])
         rows                  @(subscribe [:rows sheet-ref])
-        on-double-click-local (fn [m] #(on-double-click (merge m {:event %})))
-        hide-column           (subvec (vec (flatten (conj (repeat (count columns) false) hide-column))) 0 (inc (count columns)))
-        locked                (subvec (vec (flatten (conj (repeat (count columns) false) locked))) 0 (inc (count columns)))]
+        on-double-click-local (fn [m] #(on-double-click (merge m {:event %})))]
     [:div.Body
      [table
       [colgroup "headers"
        (if (= row-heading :hidden) columns (into [nil nil] columns))
        (if (= row-heading :hidden) column-widths (into [20 0] column-widths ))
-       hide-column]
+       hide-columns]
       (if (empty? rows)
         [:tbody.empty [:tr [:td empty-message]]]
         (into [:tbody]
@@ -217,35 +216,35 @@
                                            ;; Row-heading
                                            (when-not (= row-heading :hidden)
                                              (case row-heading
-                                               :numeric [:td.Index {:class (if (> n 99) "Smaller" "")} (inc n)]
-                                               :select  [:td.Select [:input {:type :checkbox}]]
+                                               :numeric [:td.index {:class (if (>= (inc n) 100) "smaller" "")} (inc n)]
+                                               :select  [:td.select [:input {:type :checkbox}]]
                                                [:td]))
                                            ;; Add space between row-heading and body-content
                                            (when-not (= row-heading :hidden)
-                                             [:td.Spacer {:style {:border-top 0 :border-bottom 0}}])]
+                                             [:td.spacer {:style {:border-top 0 :border-bottom 0}}])]
                                           ;; Rows
                                           (->> row
-                                               (map-indexed (fn [x {:keys [cell-ref value align fill]}]
-                                                              (when (false? (nth hide-column x))
+                                               (map-indexed (fn [x {:keys [cell-ref value align fill] :as c}]
+                                                              (when-not (contains? hide-columns (util/col-ref cell-ref))
                                                                 (let [k (merge
                                                                          {:key             cell-ref
                                                                           :style           (merge {}
                                                                                                   (when ((complement nil?) align) {:text-align align})
                                                                                                   (when ((complement nil?) fill) {:background fill}))
-                                                                          :on-double-click (on-double-click-local {:editable (and editable? (not (nth locked x)))
+                                                                          :on-double-click (on-double-click-local {:editable (and editable? (not (contains? lock-columns (util/col-ref cell-ref))))
                                                                                                                    :cell-ref cell-ref})
                                                                           :class           (u/names->str [(when editable? :Editable)
-                                                                                                          (when (and (> (count locked) x)
-                                                                                                                     (nth locked x)) :Locked)])}
+                                                                                                          #_(when (and (> (count lock-columns) x)
+                                                                                                                     (nth lock-columns x)) :Lock-Columns)])}
                                                                          (when editable? {:title cell-ref}))]
                                                                   (cond
-                                                                    (number? value) [:td.Cell.number k [:span (number-formatter value)]]
-                                                                    (inst? value)   [:td.Cell.date k [:span (inst-formatter value)]]
-                                                                    (vector? value) [:td.Cell.custom k value]
-                                                                    (fn? value)     [:td.Cell.custom k (value {:row      row
-                                                                                                               :editable (and editable? (not (nth locked x)))
+                                                                    (number? value) [:td.cell.number k [:span (number-formatter value)]]
+                                                                    (inst? value)   [:td.cell.date k [:span (inst-formatter value)]]
+                                                                    (vector? value) [:td.cell.custom k value]
+                                                                    (fn? value)     [:td.cell.custom k (value {:row      row
+                                                                                                               :editable (and editable? (not (contains? lock-columns (util/col-ref cell-ref))))
                                                                                                                :cell-ref cell-ref})]
-                                                                    :else           [:td.Cell.string k
+                                                                    :else           [:td.cell.string k
                                                                                      (when-not (nil? value)
                                                                                        (if (str/starts-with? value "http")
                                                                                          [:a {:href value} value]
@@ -255,26 +254,13 @@
 (defn sheet
   [params data]
   (let [sheet-ref  (:name params)
-        title-rows (subscribe [:title-rows sheet-ref])
-        ;; !worksheet        (atom nil)
-        ;; !mouse-down?      (atom false)
-        ;; set-worksheet-ref #(reset! !worksheet %)
-        ;; set-mouse-down    #(reset! !mouse-down? true)
-        ;; set-mouse-up      #(do (reset! !mouse-down? false)
-        ;;                        #?(:cljs (.map (->> ".Duplicate"
-        ;;                                            (.querySelectorAll @!worksheet)
-        ;;                                            (.call js/Array.prototype.slice))
-        ;;                                       (fn [el] (.remove (.-classList el) "Duplicate")))))
-        ]
+        title-rows (subscribe [:title-rows sheet-ref])]
     (dispatch [:sheet sheet-ref data])
     (fn [{:keys [editable? caption?]
          :or   {editable? false}
          :as   params} data]
       (when-not (empty? @title-rows)
-        [:div.Worksheet.fill { ;; :ref           set-worksheet-ref
-                              ;; :on-mouse-down set-mouse-down
-                              ;; :on-mouse-up   set-mouse-up
-                              :class (u/names->str (into [(when editable? :editable)
+        [:div.Worksheet.fill {:class (u/names->str (into [(when editable? :editable)
                                                           (when caption? :caption)] (:class params)))}
          [:div.Table
           [headings sheet-ref params]
