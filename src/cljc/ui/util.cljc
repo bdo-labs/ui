@@ -1,10 +1,11 @@
 (ns ui.util
   (:require #?(:cljs [cljs.core :refer [random-uuid]])
             [clojure.string :as str]
-            [clojure.spec :as spec]
+            [clojure.spec.alpha :as spec]
             [markdown.core :as markdown]
             [tongue.core :as tongue]
-            [garden.color :as color]))
+            [garden.color :as color]
+            [ui.spec-helper :as h]))
 
 
 (defn log
@@ -76,16 +77,26 @@
     (exception (spec/explain-str spec args))))
 
 
+(def ^:private +slug-tr-map+
+  (zipmap "ąàáäâãåæăćčĉęèéëêĝĥìíïîĵłľńňòóöőôõðøśșšŝťțŭùúüűûñÿýçżźž"
+          "aaaaaaaaaccceeeeeghiiiijllnnoooooooossssttuuuuuunyyczzz"))
+
+(defn lower
+  "Converts string to all lower-case.
+  This function works in strictly locale independent way,
+  if you want a localized version, just use `locale-lower`"
+  [s]
+  (when (string? s)
+    (.toLowerCase #?(:clj ^String s :cljs s))))
+
+
 (defn slug
-  "Removes characters that are not URL-compliant"
+  "Transform text into a URL slug"
   [& s]
-  (-> (str/join " " s)
-      (str/lower-case)
-      (str/replace #" " "-")
-      (str/replace #"[^a-zA-Z-]" "")
-      (str/replace #"\-{2,}" "-")
-      (str/replace #"^-" "")
-      (str/replace #"-$" "")))
+  (some-> (lower (str/join " " (flatten s)))
+          (str/escape +slug-tr-map+)
+          (str/replace #"[^\w\s]+" "")
+          (str/replace #"\s+" "-")))
 
 
 (defn md->html
@@ -134,7 +145,7 @@
 
 (defn row-num [cell-ref]
   (let [cell-ref (if (keyword? cell-ref) (name cell-ref) (str cell-ref))]
-    (dec (parse-int (str/replace cell-ref #"[^0-9]" "")))))
+    (parse-int (str/replace cell-ref #"[^0-9]" ""))))
 
 
 (defn col-ref [cell-ref]
@@ -166,6 +177,7 @@
           38 "up"
           39 "right"
           40 "down"
+          46 "delete"
           91 "cmd"}
          ;; A - Z
          (let [alphacodes (range 65 (inc 90))]
@@ -208,8 +220,9 @@
 
 
 (defn keys-from-spec [s]
-  (->> (spec/form s)
+  (->> (h/extract-spec-keys s)
        (filter vector?)
+       (merge)
        (flatten)
        (mapv (comp keyword name))))
 
@@ -252,3 +265,12 @@
                  (js/clearTimeout @timeout*)
                  (reset! timeout* (js/setTimeout (partial f event) delay))))
              f)))
+
+
+(defn js->cljs [obj]
+  #?(:clj obj
+     :cljs
+     (-> obj
+         (js/JSON.stringify)
+         (js/JSON.parse)
+         (js->clj :keywordize-keys true))))

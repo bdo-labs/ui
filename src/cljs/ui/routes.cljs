@@ -22,7 +22,7 @@
 
 
 (defn init []
-  (secretary/set-config! :prefix "#")
+  ;; (secretary/set-config! :prefix "#")
   (re-frame/dispatch-sync [:initialize-db])
   (re-frame/clear-subscription-cache!)
   (accountant/configure-navigation!

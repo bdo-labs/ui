@@ -7,14 +7,13 @@
 (defcssfn translateZ)
 
 
-(defn style
-  [{:keys [primary]}]
+(defn style [{:keys [primary]}]
   [[:.Progress-bar {:position :fixed
                     :top      0
                     :left     0
                     :width    (unit/percent 100)
                     :height   (unit/rem 0.25)
-                    :z-index  100}
+                    :z-index  200}
     [:.Progress {:background primary
                  :height     (unit/percent 100)
                  :transition [[:200ms :ease]]

@@ -1,7 +1,8 @@
 (ns ui.element.content
   (:require [ui.util :as u]
             [clojure.string :as str]
-            [clojure.spec :as spec]))
+            [clojure.spec.alpha :as spec]
+            [ui.element.containers :refer [container]]))
 
 
 ;; TODO add parameters
@@ -46,9 +47,13 @@
 (defn article
   [& args]
   (let [{:keys [params content]} (u/conform-or-fail ::article args)]
-    (into [:article (merge {:role :article} params)]
-          (->> (map last content)
-               (map section)))))
+    [container {:rounded?   true
+                :raised?    true
+                :background :white
+                :style {:margin "2em"}}
+     (into [:article (merge {:role :article} params)]
+           (->> (map last content)
+                (map section)))]))
 
 
 (defn vr [] [:div.Vertical-rule])

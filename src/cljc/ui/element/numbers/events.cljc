@@ -1,7 +1,7 @@
 (ns ui.element.numbers.events
   (:require [re-frame.core :refer [reg-event-db reg-event-fx]]
             [#?(:clj clojure.core :cljs reagent.core) :refer [atom]]
-            [clojure.spec :as spec]
+            [clojure.spec.alpha :as spec]
             [ui.util :as u]
             [clojure.string :as str]
             [ui.util :as util]))
@@ -13,8 +13,10 @@
 (spec/def ::name (spec/and string? not-empty))
 (spec/def ::title (spec/and string?
                             #(not (str/starts-with? % "http"))
+                            #(not (str/starts-with? % "="))
                             #(nil? (re-matches numbers-only %))))
 (spec/def ::titles (spec/coll-of ::title))
+(spec/def ::title-row? boolean)
 (spec/def ::column-heading #{:alpha :numeric :hidden})
 (spec/def ::row-heading #{:alpha :numeric :select :hidden})
 (spec/def ::type #{:number :inst :string})
@@ -46,24 +48,30 @@
 (spec/def ::sortable? boolean?)
 (spec/def ::filterable? boolean?)
 (spec/def ::freeze? boolean?)
+(spec/def ::hidden boolean?)
 
 
 (spec/def ::inst-formatter fn?)
 (spec/def ::number-formatter fn?)
 
 
+(spec/def ::value (spec/and any? #(not (map? %))))
+(spec/def ::values (spec/coll-of ::value))
+
+
 (spec/def ::csv
   (spec/and (spec/coll-of vector?)
             (spec/cat :title-rows (spec/* ::titles)
-                      :rows (spec/* any?))))
+                      :rows (spec/* ::values))))
 
 
 (spec/def ::csv-no-title
   (spec/and (spec/coll-of vector?)
-            (spec/cat :rows (spec/* any?))))
+            (spec/cat :rows (spec/* ::values))))
 
 
-(spec/def ::unq-column (spec/map-of #{:rows} any?))
+(spec/def ::unq-column
+  (spec/coll-of map?))
 (spec/def ::unq-columns (spec/coll-of ::unq-column))
 
 
@@ -88,7 +96,8 @@
              :opt-un [::column-heading
                       ::row-heading
                       ::editable?
-                      ::caption?]))
+                      ::caption?
+                      ::hidden]))
 
 
 (spec/def ::args (spec/cat :params ::params :content ::data))
@@ -131,15 +140,16 @@
 (defn data->columns
   "Transform the [data] passed in; to manageable columns"
   [data]
-  (->> (apply map list data)
-       (map-indexed
-        (fn [n col]
-          (let [col-ref (u/col-refs n)
-                col     (vec (map-indexed #(merge {:cell-ref (cell-ref col-ref (inc %1))} %2) col))]
-            (infer-column {:col-ref col-ref
-                           :filters {}
-                           :rows    col}))))
-       (vec)))
+  (let [res (->> (apply map list data)
+               (map-indexed
+                (fn [n col]
+                  (let [col-ref (u/col-refs n)
+                        col     (vec (map-indexed #(merge {:cell-ref (cell-ref col-ref (inc %1))} %2) col))]
+                    (infer-column {:col-ref col-ref
+                                   :filters {}
+                                   :rows    col}))))
+               (vec))]
+    res))
 
 
 (defn csv-no-title->columns
@@ -202,11 +212,31 @@
                     {:dispatch [:add-filter sheet-ref col-ref filter-name filter-fn]}))))
 
 
-(reg-event-fx :filter-eq
-              (fn handle-filter-eq [{:keys [db]} [k sheet-ref col-ref s]]
-                (let [k (keyword (u/slug (name k) " " s))
-                      f (partial = s)]
-                  {:dispatch [:toggle-filter sheet-ref col-ref k f]})))
+(reg-event-fx
+ :filter-eq
+ (fn handle-filter-eq [{:keys [db]} [k sheet-ref col-ref s]]
+   (let [k (keyword (u/slug (name k) " " s))
+         f (partial = s)]
+     {:dispatch [:toggle-filter sheet-ref col-ref k f]})))
+
+
+
+(defn smart-case-includes? [substr s]
+  (if-not (empty? (re-find #"[A-Z]" substr))
+    (str/includes? s substr)
+    (when-not (empty? s)
+     (str/includes? (str/lower-case s) (str/lower-case substr)))))
+
+
+
+(reg-event-fx
+ :filter-smart-case
+ (fn handle-filter-smart-case [{:keys [db]} [k sheet-ref col-ref s]]
+   (let [k (keyword (u/slug (name k) " smart-case" ))
+         f (partial smart-case-includes? s)]
+     {:dispatch [:toggle-filter sheet-ref col-ref k f]})))
+
+
 
 
 (reg-event-fx :filter-range
@@ -265,5 +295,5 @@
               (fn handle-set-cell-val [db [_ sheet-ref cell-ref value]]
                 (assoc-in db [sheet-ref
                               :columns (u/col-num cell-ref)
-                              :rows (u/row-num cell-ref)
+                              :rows (dec (u/row-num cell-ref))
                               :value] value)))

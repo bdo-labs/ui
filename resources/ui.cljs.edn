@@ -1,3 +1,3 @@
-{:require     [ui.core]
- ;; :init-fns    [ui.core/init]
- }
+{:require          [ui.core]
+ :init-fns         [ui.core/init!]
+ :compiler-options {:parallel-build true}}

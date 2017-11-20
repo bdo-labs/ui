@@ -6,7 +6,7 @@
   "
   (:require [ui.elements :as element]
             #_[clojure.test.check.generators :as gen]
-            [clojure.spec :as spec]
+            [clojure.spec.alpha :as spec]
             [ui.util :as util]))
 
 (spec/def ::aligned (spec/or :x ::horizontal-alignment

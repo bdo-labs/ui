@@ -5,7 +5,7 @@
             [ui.element.button :refer [button]]
             [ui.element.icon :refer [icon]]
             [clojure.test.check.generators :as gen]
-            [clojure.spec :as spec]
+            [clojure.spec.alpha :as spec]
             [garden.units :as unit]
             [garden.color :as color]
             [ui.util :as u]))
@@ -26,13 +26,17 @@
     ;; [(selector/& (selector/not :.Open)) {:display :none}]
     [:&.show
      [:.Backdrop {:opacity   1
-                  :animation [[:fade :200ms :ease]]}]]
+                  :animation [[:fade :200ms :ease]]
+                  :z-index 99}]]
     [:.Content {:position  :absolute
                 :left      (unit/percent 50)
                 :top       (unit/percent 50)
-                :transform [[(translateY (unit/percent -50)) (translateX (unit/percent -50))]]}
+                :transform [[(translateY (unit/percent -50)) (translateX (unit/percent -50))]]
+                :z-index 101}
      [:.Container {:animation [[:fade-up :200ms :ease]]
-                   :position  :relative}]]]
+                   :position  :relative}
+      ;; TODO This hack should be corrected!
+      [:&.raised {:overflow :visible}]]]]
    [:.Close {:position :absolute
              :cursor :pointer
              :top 0

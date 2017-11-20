@@ -8,6 +8,8 @@
             [ui.element.button :refer [button]]
             [ui.element.menu :as menu]
             [ui.element.containers :refer [container]]
+            [ui.element.textfield :refer [textfield]]
+            [ui.element.checkbox :refer [checkbox]]
             [ui.element.clamp :refer [clamp]]
             [clojure.string :as str]
             [ui.util :as util]))
@@ -48,19 +50,24 @@
 (defn string-filter
   "Outputs a list of unique values of a column"
   [sheet-ref col-ref]
-  (let [filter-eq #(dispatch [:filter-eq sheet-ref col-ref (extract-value %)])
-        unique    @(subscribe [:unique-values sheet-ref col-ref])]
-    (->> unique
-         (map-indexed
-          (fn [n s]
-            [:div.Row {:key (str "uniq-" col-ref "-" n)}
-             [:input {:id        (str "filter-" col-ref "-" n)
-                      :key       (str "uniq-input-" col-ref "-" n)
-                      :type      :checkbox
-                      :value     s
-                      :on-change filter-eq}]
-             [:label {:key (str "uniq-label-" col-ref "-" n)
-                      :for (str "filter-" col-ref "-" n)} s]])))))
+  (let [filter-eq         #(dispatch [:filter-eq sheet-ref col-ref (extract-value %)])
+        filter-smart-case #(dispatch [:filter-smart-case sheet-ref col-ref (extract-value %)])
+        unique            @(subscribe [:unique-values sheet-ref col-ref])]
+    [:div
+     [textfield {:label     "Search"
+                 :on-change filter-smart-case}]
+     [:br]
+     (for [n (range (count unique))]
+       (let [s (nth unique n)]
+         [:div.Row {:key (str "uniq-" col-ref "-" n)}
+          [:input {:id        (str "filter-" col-ref "-" n)
+                   :key       (str "uniq-input-" col-ref "-" n)
+                   :type      :checkbox
+                   :value     s
+                   :on-change filter-eq}]
+          [:label {:key (str "uniq-label-" col-ref "-" n)
+                   :for (str "filter-" col-ref "-" n)} s]
+          ]))]))
 
 
 (defn date-filter
@@ -93,13 +100,15 @@
                  :gap?   false
                  :fill?  true}
       [button {:key      (str col-ref "-sort-asc")
-               :fill?    true
+               :fill    true
+               :class    "secondary"
                :on-click sort-ascending} "Sort Ascending"]
       [button {:key      (str col-ref "-sort-dsc")
-               :fill?    true
+               :fill    true
+               :class    "secondary"
                :on-click sort-descending} "Sort Descending"]
       [container {:layout :vertically
-                  :wrap? false
+                  :wrap?  false
                   :fill?  true
                   :gap?   false
                   :style  {:max-height "25em"
@@ -161,31 +170,32 @@
           [:th {:col-span (- (count columns) (count hide-columns)) :style {:border-left 0 :border-right 0}}
            (when caption?
              [:h2.Caption (str sheet-ref)])]])
-       ;; Title-rows
-       (->> title-rows
-            (map (fn [row]
-                   (let [row-num (u/row-num (:cell-ref (first row)))]
-                     [:tr.Titlerow {:key (str "Titlerow-" row-num)}
-                      (when-not (= row-heading :hidden)
-                        ;; TODO Move to stylesheet
-                        [:th.Index {:style (if (= column-heading :hidden)
-                                             {:border-top "1px solid rgb(230,230,230)"}
-                                             {})} row-num])
-                      (when-not (= row-heading :hidden)
-                        [:th {:style {:border-top 0 :border-bottom 0}}])
-                      (map-indexed (fn [n title]
-                                     (when-not (contains? hide-columns (util/col-ref (:cell-ref title)))
-                                       [:th.Titlecolumn {:key (str "Title-" n)}
-                                        [:span (:value title)]
-                                        (when (= sorted-column (u/col-ref (:cell-ref title)))
-                                          [:span.Arrow
-                                           (if sort-ascending? "↑" "↓")])
-                                        (when (and (= column-heading :hidden)
-                                                   (= row-num 0))
-                                          [:span
-                                           [:button.Dropdown-origin {:on-click (toggle-column-menu (u/col-ref (:cell-ref title)))} "›"]
-                                           [column-menu sheet-ref (u/col-ref (:cell-ref title))]
-                                           ])])) row)]))))]]]))
+       (when-not (empty? title-rows)
+         ;; Title-rows
+         (->> title-rows
+              (map (fn [row]
+                     (let [row-num (u/row-num (:cell-ref (first row)))]
+                       [:tr.Titlerow {:key (str "Titlerow-" row-num)}
+                        (when-not (= row-heading :hidden)
+                          ;; TODO Move to stylesheet
+                          [:th.numeric {:style (if (= column-heading :hidden)
+                                                 {:border-top "1px solid rgb(230,230,230)"}
+                                                 {})} row-num])
+                        (when-not (= row-heading :hidden)
+                          [:th {:style {:border-top 0 :border-bottom 0}}])
+                        (map-indexed (fn [n title]
+                                       (let [n (inc n)]
+                                         (when-not (contains? hide-columns (util/col-ref (:cell-ref title)))
+                                           [:th.Titlecolumn {:key (str "Title-" n)}
+                                            [:span (:value title)]
+                                            (when (= sorted-column (u/col-ref (:cell-ref title)))
+                                              [:span.Arrow
+                                               (if sort-ascending? "↑" "↓")])
+                                            (when (and (= column-heading :hidden)
+                                                       (= row-num 1))
+                                              [:span
+                                               [:button.Dropdown-origin {:on-click (toggle-column-menu (u/col-ref (:cell-ref title)))} "›"]
+                                               [column-menu sheet-ref (u/col-ref (:cell-ref title))]])]))) row)])))))]]]))
 
 
 (defn body
@@ -211,12 +221,12 @@
         (into [:tbody]
               (->> rows
                    (map-indexed (fn [n row]
-                                  (let [row-index (u/row-num (:cell-ref (first row)))]
-                                    (into [:tr {:key (str "Row:" row-index)}
+                                  (let [row-num (u/row-num (:cell-ref (first row)))]
+                                    (into [:tr {:key (str "Row:" row-num)}
                                            ;; Row-heading
                                            (when-not (= row-heading :hidden)
                                              (case row-heading
-                                               :numeric [:td.index {:class (if (>= (inc n) 100) "smaller" "")} (inc n)]
+                                               :numeric [:td.numeric {:class (if (>= row-num 100) "smaller" "")} row-num]
                                                :select  [:td.select [:input {:type :checkbox}]]
                                                [:td]))
                                            ;; Add space between row-heading and body-content
@@ -226,14 +236,18 @@
                                           (->> row
                                                (map-indexed (fn [x {:keys [cell-ref value align fill] :as c}]
                                                               (when-not (contains? hide-columns (util/col-ref cell-ref))
-                                                                (let [k (merge
+                                                                (let [editable? (if (and (meta value)
+                                                                                         (not (nil? (:editable? (meta value)))))
+                                                                                  (:editable? (meta value))
+                                                                                  editable?)
+                                                                      k (merge
                                                                          {:key             cell-ref
                                                                           :style           (merge {}
                                                                                                   (when ((complement nil?) align) {:text-align align})
                                                                                                   (when ((complement nil?) fill) {:background fill}))
                                                                           :on-double-click (on-double-click-local {:editable (and editable? (not (contains? lock-columns (util/col-ref cell-ref))))
                                                                                                                    :cell-ref cell-ref})
-                                                                          :class           (u/names->str [(when editable? :Editable)
+                                                                          :class           (u/names->str [(if editable? :editable :not-editable)
                                                                                                           #_(when (and (> (count lock-columns) x)
                                                                                                                      (nth lock-columns x)) :Lock-Columns)])}
                                                                          (when editable? {:title cell-ref}))]
@@ -253,16 +267,20 @@
 
 (defn sheet
   [params data]
-  (let [sheet-ref  (:name params)
-        title-rows (subscribe [:title-rows sheet-ref])]
-    (dispatch [:sheet sheet-ref data])
-    (fn [{:keys [editable? caption?]
+  (let [sheet-ref (:name params)
+        rows      (subscribe [:rows sheet-ref])]
+    (fn [{:keys [editable? caption? hidden]
          :or   {editable? false}
          :as   params} data]
-      (when-not (empty? @title-rows)
-        [:div.Worksheet.fill {:class (u/names->str (into [(when editable? :editable)
-                                                          (when caption? :caption)] (:class params)))}
-         [:div.Table
-          [headings sheet-ref params]
-          [body sheet-ref params]]]))))
+      (dispatch [:sheet sheet-ref data])
+      (when (and (not hidden)
+                 (not (empty? @rows)))
+        (let [classes (u/names->str (into [(when editable? :editable)
+                                           (when caption? :caption)]
+                                          (:class params)))]
+          [:div.Worksheet.fill {:key   sheet-ref
+                                :class classes}
+           [:div.Table
+            [headings sheet-ref params]
+            [body sheet-ref params]]])))))
 

@@ -21,7 +21,7 @@
 
      Mess with the clamp to make some progress 🤓
      "
-     [element/clamp {:id "progress-clamp"
+     #_[element/clamp {:id "progress-clamp"
                      :labels? false
                      :range :lower
                      :on-change on-change} (range 101)]

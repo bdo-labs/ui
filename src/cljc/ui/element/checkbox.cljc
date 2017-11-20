@@ -1,7 +1,7 @@
 (ns ui.element.checkbox
   #?(:cljs (:require-macros [garden.def :refer [defcssfn]]))
   (:require [ui.util :as u]
-            [clojure.spec :as spec]
+            [clojure.spec.alpha :as spec]
             #?(:clj [garden.def :refer [defcssfn]])
             [garden.units :as unit]
             [garden.color :as color]))
@@ -26,6 +26,8 @@
    [:.Radio
     [:.Shape {:border-radius (unit/percent 50)}]]
    [:.toggle
+    [:&:hover
+     [:input {:border-color primary}]]
     [:.Shape {:width        (unit/rem 4)
               :margin-right (unit/rem 1)}]
     [:input {:border-radius (unit/rem 1.2)
@@ -60,14 +62,15 @@
                 :align-items :baseline
                 :user-select :none
                 :position    :relative}
+    [:&:hover
+     [:input {:border-color primary}]]
     [:.Shape {:margin-right (unit/rem 0.5)}]
     [:input {:position :relative}]
     [:i {:position         :absolute
          :left             (unit/percent 50)
-         ;; :top              (unit/rem -0.3)
          :font-size        (unit/rem 2.5)
          :transform-origin [[:center :center]]
-         :transform        [[(scale 0) (translateX (unit/percent -50)) (translateY (unit/percent -15))]]
+         :transform        [[(scale 0) (translateX (unit/percent -50)) (translateY (unit/percent -25))]]
          :transition       [[:100ms :ease]]
          :z-index          2}]
     [:&.indeterminate
@@ -76,7 +79,7 @@
      [:input {:background   primary
               :border-color (color/darken primary 10)}]]
     [:&.checked
-     [:i {:transform [[(scale 1) (translateX (unit/percent -50)) (translateY (unit/percent -15))]]}]
+     [:i {:transform [[(scale 1) (translateX (unit/percent -50)) (translateY (unit/percent -25))]]}]
      [:input {:background   primary
               :border-color (color/darken primary 10)}]]
     [:input {:-webkit-appearance :none
@@ -84,7 +87,7 @@
              :border             [[:solid (unit/px 1) :silver]]
              :position           :relative
              :outline            :none
-             :transition         [[:100ms :ease]]
+             :transition         [[:200ms :ease]]
              :width              (unit/rem 1.5)
              :height             (unit/rem 1.5)
              :border-radius      (unit/rem 0.2)

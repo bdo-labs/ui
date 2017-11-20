@@ -10,14 +10,14 @@
             [ui.docs.vertically :as vertically]
             [ui.docs.buttons :as buttons]
             [ui.docs.icons :as icons]
-            [ui.docs.progress :as progress]
+            #_[ui.docs.progress :as progress]
             [ui.docs.colors :as colors]
             [ui.docs.dialog :as dialog]
             [ui.docs.dropdown :as dropdown]
             [ui.docs.inputs :as inputs]
-            #?(:cljs [ui.docs.boundary :as boundary])
             [ui.docs.date-picker :as date-picker]
-            [ui.docs.sheet :as sheet]))
+            [ui.docs.sheet :as sheet]
+            #?(:cljs [ui.docs.boundary :as boundary])))
 
 
 (defn- menu-item []
@@ -49,7 +49,7 @@
   [item-name]
   (case item-name
     ;; Virtuals
-    #_(:cljs :boundary [boundary/documentation])
+    :boundary #?(:clj [] :cljs [boundary/documentation])
 
     ;; Layouts
     :centered [centered/documentation]
@@ -65,7 +65,7 @@
     :dropdown [dropdown/documentation]
     :icons [icons/documentation]
     :inputs [inputs/documentation]
-    :progress [progress/documentation]
+    ;; :progress [progress/documentation]
     :sheet [sheet/documentation]
     ;; :sidebar [sidebar/documentation]
     [intro]))
@@ -74,15 +74,15 @@
 (defn- doc-panel
   []
   (let [active-item @(re-frame/subscribe [:active-doc-item])
-        #_(:cljs virtuals [:boundary])
+        virtuals #?(:clj [] :cljs [:boundary])
         layouts     [:centered :horizontally :vertically :fill]
-        elements    [:buttons :colors :date-picker :dialog :dropdown :icons :inputs :progress :sheet]]
+        elements    [:buttons :colors :date-picker :dialog :dropdown :icons :inputs :sheet]]
     [element/sidebar {:locked true}
      [layout/vertically {:role :navigation}
       [:menu [menu-item :ui]]
       (into [:menu [:h4 "layout/"]] (for [l layouts] [menu-item l])) [:br]
       (into [:menu [:h4 "elements/"]] (for [elem elements] [menu-item elem])) [:br]
-      #_(:cljs (into [:menu [:h4 "virtuals/"]] (for [v virtuals] [menu-item v])))
+      #?(:cljs (into [:menu [:h4 "virtuals/"]] (for [v virtuals] [menu-item v])))
       [:br]]
      [doc-item active-item]]))
 
@@ -92,18 +92,16 @@
   [layout/centered {:class "Marketing"
                     :fill? true
                     :style {:height "100vh"}}
-   [layout/centered {:raised? true
-                     :style   {:background :white}}
-    [element/article
-     "
+   [element/article
+    "
       # UI
       ### A Straight-Forward Library for Composing User-Interfaces
       "
-     [element/button {:class    "primary"
-                      :on-click #(re-frame/dispatch [:navigate :docs])
-                      :rounded? true} "Get Started"]
+    [element/button {:class    "primary"
+                     :on-click #(re-frame/dispatch [:navigate :docs])
+                     :rounded  true} "Get Started"]
 
-     "
+    "
 
 
       #### Why UI?
@@ -111,7 +109,7 @@
       - Self-aware elements for quick prototyping
       - Describe layouts naturally through verbs
       - Have a say!
-      "]]])
+      "]])
 
 
 (defn- not-found-panel []
@@ -128,9 +126,9 @@
 
 (defn main-panel []
   (let [active-panel @(re-frame/subscribe [:active-panel])
-        progress     @(re-frame/subscribe [:progress])
+        ;; progress     @(re-frame/subscribe [:progress])
         fragments    @(re-frame/subscribe [:fragments])]
     [:div {:style {:height "100vh"
                    :width  "100vw"}}
-     [element/progress-bar {:progress progress}]
+     #_[element/progress-bar {:progress progress}]
      [panels active-panel]]))

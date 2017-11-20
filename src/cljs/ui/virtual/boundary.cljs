@@ -1,61 +1,96 @@
 (ns ui.virtual.boundary
   (:require [garden.units :as unit]
+            [goog.events :as events]
+            [goog.events.EventType]
             [ui.util :as util]
             [clojure.test.check.generators :as gen]
-            [clojure.spec :as spec]
+            [clojure.spec.alpha :as spec]
             [reagent.core :as reagent]
             [re-frame.core :as re-frame]))
 
 
-(defn style []
-  [])
+;; Views ------------------------------------------------------------------
 
 
-(spec/def ::stub
-  (spec/with-gen fn?
-    (gen/return (constantly nil))))
+(defn boundary
+  "Create a virtual boundary around an element for more fine-grained events"
+  [& args]
+  (let [{:keys [params content]} (util/conform-or-fail ::args args)
+        {:keys [id
+                lift
+                offset]
+         :or   {offset [0]}}     params
+        offset                   (take 4 (cycle offset))
+        [top left bottom right]  offset
+        element*                 (clojure.core/atom nil)
+        content-params           (merge (second content)
+                                        {:ref #(reset! element* %)})]
+    (reagent/create-class
+     {:display-name           "boundary"
+      :component-did-mount    #(let [coord     (util/js->cljs (.getBoundingClientRect @element*))
+                                     adj-coord (-> coord
+                                                   (update-in [:top] - top)
+                                                   (update-in [:y] - top)
+                                                   (update-in [:height] + (+ top bottom))
+                                                   (update-in [:bottom] + bottom)
+                                                   (update-in [:left] - left)
+                                                   (update-in [:x] - left)
+                                                   (update-in [:width] + (+ left right))
+                                                   (update-in [:right] + right))]
+                                 (re-frame/dispatch [::register id])
+                                 (re-frame/dispatch [::update id adj-coord])
+                                 (when (true? lift)
+                                   (set! (.-position (.-style @element*)) "absolute")
+                                   (set! (.-left (.-style @element*)) (str (:left coord) "px"))
+                                   (set! (.-top (.-style @element*)) (str (:top coord) "px"))
+                                   ;; TODO Should we swap with this dummy upon changes to the viewport?
+                                   (when-let [dummy (.insertBefore @element* (.createElement js/document "div") nil)]
+                                     (set! (.-width (:width coord)))
+                                     (set! (.-height (:height coord)))
+                                     (.appendChild (.-body js/document) @element*))))
+      :component-did-update   #(let [coord (util/js->cljs (.getBoundingClientRect @element*))]
+                                 (re-frame/dispatch [::update id coord]))
+      :component-will-unmount #(re-frame/dispatch [::un-register id])
+      :reagent-render         #(assoc-in content [1] content-params)})))
+
+
+
+;; Specifications ---------------------------------------------------------
 
 
 (spec/def ::id (spec/and string? not-empty))
-(spec/def ::in-viewport ::stub)
-(spec/def ::on-mouse-enter ::stub)
-(spec/def ::on-mouse-leave ::stub)
-(spec/def ::on-mouse-inside ::stub)
-(spec/def ::on-click-inside ::stub)
-(spec/def ::on-mouse-outside ::stub)
-(spec/def ::on-click-outside ::stub)
 (spec/def ::offset (spec/coll-of int? :min-count 1 :max-count 4))
-(spec/def ::visible boolean?)
-
-
-(defn offset [v]
-  (take 4 (cycle v)))
-
-
-#_(spec/fdef :args (spec/cat :offset ::offset)
-           :ret (spec/coll-of int? :count 4)
-           :fn #(take 4 (cycle (-> % :args :offset))))
+(spec/def ::lift boolean?)
+(spec/def ::content vector?)
 
 
 (spec/def ::params
-  (spec/keys :opt-un [::id
-                      ::in-viewport
-                      ::on-mouse-enter
-                      ::on-mouse-leave
-                      ::on-mouse-inside
-                      ::on-click-inside
-                      ::on-mouse-outside
-                      ::on-click-outside
-                      ::offset
-                      ::visible]))
+  (spec/keys :req-un [::id]
+             :opt-un [::offset ::lift]))
 
 
-(spec/def ::content (spec/or :vec vector?
-                             :seq seq?))
+(spec/def ::args (spec/cat :params ::params :content ::content))
 
 
-(spec/def ::args (spec/cat :params ::params
-                           :content ::content))
+;; Events -----------------------------------------------------------------
+
+
+(re-frame/reg-event-db
+ ::set-mouse-position
+ (fn [db [_ pos]]
+   (assoc db ::mouse-position pos)))
+
+
+(re-frame/reg-event-db
+ ::set-mouse-click
+ (fn [db [_ click]]
+   (assoc db ::mouse-click click)))
+
+
+(re-frame/reg-event-db
+ ::set-viewport
+ (fn [db [_ coord]]
+   (assoc db ::viewport coord)))
 
 
 (re-frame/reg-event-db
@@ -74,75 +109,94 @@
    (update-in db [::boundaries] dissoc id)))
 
 
+;; Subscriptions ----------------------------------------------------------
+
+
 (re-frame/reg-sub ::boundaries util/extract)
+(re-frame/reg-sub ::mouse-position util/extract)
+(re-frame/reg-sub ::mouse-click util/extract)
+(re-frame/reg-sub ::viewport util/extract)
 
 
-(defn js->cljs [obj]
-   (js->clj obj :keywordize-keys true))
+(re-frame/reg-sub
+ ::mouse-inside
+ :<- [::boundaries]
+ :<- [::mouse-position]
+ (fn [[boundaries position] [_ id]]
+   (when (some-> (:x position)
+                 (:x boundaries))
+     (when-let [boundary (get boundaries id)]
+       (and (> (:x position) (:x boundary))
+            (< (:x position) (+ (:x boundary) (:width boundary)))
+            (> (:y position) (:y boundary))
+            (< (:y position) (+ (:y boundary) (:height boundary))))))))
 
 
-(defn init-boundaries
-  "Keeps hold of all boundaries, so we can spawn fewer DOM-events"
-  []
-  (let [boundaries @(re-frame/subscribe [::boundaries])]
-   (.addEventListener js/document)))
+(re-frame/reg-sub
+ ::click-outside
+ (fn [[_ id]]
+   [(re-frame/subscribe [::mouse-click])
+    (re-frame/subscribe [::mouse-inside id])])
+ (fn [[click inside] _]
+   (and click (not inside))))
 
 
-(defn boundary
-  "Create a virtual boundary around an element for more fine-grained events"
-  [& args]
-  (let [{:keys [params content]}   (util/conform-or-fail ::args args)
-        {:keys [id
-                in-viewport
-                on-mouse-enter
-                on-mouse-leave
-                on-mouse-inside
-                on-click-inside
-                on-mouse-outside
-                on-click-outside
-                offset
-                visible]
-         :or   {offset [0 0 0 0]}} params
-        !element                   (clojure.core/atom nil)
-        content-params             (merge (second content)
-                                          {:ref #(reset! !element %)})]
-    (reagent/create-class
-     {:display-name           "boundary"
-      :component-did-mount    #(re-frame/dispatch [::register id])
-      :component-did-update   #(let [coord (js->cljs (.getBoundingClientRect @!element))]
-                                 (re-frame/dispatch [::update id coord]))
-      :component-will-unmount #(re-frame/dispatch [::un-register id])
-      :reagent-render         #(assoc-in content [1] content-params)})))
+(re-frame/reg-sub
+ ::in-viewport
+ :<- [::boundaries]
+ :<- [::viewport]
+ (fn [[boundaries viewport] [_ id]]
+   (when-let [boundary (get boundaries id)]
+     (util/log boundary viewport)
+     (and (<= (:top boundary) (:height viewport))
+          (<= (:left boundary) (:width viewport))))))
 
 
-#_(defn boundary
-  [{:keys [on-mouse-within
-           on-mouse-up
-           on-mouse-leave
-           on-mouse-enter
-           visible?
-           offset]
-    :as   params} content]
-  (let [!element       (clojure.core/atom nil)
-        !within?       (atom true)
-        content-params (merge (second content)
-                              {:ref #(reset! !element %)})
-        mouse-up       #(on-mouse-up %)
-        mouse-enter    #(do (reset! !within? true)
-                            (when (fn? on-mouse-enter) (on-mouse-leave %)))
-        mouse-leave    #(do (reset! !within? false)
-                            (when (fn? on-mouse-leave) (on-mouse-leave %)))
-        mouse-move     #(when @!within?
-                          (let [dim         (.getBoundingClientRect @!element)
-                                mouse-x     (- (.-pageX %) (.-left dim))
-                                mouse-x-pct (* (/ mouse-x (.-width dim)) 100)]
-                            (set! (.-mouseX %) mouse-x)
-                            (set! (.-mousePercentX %) mouse-x-pct)
-                            (on-mouse-within %)))]
-    [:div.Boundary
-     (when visible? [:div.Made-visible])
-     [(assoc-in content [1] content-params)]
-     [:div.Events {:on-mouse-enter mouse-enter
-                   :on-mouse-up    mouse-up
-                   :on-mouse-move  mouse-move
-                   :on-mouse-leave mouse-leave}]]))
+;; Events -----------------------------------------------------------------
+
+
+(def event
+  {:mousemove   goog.events.EventType.MOUSEMOVE
+   :mousedown   goog.events.EventType.MOUSEDOWN
+   :mouseup     goog.events.EventType.MOUSEUP
+   :load        goog.events.EventType.LOAD
+   :scroll      goog.events.EventType.SCROLL
+   :resize      goog.events.EventType.RESIZE
+   :orientation goog.events.EventType.ORIENTATIONCHANGE})
+
+
+(defn listen [ks f]
+  (->> [ks]
+       (flatten)
+       (mapv #(events/listen js/window (-> event %) f))))
+
+
+(defn on-mouse-up []
+  (re-frame/dispatch [::set-mouse-click false]))
+
+
+(defn on-mouse-down []
+  (re-frame/dispatch [::set-mouse-click true]))
+
+
+(defn on-mouse-move [e]
+  (let [pos {:x (.-screenX e)
+             :y (.-screenY e)}]
+    (re-frame/dispatch [::set-mouse-position pos])))
+
+
+;; FIXME Needs to be container-aware and take scroll into account
+(defn on-viewport-change [e]
+  (let [width  (max (or (.-clientWidth (.-documentElement js/document))
+                        (.-innerWidth js/window)))
+        height (max (or (.-clientHeight (.-documentElement js/document))
+                        (.-innerHeight js/window)))
+        coord {:width width
+               :height height}]
+    (re-frame/dispatch [::set-viewport coord]))) 
+
+
+(listen :mouseup on-mouse-up)
+(listen :mousedown on-mouse-down)
+(listen :mousemove on-mouse-move)
+(listen [:load :resize :orientation] on-viewport-change)

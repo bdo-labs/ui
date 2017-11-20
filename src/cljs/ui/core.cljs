@@ -31,7 +31,7 @@
       (.addEventListener js/document "keyup" on-key-up))))
 
 
-(defn ^:export init []
+(defn ^:export init! []
   (dev-setup)
   (routes/init)
   (event-listeners)

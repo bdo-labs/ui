@@ -1,7 +1,7 @@
 (ns ui.element.clamp
   #?(:cljs (:require-macros [garden.def :refer [defcssfn]]))
-  (:require #?(:clj [garden.def :refer [defcssfn]])
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
+            #?(:clj [garden.def :refer [defcssfn]])
             [garden.units :as unit]
             [garden.color :as color]
             [re-frame.core :as re-frame]
@@ -183,11 +183,8 @@
                       :lower lower-value
                       (str lower-value " - " upper-value))])
       ;; Wrap the slider in a boundary that exposes a relative clientX-stream
-      #_[boundary {:on-mouse-within mouse-within
-                 :on-mouse-up     mouse-up
-                 :on-mouse-levave mouse-up
-                 :offset          {:top  (unit/rem 1)
-                                   :left (unit/rem 3)}}
+      #_[boundary {:offset          [(unit/rem 1)
+                                   (unit/rem 3)]}
        [:div.Slider {}
         (when-not (= (:range params) :lower)
           [:div.Knob {:on-mouse-down (mouse-down ::lower-knob)

@@ -1,6 +1,6 @@
 (ns ui.element.icon
   (:require #_[clojure.test.check.generators :as gen]
-            [clojure.spec :as spec]
+            [clojure.spec.alpha :as spec]
             [clojure.string :as str]
             [clojure.string :as str]
             [ui.util :as util]

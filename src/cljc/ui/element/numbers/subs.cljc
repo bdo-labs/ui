@@ -1,6 +1,7 @@
 (ns ui.element.numbers.subs
   (:require [re-frame.core :refer [reg-sub subscribe]]
-            [ui.util :as u]))
+            [ui.util :as u]
+            [ui.util :as util]))
 
 
 (reg-sub :sheet
@@ -153,3 +154,18 @@
          (fn [cells [_ sheet-ref cell-ref]]
            (let [index (.indexOf (keys cells) (keyword cell-ref))]
              (nth (vals cells) index))))
+
+
+(reg-sub
+ :range
+ (fn [[_ sheet-ref]]
+   (subscribe [:columns sheet-ref]))
+ (fn [cols [_ sheet-ref from-ref to-ref]]
+   (let [col-n  (util/col-num from-ref)
+         from-n (util/row-num from-ref)
+         to-n   (util/row-num to-ref)
+         rows   (->> (nth cols col-n)
+                     (:rows)
+                     (drop from-n)
+                     (take (inc to-n)))]
+     rows)))

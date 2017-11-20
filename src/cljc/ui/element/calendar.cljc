@@ -11,7 +11,7 @@
             [ui.util :as u]
             [ui.util :as util]
             [clojure.test.check.generators :as gen]
-            [clojure.spec :as spec]))
+            [clojure.spec.alpha :as spec]))
 
 
 ;; Specifications ---------------------------------------------------------
@@ -202,7 +202,7 @@
                    :gap?   false}
         (for [year years]
           [button {:key      (str "year-button-" year)
-                   :fill?    true
+                   :fill    true
                    :on-click #(on-click [(fmt/parse (fmt/formatter "yyyy-MM-dd") (str year "-01-01"))
                                          (time/last-day-of-the-month (fmt/parse (fmt/formatter "yyyy-MM-dd") (str year "-12-01")))])}
            (str year)])])]))
@@ -239,12 +239,12 @@
               (for [month months]
                 (let [val (fmt/unparse (fmt/formatter "MMMM") month)]
                   [button (merge {:key      (str "btn-" val)
-                                  :fill?    true
+                                  :fill    true
                                   :on-click #(on-click [(time/first-day-of-the-month month) (time/last-day-of-the-month month)])}
                                  (when (= (dt->str selected) (dt->str (time/first-day-of-the-month month))) {:class "primary"})) val]))
               (let [val (str (fmt/unparse (fmt/formatter "MMMM") (first months)) " - " (fmt/unparse (fmt/formatter "MMMM") (last months)))]
                 [button (merge {:key      (str "btn-" val)
-                                :fill?    true
+                                :fill    true
                                 :on-click #(on-click [(time/first-day-of-the-month (first months)) (time/last-day-of-the-month (last months))])}
                                (when (= (dt->str selected) (dt->str (time/first-day-of-the-month (first months)))) {:class "primary"})) val]))])]))))
 

@@ -1,7 +1,9 @@
 (ns ui.docs.buttons
   (:require [ui.elements :as element]
             [ui.layout :as layout]
-            [clojure.spec :as spec]))
+            [clojure.spec.alpha :as spec]
+            [clojure.pprint :as pprint]
+            [ui.util :as util]))
 
 (defn documentation []
   [element/article
@@ -10,23 +12,19 @@
 
    "
    [layout/horizontally
-    [element/button {:flat? true
-                     :fill? true} "Foo"]
-    [element/button {:class "primary"} [:span "Bar"]]
-    [element/button {:class "secondary" :rounded? true} "Baz"]
-    [element/button {:rounded? true :flat? true} "Qux"]
+    [element/button {:flat true
+                     :fill true} "Foo"]
+    [element/button {:class "primary"
+                     :ripple true} [:span "Bar"]]
+    [element/button {:class "secondary" :rounded true :disabled true} "Baz"]
+    [element/button {:rounded true :flat true} "Qux"]
     [element/button {:class "secondary"}
      [element/icon {:font "ion"} "ios-settings"]
      "Settings"]
-    [element/button {:flat?     true
-                     :circular? true
+    [element/button {:flat     true
+                     :circular true
                      :title     "Un-lock"}
-     [element/icon {:font "material-icons"} "fingerprint"]]]
-   (let [specs (apply hash-map (rest (spec/form :ui.element.button/params)))]
-     [:pre (pr-str (:req-un specs))]
-     [:pre (pr-str (zipmap (map name (:opt-un specs))
-                           (map (comp name spec/form)
-                                (:opt-un specs))))])
+     [element/icon {:font "material-icons"} "fingerprint"]]] 
    [:p
     [:em
      [:small

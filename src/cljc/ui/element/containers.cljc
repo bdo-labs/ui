@@ -1,5 +1,5 @@
 (ns ui.element.containers
-  (:require [clojure.spec :as spec]
+  (:require [clojure.spec.alpha :as spec]
             [clojure.string :as str]
             [garden.units :as unit]
             [garden.color :as color]
@@ -71,6 +71,7 @@
 (spec/def ::raised? boolean?)
 (spec/def ::rounded? boolean?)
 (spec/def ::wrap? boolean?)
+(spec/def ::scrollable? boolean?)
 (spec/def ::align (spec/coll-of ::alignment :min-count 1 :max-count 2))
 (spec/def ::alignment #{:start :end :center})
 (spec/def ::layout #{:horizontally :vertically})
@@ -84,7 +85,7 @@
 
 ;; Consolidated parameters
 (spec/def ::container-params
-  (spec/keys :opt-un [::compact? ::fill? ::gap? ::inline? ::raised? ::rounded? ::wrap?
+  (spec/keys :opt-un [::compact? ::fill? ::gap? ::inline? ::raised? ::rounded? ::wrap? ::scrollable?
                       ::layout ::background ::align ::space ::width]))
 
 ;; Full arguments specifications
@@ -94,21 +95,28 @@
 
 
 (defn container [& args]
-  (let [{:keys [params content]}         (util/conform-or-fail ::container-args args)
-        ui-params                        (util/keys-from-spec ::container-params)
-        params                           (merge {:gap?  true
-                                                 :wrap? true
-                                                 :align [:start :start]} params)
-        {:keys [style background width]} params
-        background                       (if-not (nil? background) {:background (last background)} {})
-        class                            (util/params->classes (dissoc params :width :background))
-        width                            (apply hash-map width)
-        style                            (merge style width background)]
-    (into [:div.Container
-           (merge {:class class}
-                  (apply dissoc params (conj ui-params :class))
-                  {:style style})]
-          (map last content))))
+  (let [{:keys [params content]}                              (util/conform-or-fail ::container-args args)
+        ui-params                                             (util/keys-from-spec ::container-params)
+        params                                                (merge {:gap?  true
+                                                                      :wrap? true
+                                                                      :align [:start :start]} params)
+        {:keys [style background width scrollable? rounded?]} params
+        background                                            (if-not (nil? background) {:background (last background)} {})
+        class                                                 (util/params->classes (dissoc params :width :background))
+        width                                                 (apply hash-map width)
+        style                                                 (merge style width background)]
+    (if (and scrollable? rounded?)
+      [:div.Container
+       (merge {:class class}
+              (apply dissoc params (conj ui-params :class))
+              {:style style})
+       (into [:div.Container.fill.no-gap]
+             (map last content))]
+      (into [:div.Container
+             (merge {:class class}
+                    (apply dissoc params (conj ui-params :class))
+                    {:style style})]
+            (map last content)))))
 
 
 (defn sidebar

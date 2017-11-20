@@ -1,29 +1,28 @@
 (ns ui.docs.boundary
-  (:require [ui.elements :as element]
+  (:require [reagent.core :refer [atom]]
+            [ui.elements :as element]
             [ui.virtuals :as virtual]
-            [ui.layout :as layout]))
+            [ui.layout :as layout]
+            [re-frame.core :as re-frame]))
 
 
 (defn documentation []
-  (let [!event (atom nil)]
-   [element/article
-    "### Boundary
+  (let [id            "button-boundary"
+        click-outside @(re-frame/subscribe [:ui.virtual.boundary/click-outside id])]
+    [element/article
+     "### Boundary
 
    Boundary as implied by it's name will find the boundary of it's
-   immidiate child, so that you can apply some utility-actions that
-   are not part of the regular DOM. The two most typical scenarios
-   that comes to mind is:
-   
-   1. Being able to close a dropdown-menu when you click outside of it  
-   2. Adding animation whenever the boundary is within the viewport  
-   
-   There are probably thousands of other ways to use these boundaries, 
-   that was just meant to spark some nerves! 
+   immidiate child. You can then use that boundary to apply interaction
+   that are not natively available in the DOM. Such as knowing when the
+   element is within the viewport or when your clicking on the outside
+   of it.
    "
-    [:pre (pr-str @!event)]
-    #_[element/boundary {:on-mouse-within #(reset! !event :on-mouse-within)
-                       :on-mouse-enter  #(reset! !event :on-mouse-enter)
-                       :on-mouse-leave  #(reset! !event :on-mouse-leave)
-                       :on-mouse-up     #(reset! !event :on-mouse-up)}
-     [element/button {:fill? true} "Move mouse-pointer here"]]]))
+     [:pre {:style {:background-color (if click-outside "red" "")}}
+      (pr-str click-outside)]
+     [virtual/boundary {:id     id
+                        :offset [10 -5]
+                        :lift   true}
+      [element/button {:class "primary"}
+       "Move mouse-pointer here"]]]))
 

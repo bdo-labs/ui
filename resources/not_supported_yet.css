@@ -45,9 +45,10 @@ in 2.0, but at-least our upgrade-path is way easier now.
 .Worksheet:not(.Caption) .Titlerow:first-child .Titlecolumn { border-top: solid 1px rgb(230,230,230); }
 
 
-/* Buttons */
-.Button[disabled] { opacity: 0.1; }
-
-
 .Dialog > .Content { z-index: 102; }
 .Dialog > .Content > .Container { z-index: 103; }
+
+
+.Label input:focus + label {
+    opacity: 1;
+}

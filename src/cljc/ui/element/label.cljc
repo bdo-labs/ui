@@ -1,25 +1,23 @@
 (ns ui.element.label
-  (:require [clojure.spec :as spec]))
+  (:require [clojure.spec.alpha :as spec]
+            [ui.util :as util]))
 
 
-(spec/def ::label-params
-  (spec/keys :req-un [::text]
+(spec/def ::params
+  (spec/keys :req-un [::value]
              :opt-un [::id ::on-key-down]))
 
 
-(spec/def ::label-args
-  (spec/cat :params ::label-params))
+(spec/def ::args
+  (spec/cat :params ::params))
 
 
 (defn label
-  [{:keys [id text on-key-down]}]
-  (let [uid (str "label-" id)]
-    (fn []
-      [:span.Label
-       [:input {:id uid :type :text :on-key-down on-key-down}]
-       [:label {:for uid} text]])))
+  [& args]
+  (let [{:keys [params]}               (util/conform-or-fail ::args args)
+        {:keys [id value on-key-down]} params
+        id                             (util/slug id value "label")]
+    [:span.Label {:key (util/gen-id)}
+     [:input {:id id :type :text :on-key-down on-key-down}]
+     [:label {:for id} value]]))
 
-
-(spec/fdef label
-        :args ::label-args
-        :ret vector?)

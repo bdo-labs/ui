@@ -1,10 +1,11 @@
 (ns ui.docs.inputs
   (:require [clojure.string :as str]
+            [#?(:clj clojure.core :cljs reagent.core) :refer [atom]]
             [re-frame.core :as re-frame]
             [ui.elements :as element]
             [ui.layout :as layout]
             [ui.util :as util]
-            [clojure.spec :as spec]))
+            [clojure.spec.alpha :as spec]))
 
 
 (def characters
@@ -102,13 +103,13 @@
 
 
 ;; Subscriptions
-(re-frame/reg-sub ::bacon? util/extract-or-false)
-(re-frame/reg-sub ::cheese? util/extract-or-false)
-(re-frame/reg-sub ::ketchup? util/extract-or-false)
-(re-frame/reg-sub ::email? util/extract-or-false)
+(re-frame/reg-sub ::bacon util/extract-or-false)
+(re-frame/reg-sub ::cheese util/extract-or-false)
+(re-frame/reg-sub ::ketchup util/extract-or-false)
+(re-frame/reg-sub ::email util/extract-or-false)
 (re-frame/reg-sub ::items-opened util/extract)
-(re-frame/reg-sub ::multiple? util/extract-or-false)
-(re-frame/reg-sub ::disabled? util/extract-or-false)
+(re-frame/reg-sub ::multiple util/extract-or-false)
+(re-frame/reg-sub ::disabled util/extract-or-false)
 (re-frame/reg-sub ::query util/extract)
 (re-frame/reg-sub ::items util/extract)
 
@@ -118,9 +119,10 @@
  :<- [::items]
  :<- [::query]
  (fn [[coll query] _]
-   (if-not (empty? query)
-     (filter (fn [item] (str/index-of item query)) coll)
-     coll)))
+   (let [items (if-not (empty? query)
+                 (filter (fn [item] (str/index-of item query)) coll)
+                 coll)]
+     items)))
 
 
 (re-frame/reg-sub
@@ -128,39 +130,40 @@
  :<- [::items]
  :<- [::query]
  (fn [[coll query] _]
-   (if-not (empty? query)
-     (filter (fn [item] (str/index-of item query)) coll)
-     coll)))
+   (let [items (if-not (empty? query)
+                  (filter (fn [item] (str/index-of item query)) coll)
+                  coll)]
+     items)))
 
 
 ;; Events
-(re-frame/reg-event-db ::toggle-bacon? util/toggle)
-(re-frame/reg-event-db ::toggle-cheese? util/toggle)
-(re-frame/reg-event-db ::toggle-ketchup? util/toggle)
-(re-frame/reg-event-db ::toggle-email? util/toggle)
-(re-frame/reg-event-db ::toggle-multiple? util/toggle)
-(re-frame/reg-event-db ::toggle-disabled? util/toggle)
+(re-frame/reg-event-db ::toggle-bacon util/toggle)
+(re-frame/reg-event-db ::toggle-cheese util/toggle)
+(re-frame/reg-event-db ::toggle-ketchup util/toggle)
+(re-frame/reg-event-db ::toggle-email util/toggle)
+(re-frame/reg-event-db ::toggle-multiple util/toggle)
+(re-frame/reg-event-db ::toggle-disabled util/toggle)
 
 
 (defn check-toggle []
-  (let [bacon?         @(re-frame/subscribe [::bacon?])
-        cheese?        @(re-frame/subscribe [::cheese?])
-        ketchup?       @(re-frame/subscribe [::ketchup?])
-        email?         @(re-frame/subscribe [::email?])
-        toggle-bacon   #(re-frame/dispatch [::toggle-bacon?])
-        toggle-cheese  #(re-frame/dispatch [::toggle-cheese?])
-        toggle-ketchup #(re-frame/dispatch [::toggle-ketchup?])
-        toggle-email   #(re-frame/dispatch [::toggle-email?])]
+  (let [bacon          @(re-frame/subscribe [::bacon])
+        cheese         @(re-frame/subscribe [::cheese])
+        ketchup        @(re-frame/subscribe [::ketchup])
+        email          @(re-frame/subscribe [::email])
+        toggle-bacon   #(re-frame/dispatch [::toggle-bacon])
+        toggle-cheese  #(re-frame/dispatch [::toggle-cheese])
+        toggle-ketchup #(re-frame/dispatch [::toggle-ketchup])
+        toggle-email   #(re-frame/dispatch [::toggle-email])]
     [layout/horizontally
      [layout/vertically
-      [element/checkbox {:checked   bacon?
+      [element/checkbox {:checked   bacon
                          :on-change toggle-bacon} "Bacon"]
-      [element/checkbox {:checked   cheese?
+      [element/checkbox {:checked   cheese
                          :on-change toggle-cheese} "Cheese"]
-      [element/checkbox {:checked   ketchup?
+      [element/checkbox {:checked   ketchup
                          :on-change toggle-ketchup} "Ketchup"]]
      [layout/vertically
-      [element/toggle {:checked   email?
+      [element/toggle {:checked   email
                        :on-change toggle-email} "Eat here?"]]]))
 
 
@@ -170,32 +173,37 @@
     (str/includes? (str/lower-case s) (str/lower-case substr))))
 
 
+(def selected* (atom #{}))
+
+
 (defn completion
   []
-  (let [multiple?          @(re-frame/subscribe [::multiple?])
-        disabled?          @(re-frame/subscribe [::disabled?])
+  (let [multiple           @(re-frame/subscribe [::multiple])
+        disabled           @(re-frame/subscribe [::disabled])
         filtered-items     @(re-frame/subscribe [::filtered-items])
         sep-filtered-items @(re-frame/subscribe [::sep-filtered-items])]
     [layout/horizontally
      [layout/vertically
-      [element/checkbox {:checked   multiple?
-                         :on-change #(re-frame/dispatch [::toggle-multiple?])} "Multiple?"]
-      [element/checkbox {:checked   disabled?
-                         :on-change #(re-frame/dispatch [::toggle-disabled?])} "Disabled?"]
-      [element/chooser {:label      "Name a Character from Game of Thrones"
-                        :searchable false
-                        :items      filtered-items
-                        :predicate? smart-case-includes?
-                        :multiple   multiple?
-                        :disabled   disabled?}]
-      [element/chooser {:label         "Name a Character from Game of Bones"
-                        :searchable    true
-                        :addable       "Add % to members"
-                        :empty-message "No results matching %"
-                        :items         sep-filtered-items
-                        :predicate?    smart-case-includes?
-                        :multiple      multiple?
-                        :disabled      disabled?}]]]))
+      [element/checkbox {:checked   multiple
+                         :on-change #(re-frame/dispatch [::toggle-multiple])} "Multiple"]
+      [element/checkbox {:checked   disabled
+                         :on-change #(re-frame/dispatch [::toggle-disabled])} "Disabled"]
+      [element/chooser {:style           {:width "420px"}
+                        :label           "Name a Character from Game of Thrones"
+                        :searchable      true
+                        :add-message     "Add % to members"
+                        :empty-message   "No results matching %"
+                        :max-items       1
+                        :on-select       #(do
+                                           (util/log %)
+                                           (reset! selected* %))
+                        :items           (set sep-filtered-items)
+                        :predicate?      smart-case-includes?
+                        :close-on-select false
+                        :multiple        multiple
+                        :disabled        disabled
+                        :labels          false}]]]))
+
 
 
 (defn documentation
@@ -207,6 +215,5 @@
    choices.
    "
    [check-toggle]
-   "### Chooser"
    [completion]])
 

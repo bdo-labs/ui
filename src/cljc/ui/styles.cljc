@@ -6,14 +6,16 @@
             [garden.color :as color]
             [garden.selectors :as selector :refer [defpseudoelement]]
             [ui.util :as u]
+            [ui.element.badge :as badge]
             [ui.element.checkbox :as checkbox]
             [ui.element.containers :as containers]
             [ui.element.menu :as menu]
+            [ui.element.ripple :as ripple]
             [ui.element.button :as button]
             [ui.element.clamp :as clamp]
             [ui.element.progress-bar :as progress-bar]
-            [ui.element.modal :as modal]
-            [ui.element.loaders :as loaders]))
+            [ui.element.modal :as modal]))
+
 
 ;;
 ;; Realizations that should be materialized
@@ -35,7 +37,7 @@
 ;;   Strategy for how containers will melt together or spread apart,
 ;;   how they push and pull each other and so forth. This also means
 ;;   that most elements will need to be created from the same cloth
-;;   / "container".
+;;   "container".
 ;;
 
 
@@ -46,19 +48,18 @@
 (defcssfn translateY)
 (defcssfn translateZ)
 
-#_(defpseudoelement -webkit-color-swatch-wrapper)
-#_(defpseudoelement -webkit-color-swatch)
 
 (def theme
   {:default {:background (color/rgb [245 245 245])
-             :primary (color/rgb [46 175 164])
-             :secondary (color/rgb [12 164 226])
+             :primary (color/rgb [70 111 226])
+             :secondary (color/rgb [247 90 109])
              :tertiary (color/rgb [101 124 145])
              :positive (color/rgb [34 192 100])
              :negative (color/rgb [232 83 73])
              :font-weight 100
              :font-base (unit/rem 1.8)
              :font-scale :augmented-fourth}})
+
 
 (def scales
   {:minor-second     (/ 16 15)
@@ -70,21 +71,25 @@
    :perfect-fifth    (/ 3 2)
    :golden           (/ 1.61803 1)})
 
+
 (defn- base [{:keys [primary secondary tertiary positive negative]
-              :as theme}]
-  [[:ul {:list-style-position :inside}]
+          :as   theme}]
+  [[#{:b :stron} {:font-weight :bolder}]
+   [:img {:border-style :none}]
+   [:ul {:list-style-position :inside}]
    [:.face-primary {:color primary}]
    [:.face-secondary {:color secondary}]
    [:.face-tertiary {:color tertiary}]])
+
 
 (defn- structure [theme]
   [[:body {:overflow :hidden}]
    [:.hide {:display :none}]
    ;; TODO #app:first-child, really!?
    [#{:html :body :#app :#app:first-child} {:height (unit/percent 100)
-                                            :width  (unit/percent 100)}]
-   [#{:html :body :menu :ul} {:margin  0
-                              :padding 0}]
+                                           :width  (unit/percent 100)}]
+   [#{:html :body :menu :ul :input :.Chooser} {:margin  0
+                                              :padding 0}]
    [:main {:height (stylesheet/calc (- (unit/vh 100) (unit/px 64)))}]
    [#{:.Vertical-rule :.Horizontal-rule} {:background-color :silver}]
    [:.Vertical-rule {:width        (unit/px 1)
@@ -103,9 +108,10 @@
     [:section {:max-width    (unit/rem 70)
                :margin-right (unit/rem 3)}]]])
 
+
 (defn- layouts
   [{:keys [background]}]
-  [[:.Backdrop {:background (color/rgba [0 0 1 0.5])
+  [[:.Backdrop {:background (color/rgba [0 0 0 0.5])
                 :width      (unit/percent 100)
                 :height     (unit/percent 100)
                 :position   :absolute
@@ -123,6 +129,7 @@
                :height         (unit/percent 100)
                :position       :relative}]
     [:sidebar {:width       (unit/px 360)
+               :overflow :auto
                :background  background
                :height      (unit/percent 100)
                :position    :absolute
@@ -151,9 +158,10 @@
          [:&.Align-left [:.Slider {:transform (translateX (unit/px 360))}]]
          [:&.Align-right [:.Slider {:transform (translateX (unit/px -360))}]]]
         [:&.Ontop
-         [:sidebar {:box-shadow [[0 0 (unit/rem 6) (color/rgba [0 0 1 0.5])]]}]
+         [:sidebar {:box-shadow [[0 0 (unit/rem 6) (color/rgba [0 0 0 0.5])]]}]
          [:&.Align-left [:sidebar {:transform (translateX (unit/px 360))}]]
          [:&.Align-right [:sidebar {:transform (translateX (unit/px -360))}]]]]]]])
+
 
 (defn- header [theme]
   [[#{:.Header :.Card} {:background-color :white}]
@@ -163,12 +171,10 @@
               :box-sizing      :border-box
               :padding         [[0 (unit/rem 1)]]
               :position        :relative}
-    [:&.small {:flex    [[0 0 (unit/px 64)]]
-               :height  (unit/px 64)
-               :z-index 7}]
-    [:&.large {:flex    [[0 0 (unit/px 128)]]
-               :height  (unit/px 128)
-               :z-index 7}]]])
+    [:&.small {:flex   [[0 0 (unit/px 64)]]
+               :height (unit/px 64)}]
+    [:&.large {:flex   [[0 0 (unit/px 128)]]
+               :height (unit/px 128)}]]])
 
 
 (defn- card [{:keys [font-scale]
@@ -179,11 +185,13 @@
     {:border-radius (unit/rem 0.3)
      :overflow      :hidden}]])
 
+
 (defn- containers [theme]
   (map #(into '() %)
        [(containers/style theme)
         (header theme)
         (card theme)]))
+
 
 (defn- typography [{:keys [font-base font-weight font-scale]
                     :or   {font-base   (unit/em 1.8)
@@ -205,9 +213,11 @@
    [:.Legal {:font-size (unit/em 0.7)}
     (selector/> :*) {:margin-right (unit/rem 1)}]])
 
+
 (defkeyframes pulse-color
   [:from {:background (u/gray 240)}]
   [:to {:background (u/gray 220)}])
+
 
 (defkeyframes fade-up
   [:from {:opacity 0
@@ -215,24 +225,54 @@
   [:to {:opacity 1
         :transform (translateY 0)}])
 
+
 (defkeyframes fade
   [:from {:opacity 0}]
   [:to {:opacity 1}])
+
 
 (defkeyframes up
   [:from {:transform (translateY (unit/percent 50))}]
   [:to {:transform (translateY 0)}])
 
+
+(defkeyframes scaled
+  [:from {:transform (scale 0)}]
+  [:to {:transform (scale 1)}])
+
+
+(defkeyframes move-background
+  [0 {:background-position [[(unit/percent 0) (unit/percent 50)]]}]
+  [50 {:background-position [[(unit/percent 100) (unit/percent 50)]]}]
+  [100 {:background-position [[(unit/percent 0) (unit/percent 50)]]}])
+
+
+;; (defkeyframes scale-ripple
+;;   [:from {:opacity          0
+;;           :transform-origin [[:center :center]]
+;;           :transform        (scale 0)}]
+;;   [:to {:opacity          1
+;;         :transform-origin [[:center :center]]
+;;         :transform        (scale 10)}])
+
+
 (defn- animations [theme]
   [pulse-color]
   [fade]
   [up]
-  [fade-up])
+  [fade-up]
+  [move-background]
+  [scaled]
+  ;; [scale-ripple]
+  )
+
 
 (defn- forms [{:keys [primary secondary]}]
   [[:.Chooser {:position      :relative
                :width         (unit/percent 100)
                :margin-bottom (unit/rem 1)}
+    [:.Badge {:top   (unit/rem 1)
+              :right 0}]
     [:&.read-only [:* {:cursor :default}]]
     [:.Textfield {:margin-bottom 0}]
     [:.Dropdown {:border-top-left-radius  0
@@ -247,8 +287,8 @@
              :left     (unit/percent -100)
              :z-index  -10}]
     #_[(selector/+ (selector/input (selector/focus)) :label) {:opacity 1}]
-    [:label {:background    (color/lighten primary 15)
-             :color         (color/darken primary 40)
+    [:label {:background    (color/lighten secondary 15)
+             :color         (color/darken secondary 40)
              :display       :inline-block
              :padding       [[(unit/rem 0.5) (unit/rem 1)]]
              :margin        [[(unit/rem 0.5) (unit/rem 1)]]
@@ -256,6 +296,7 @@
              :border-radius (unit/rem 0.4)
              :font-size     (unit/em 0.75)
              :position      :relative
+             :transition    [:all :500ms :ease]
              :z-index       1
              :user-select   :none
              :cursor        :pointer
@@ -269,10 +310,6 @@
     [:&.read-only [:* {:cursor :pointer}]]
     [:&.disabled [:* {:cursor :not-allowed}]
      [:label {:color :silver}]]
-    [:input {:box-sizing :border-box
-             :margin     0
-             :display    :inline-block
-             :width      (unit/percent 100)}]
     [:label {:position      :absolute
              :color         :silver
              :transition    [[:all :200ms :ease]]
@@ -288,12 +325,19 @@
     [:input {:background    :transparent
              :border        :none
              :border-bottom [[(unit/px 1) :solid :silver]]
-             :display       :block
-             :transition    [[:all :200ms :ease]]
+             :box-sizing    :border-box
+             :display       :inline-block
              :font-weight   :600
              :outline       :none
+             :overflow      :hidden
              :padding       [[(unit/rem 0.5) 0]]
-             :position      :relative}
+             :position      :relative
+             :text-overflow :ellipsis
+             :transition    [[:all :200ms :ease]]
+             :white-space   :nowrap
+             :width         (unit/percent 100)
+             :z-index       2}
+     [:&:hover {:border-color primary}]
      [:&:focus {:border-color primary}
       [:+ [:label {:color            :black
                    :left             0
@@ -302,7 +346,7 @@
      [:&:disabled {:cursor :not-allowed}]
      [:&:required
       [:&.invalid {:border-color :red}]]]
-    [:.Ghost {:color    (color/rgba [0 0 1 0.3])
+    [:.Ghost {:color    (color/rgba [0 0 0 0.3])
               :position :absolute
               :top      (unit/rem 0.5)}]]
    [:.Collection {:background         :white
@@ -315,9 +359,13 @@
     ;; TODO Make it an immediate child selector
     [:li {:border-bottom [[:solid (unit/rem 0.1) (color/rgba [150 150 150 0.1])]]
           :padding       [[(unit/rem 1) (unit/rem 2)]]}
-     [:&.selected {:background (color/rgba [0 0 0 0.02])}]
-     [:&.intended {:background-color (color/rgba [0 0 0 0.04])}]
+     [:&.readonly {:cursor :not-allowed}]
+     [:&.selected {:background (color/rgba [0 0 0 0.04])
+                   :cursor     :pointer}]
+     [:&.intended {:background-color (color/rgba [0 0 0 0.06])
+                   :cursor           :pointer}]
      [:&:last-child {:border-bottom :none}]]]])
+
 
 (defn- calendar [{:keys [primary secondary tertiary]}]
   [[:.Date-picker {:position :relative
@@ -347,14 +395,16 @@
                               :cursor :default}
       [:span {:background primary}]]]]])
 
-(defn- numbers [theme]
+
+(defn- numbers [{:keys [primary secondary]
+             :as   theme}]
   [[:.Worksheet {:width       (unit/percent 100)
                  :user-select :none}
     [:.Row
-     [#{:input :label} {:max-width (unit/percent 100)
+     [#{:input :label} {:max-width     (unit/percent 100)
                        :text-overflow :ellipsis
-                       :white-space :nowrap
-                       :overflow :hidden}]]
+                       :white-space   :nowrap
+                       :overflow      :hidden}]]
     [:.Table {:border-bottom [[:solid (unit/px 1) (u/gray 230)]]
               :width         (unit/percent 100)}]
     [:.Arrow {:color         (u/gray 150)
@@ -384,9 +434,7 @@
       [:.Dropdown-origin {:opacity 1}]]]
     [:tr
      [#{:td:first-child :th:first-child} {:border-left [[:solid (unit/px 1) (u/gray 230)]]}]]
-    [:&.Editable
-     [:.Cell {:cursor :cell}]]
-    [:.Duplicate {:position   :relative
+    [:.duplicate {:position   :relative
                   :background :yellow}
      [:&:before {:content      "' '"
                  :box-sizing   :content-box
@@ -400,12 +448,12 @@
                  :top          (unit/px -1)
                  :left         (unit/px -1)
                  :position     :absolute}]
-     [:&.First
+     [:&.first
       [:&:before {:border-top [[:solid (unit/px 1) (color/rgb [235 200 0])]]}]]
-     [:&.Last
+     [:&.last
       [:&:before {:border-bottom [[:solid (unit/px 1) (color/rgb [235 200 0])]]}]]]
                                         ; FIXME Replace with :not selector ones stable
-    [#{:.Locked} {:cursor [[:default :!important]]
+    [#{:.locked} {:cursor [[:default :!important]]
                  :color  [[(color/rgb (doall (vec (repeat 3 120)))) :!important]]}
      [:&:after {:display [[:none :!important]]}]]
     [:th [:span {:display :inline-block}]]
@@ -414,16 +462,18 @@
                        :white-space   :nowrap
                        :text-overflow :ellipsis}]
      [:&.number {:text-align :right}]
-     [#{:&.index :&.Alpha} {:font-size   (unit/em 0.7)
-                           :font-weight 100}]
+     [#{:&.numeric :&.Alpha} {:font-size   (unit/em 0.7)
+                             :font-weight 100}]
      [:&.smaller {:font-size (unit/em 0.45)}]
-     [#{:&.index :&.select :&.alpha} {:text-align :center}]]
-    [:.Editable
+     [#{:&.numeric :&.select :&.alpha} {:text-align :center}]]
+    [:.not-editable {:background (u/gray 250)}]
+    [:.editable
+     [:&.cell {:cursor :cell}]
      [:&:hover {:position :relative}
       [:&:before {:content    "' '"
                   :box-sizing :content-box
                   :display    :block
-                  :border     [[:solid (unit/px 1) (u/gray 150)]]
+                  :border     [[:solid (unit/px 1) (u/gray 185)]]
                   :width      (unit/percent 100)
                   :height     (unit/percent 100)
                   :top        (unit/px -1)
@@ -460,16 +510,18 @@
     [#{:th :td} {:border-bottom [[:solid (unit/px 1) (u/gray 230)]]
                 :border-right  [[:solid (unit/px 1) (u/gray 230)]]
                 :padding       (unit/rem 1)}]
-    [:.Chooser {:margin 0}
+    [:.Chooser
      [:span {:display :inline}]
      [:.Textfield {:margin  0
                    :padding 0}
       [:&.dirty
        [:label {:display :none}]]
-      [:input
+      [:input {:border     :none
+               :margin-top (unit/rem -1) ;; TODO Why is this necessary for mid-alignment
+               :padding    0}
        [:&:focus
-        [:+ [:label {:opacity 0}]]]]
-      [:input {:border :none}]]]]])
+        [:+ [:label {:opacity 0}]]]]]]]])
+
 
 (defn- color-picker [theme]
   (let [swatch-size {:height (unit/em 5.625)
@@ -497,6 +549,7 @@
                 :cursor    :pointer
                 :padding   (unit/em 0.5)}]]]))
 
+
 (defn- in-doc [{:keys [primary]}]
   (let [contrast (u/gray 240)
         triangle [(linear-gradient (unit/deg 45)
@@ -505,10 +558,9 @@
                                    [:transparent (unit/percent 75)]
                                    [contrast (unit/percent 75)]
                                    contrast)]]
-    [[:.Marketing {:background (linear-gradient (unit/deg 45) (color/rgb [64 60 82]) (color/rgb [34 25 50]))
-                   :color (color/rgb [240 240 240])}
+    [[:.Marketing {:color (color/rgb [240 240 240])}
       [:.raised {:color (color/rgb [50 50 50])}]
-      [:section {:margin-top (unit/rem 5)
+      [:section {:margin-top    (unit/rem 5)
                  :margin-bottom (unit/rem 5)}]]
      [:.Container
       [:&.demo {:background          (vec (repeat 2 triangle))
@@ -516,15 +568,16 @@
                 :background-size     [[(unit/px 20) (unit/px 20)]]
                 :min-width           (unit/vw 50)
                 :min-height          (unit/vh 35)
-                :box-shadow          [[:inset 0 (unit/px 2) (unit/px 8) (color/rgba [0 0 1 0.3])]]}
+                :box-shadow          [[:inset 0 (unit/px 2) (unit/px 8) (color/rgba [0 0 0 0.3])]]}
        [:.fill {:background (-> theme :default :primary)
-                :border     [[:dashed (unit/px 1) (color/rgba [0 0 1 0.2])]]}]]]
+                :border     [[:dashed (unit/px 1) (color/rgba [0 0 0 0.2])]]}]]]
      [#{:.Code :pre} {:background    (u/gray 250)
-                      :border-radius (unit/rem 0.3)
-                      :color         (u/gray 170)
-                      :font-family   [[:monospace]]
-                      :white-space   :pre
-                      :padding       (unit/rem 2)}]
+                     :border-radius (unit/rem 0.3)
+                     :font-family   [[:monospace :monospace]]
+                     :font-size     (unit/em 1)
+                     :color         (u/gray 170)
+                     :white-space   :pre
+                     :padding       (unit/rem 2)}]
      [#{:.Code :code} {:line-height 1.8}
       [:label {:background    (color/rgb [38 189 230])
                :color         :white
@@ -536,30 +589,42 @@
      [:.Demo-box {:border           [[:solid (unit/px 1) :silver]]
                   :background-color :white
                   :padding          (unit/rem 2)}]
-     [:body {:background :white}]
+     [:body {
+             ;; :background (linear-gradient (unit/deg 145) (color/rgb [201 220 241]) (color/rgb [171 190 211]))
+             :background                (linear-gradient (unit/deg 45) (color/rgb [65 88 208]) (color/rgb [200 80 192]) (color/rgb [255 204 112]))
+             :background-size           [[(unit/percent 400) (unit/percent 400)]]
+             :animation                 [[:move-background :30s :ease]]
+             :animation-iteration-count :infinite}]
      [:.Functional-hide {:position :absolute
                          :left     (unit/vw -200)}]]))
+
 
 (def docs
   (let [theme (:default theme)]
     (map #(into '() %) [(in-doc theme)])))
 
+
+(defn custom [theme]
+  (map #(into '() %) [(animations theme)
+                      (base theme)
+                      (structure theme)
+                      (layouts theme)
+                      (containers theme)
+                      (numbers theme)
+                      (forms theme)
+                      (color-picker theme)
+                      (calendar theme)
+                      (typography theme)
+                      (ripple/style theme)
+                      (badge/style theme)
+                      (button/style theme)
+                      (menu/style theme)
+                      (checkbox/style theme)
+                      (modal/style theme)
+                      (clamp/style theme)
+                      (progress-bar/style theme)]))
+
+
 (def screen
   (let [theme (:default theme)]
-    (map #(into '() %) [(animations theme)
-                        (base theme)
-                        (structure theme)
-                        (layouts theme)
-                        (containers theme)
-                        (numbers theme)
-                        (forms theme)
-                        (color-picker theme)
-                        (calendar theme)
-                        (typography theme)
-                        (button/style theme)
-                        (menu/style theme)
-                        (checkbox/style theme)
-                        (modal/style theme)
-                        (clamp/style theme)
-                        (progress-bar/style theme)
-                        (loaders/style theme)])))
+    (custom theme)))

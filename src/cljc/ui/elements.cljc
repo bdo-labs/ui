@@ -1,5 +1,6 @@
 (ns ui.elements
   (:require [ui.element.button :as button]
+            [ui.element.ripple :as ripple]
             [ui.element.icon-button :as icon-button]
             [ui.element.link :as link]
             [ui.element.icon :as icon]
@@ -7,7 +8,7 @@
             [ui.element.content :as content]
             [ui.element.auto-complete :as auto-complete]
             [ui.element.chooser :as chooser]
-            [ui.element.progress-bar :as progress-bar]
+            #_[ui.element.progress-bar :as progress-bar]
             [ui.element.loaders :as loaders]
             [ui.element.textfield :as textfield]
             [ui.element.collection :as collection]
@@ -22,15 +23,19 @@
             [ui.element.color-swatch :as color-swatch]
             [ui.element.color-picker :as color-picker]
             [ui.element.numbers.views :as numbers]
-            ))
+            [ui.element.badge :as badge]))
 
 
 (def dropdown menu/dropdown)
 
 
+(def ripple ripple/ripple)
+
+
 (def button button/button)
 (def link link/link)
 (def icon icon/icon)
+(def badge badge/badge)
 
 
 (def color-swatch color-swatch/color-swatch)
@@ -63,16 +68,15 @@
 (def auto-complete auto-complete/auto-complete)
 (def chooser chooser/chooser)
 (def collection collection/collection)
-(def clamp clamp/clamp)
+;; (def clamp clamp/clamp)
 (def days calendar/days)
 (def months calendar/months)
 (def years calendar/years)
 (def date-picker date-picker/date-picker)
-;(def timeline timeline/timeline)
 
 
 (def dialog modal/dialog)
 (def confirm-dialog modal/confirm-dialog)
 
-(def progress-bar progress-bar/progress-bar)
+#_(def progress-bar progress-bar/progress-bar)
 (def spinner loaders/spinner)

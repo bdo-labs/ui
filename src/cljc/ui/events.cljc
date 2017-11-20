@@ -1,6 +1,6 @@
 (ns ui.events
   (:require #_[clojure.test.check.generators :as gen]
-            [clojure.spec :as spec]
+            [clojure.spec.alpha :as spec]
             [re-frame.core :as re-frame]
             [ui.db :as db]
             [ui.util :as u]

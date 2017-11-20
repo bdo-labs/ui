@@ -1,9 +1,10 @@
 (ns ui.element.menu
   #?(:cljs (:require-macros [garden.def :refer [defcssfn]]))
   (:require #?(:clj [garden.def :refer [defcssfn]])
+            [re-frame.core :as re-frame]
             [ui.util :as util]
             [clojure.string :as str]
-            [clojure.spec :as spec]
+            [clojure.spec.alpha :as spec]
             [garden.units :as unit]
             [garden.color :as color]
             [ui.element.containers :refer [container]]))
@@ -17,10 +18,12 @@
 ;; TODO These !important rules should be avoided
 (defn style [theme]
   [[:.Dropdown {:position         [[:absolute :!important]]
+                :background       :white
                 :transform        (scale 1)
                 :transform-origin [[:top :right]]
                 :transition       [[:200ms (cubic-bezier 0.770, 0.000, 0.175, 1.000)]]
-                :z-index          150}
+                :z-index          90
+                :font-weight      :normal}
     [:&.not-open {:transform (scale 0)}]
     [:&.origin-top-left {:transform-origin [[:top :left]]}]
     [:&.origin-top-right {:transform-origin [[:top :right]]}]
@@ -49,18 +52,22 @@
 
 
 (defn dropdown [& args]
-  (let [{:keys [params content]} (util/conform-or-fail ::dropdown-args args)
-        {:keys [open? origin]}   params
-        classes                  (str "Dropdown "
-                                      (if open? "open " "not-open ")
-                                      (when origin (str "origin-" (str/join "-" (map name origin)))))
-        ui-params                (util/keys-from-spec ::dropdown-params)
-        container-params         {:layout   :vertically
-                                  :gap?     false
-                                  :raised?  true
-                                  :rounded? true
-                                  :class    classes}
-        params                   (merge container-params (apply dissoc params ui-params))]
+  (let [{:keys [params content]}   (util/conform-or-fail ::dropdown-args args)
+        {:keys [id
+                open?
+                origin]
+         :or   {id (util/gen-id)}} params
+        classes                    (str "Dropdown "
+                                        (if open? "open " "not-open ")
+                                        (when origin (str "origin-" (str/join "-" (map name origin)))))
+        ui-params                  (util/keys-from-spec ::dropdown-params)
+        container-params           {:key      (util/slug id "dropdown")
+                                    :layout   :vertically
+                                    :gap?     false
+                                    :raised?  true
+                                    :rounded? true
+                                    :class    classes}
+        params                     (merge container-params (apply dissoc params ui-params))]
     (into [container params]
           (when open? (map last content)))))
 

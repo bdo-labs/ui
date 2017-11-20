@@ -1,6 +1,6 @@
 (ns ui.element.textfield
   (:require [#?(:clj clojure.core :cljs reagent.core) :refer [atom]]
-            [clojure.spec :as spec]
+            [clojure.spec.alpha :as spec]
             [clojure.test.check.generators :as gen]
             [ui.util :as util]
             [clojure.string :as str]))
@@ -61,11 +61,11 @@
           class                       (str/join " " [(util/params->classes params)
                                                      (when (or (not (empty? value))
                                                                (not (empty? placeholder))) "dirty")])]
-      [:div.Textfield {:key   (str "textfield-" id)
+      [:div.Textfield {:key   (util/slug "textfield" id)
                        :style style
                        :class class}
        [:input (merge
-                (dissoc params :class :style :placeholder)
+                (dissoc params :class :style :placeholder :label)
                 {:type          :text
                  :placeholder   placeholder
                  :auto-complete "off"})]
