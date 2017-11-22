@@ -10,7 +10,7 @@
             [ui.docs.vertically :as vertically]
             [ui.docs.buttons :as buttons]
             [ui.docs.icons :as icons]
-            #_[ui.docs.progress :as progress]
+            [ui.docs.progress :as progress]
             [ui.docs.colors :as colors]
             [ui.docs.dialog :as dialog]
             [ui.docs.dropdown :as dropdown]
@@ -65,7 +65,7 @@
     :dropdown [dropdown/documentation]
     :icons [icons/documentation]
     :inputs [inputs/documentation]
-    ;; :progress [progress/documentation]
+    :progress [progress/documentation]
     :sheet [sheet/documentation]
     ;; :sidebar [sidebar/documentation]
     [intro]))
@@ -76,7 +76,7 @@
   (let [active-item @(re-frame/subscribe [:active-doc-item])
         virtuals #?(:clj [] :cljs [:boundary])
         layouts     [:centered :horizontally :vertically :fill]
-        elements    [:buttons :colors :date-picker :dialog :dropdown :icons :inputs :sheet]]
+        elements    [:buttons :colors :date-picker :dialog :dropdown :icons :inputs :progress :sheet]]
     [element/sidebar {:locked true}
      [layout/vertically {:role :navigation}
       [:menu [menu-item :ui]]
@@ -126,9 +126,9 @@
 
 (defn main-panel []
   (let [active-panel @(re-frame/subscribe [:active-panel])
-        ;; progress     @(re-frame/subscribe [:progress])
+        progress     @(re-frame/subscribe [:progress])
         fragments    @(re-frame/subscribe [:fragments])]
     [:div {:style {:height "100vh"
                    :width  "100vw"}}
-     #_[element/progress-bar {:progress progress}]
+     [element/progress-bar {:progress progress}]
      [panels active-panel]]))

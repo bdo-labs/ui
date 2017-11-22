@@ -8,7 +8,7 @@
             [ui.element.content :as content]
             [ui.element.auto-complete :as auto-complete]
             [ui.element.chooser :as chooser]
-            #_[ui.element.progress-bar :as progress-bar]
+            [ui.element.progress-bar :as progress-bar]
             [ui.element.loaders :as loaders]
             [ui.element.textfield :as textfield]
             [ui.element.collection :as collection]
@@ -78,5 +78,5 @@
 (def dialog modal/dialog)
 (def confirm-dialog modal/confirm-dialog)
 
-#_(def progress-bar progress-bar/progress-bar)
+(def progress-bar progress-bar/progress-bar)
 (def spinner loaders/spinner)
