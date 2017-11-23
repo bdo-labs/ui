@@ -124,13 +124,12 @@
 
 ;; View -------------------------------------------------------------------
 
-
 (defn- emphasize-match
   "Emphasize the [substr]-match within [s]tring"
   [s substr]
   (if (or (empty? s) (empty? substr))
     s
-    (let [pattern (re-pattern (str "(?iu)" substr))]
+    (let [pattern (re-pattern (str "(?i)" substr))]
       (->> (-> (str/replace s pattern #(str ":" %1 ":"))
                (str/split #":"))
            (map-indexed #(if (util/=i %2 substr)
@@ -242,5 +241,3 @@
                         :on-mouse-enter #(set-intended! item)
                         :on-click       #(add-item! item)}
                    (emphasize-match label emphasize)]))))])))))
-
-
