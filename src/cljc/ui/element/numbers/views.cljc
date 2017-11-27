@@ -209,6 +209,7 @@
                      lock-columns #{}}}]
   (let [columns               @(subscribe [:columns sheet-ref])
         rows                  @(subscribe [:rows sheet-ref])
+        sort-ascending?       @(subscribe [:sort-ascending? sheet-ref])
         on-double-click-local (fn [m] #(on-double-click (merge m {:event %})))]
     [:div.Body
      [table
@@ -269,10 +270,10 @@
   [params data]
   (let [sheet-ref (:name params)
         rows      (subscribe [:rows sheet-ref])]
+    (dispatch [:sheet sheet-ref data])
     (fn [{:keys [editable? caption? hidden]
          :or   {editable? false}
          :as   params} data]
-      (dispatch [:sheet sheet-ref data])
       (when (and (not hidden)
                  (not (empty? @rows)))
         (let [classes (u/names->str (into [(when editable? :editable)
