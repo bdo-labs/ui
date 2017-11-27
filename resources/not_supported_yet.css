@@ -52,3 +52,12 @@ in 2.0, but at-least our upgrade-path is way easier now.
 .Label input:focus + label {
     opacity: 1;
 }
+
+/* IE overrides */
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+    .Container div.fill,
+    .Table .Titlerow button {
+        /* Flex bug */
+        flex: 1 0 auto !important;
+    }
+}
