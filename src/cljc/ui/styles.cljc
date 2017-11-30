@@ -139,6 +139,7 @@
     [:main {:width              (unit/percent 100)
             :overflow           :auto
             :overflow-scrolling :touch
+            :display            :flex
             :position           :relative
             :height             (unit/percent 100)}]
     #_[:&.Locked
@@ -167,6 +168,7 @@
   [[#{:.Header :.Card} {:background-color :white}]
    [:.Header {:justify-content :space-between
               :align-items     :center
+              :z-index         1
               :width           (unit/vw 100)
               :box-sizing      :border-box
               :padding         [[0 (unit/rem 1)]]
@@ -375,8 +377,7 @@
    [:.Calendar
     [:table {:user-select  :none
              :text-align   :center
-             :table-layout :fixed
-             :width        (unit/percent 100)}]
+             :table-layout :fixed}]
     [:th {:padding (unit/rem 2)}]
     [:td {:padding (unit/rem 1)}]
     [#{:.Previous :.Next} {:color (color/lighten tertiary 40)}]
@@ -500,7 +501,8 @@
     [:table {:border-collapse :separate
              :table-layout    :fixed
              :width           :inherit}]
-    [:.Titlecolumn {:text-align :left}]
+    [:.Titlecolumn {:text-align :left}
+     [:span {:font-weight 600}]]
     [:&.Selectable
      [:tr
       [:&:hover
