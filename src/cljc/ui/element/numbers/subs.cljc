@@ -9,6 +9,13 @@
            (get db sheet-ref)))
 
 
+(reg-sub :row-count
+         (fn [[_ sheet-ref]]
+           (subscribe [:sheet sheet-ref]))
+         (fn [sheet _]
+           (get sheet :row-count)))
+
+
 (reg-sub :columns
          (fn [[_ sheet-ref]]
            (subscribe [:sheet sheet-ref]))
@@ -137,6 +144,15 @@
                                    (:sort-value (meta (:value %)))
                                    (:value %)) #(nth % (u/col-num sorted-column)))
                              sort-fn))))))
+
+
+(reg-sub
+ :row
+ (fn [[_ sheet-ref]]
+   [(subscribe [:rows sheet-ref])])
+ (fn [[rows] [_ sheet-ref n]]
+   (when (some? rows)
+     (nth rows n))))
 
 
 (reg-sub :cells

@@ -72,7 +72,8 @@
 (defn conform-or-fail
   "Conform arguments to specification or throw an exception"
   [spec args]
-  (if (spec/valid? spec args)
+  (spec/conform spec args)
+  #_(if (spec/valid? spec args)
     (spec/conform spec args)
     (exception (spec/explain-str spec args))))
 
@@ -274,3 +275,11 @@
          (js/JSON.stringify)
          (js/JSON.parse)
          (js->clj :keywordize-keys true))))
+
+
+(defn smart-case-includes? [substr s]
+  (if-not (empty? (re-find #"[A-Z]" substr))
+    (str/includes? s substr)
+    (when-not (empty? s)
+     (str/includes? (str/lower-case s) (str/lower-case substr)))))
+

@@ -121,167 +121,183 @@
 
 (defn headings
   "Headings include column-headings, caption and all of the title-rows"
-  [sheet-ref {:keys [caption? row-heading column-heading column-widths hide-columns]
+  [sheet-ref {:keys [caption? row-heading column-heading hide-columns column-count]
               :or   {column-heading :hidden
                      row-heading    :hidden
                      hide-columns   #{}}}]
   (let [col-refs           @(subscribe [:col-refs sheet-ref])
-        columns            @(subscribe [:columns sheet-ref])
         title-rows         @(subscribe [:title-rows sheet-ref])
         sort-ascending?    @(subscribe [:sort-ascending? sheet-ref] {})
         sorted-column      @(subscribe [:sorted-column sheet-ref])
         toggle-column-menu (fn [col-ref] #(dispatch [:show-column-menu sheet-ref col-ref]))]
-    [:div.Headers
-     [table
-      [colgroup "headers"
-       (if (= row-heading :hidden) columns (into [nil nil] columns))
-       (if (= row-heading :hidden) column-widths (into [20 0] column-widths ))
-       hide-columns]
-      [:thead
-       ;; Column headings
-       (when-not (= column-heading :hidden)
-         [:tr.Column-headings {:key "Column-headings"}
-          (if (= row-heading :select)
-            [:th.Select {:key "Column-select"} [:input {:type :checkbox}]]
-            (when-not (= row-heading :hidden) [:th {:key "Column-filler" :style {:border 0}}]))
-          (when-not (= row-heading :hidden)
-            [:th {:style {:border-top 0 :border-bottom 0}}])
-          (->> col-refs
-               (map #(when-not (contains? hide-columns (util/col-ref %))
-                       [:th.Column-heading
-                        {:key   (str "Column-" (name column-heading) %)
-                         :class (name column-heading)}
-                        (case column-heading
-                          :numeric (util/col-num %)
-                          :alpha   %)
-                        [:button.Dropdown-origin {:on-click (toggle-column-menu %)} "›"]
-                        [column-menu sheet-ref %]])))])
-       ;; Caption
-       ;; REVIEW Are there any valid reasons why we should use a real caption-element?
-       (when (or caption?
-                 (not= column-heading :hidden))
-         [:tr {:key "Column-Spacer"}
-          (when (and (not= column-heading :hidden)
-                     (not= row-heading :hidden))
-            [:th {:style {:border-left 0 :border-right 0}}])
-          (when (and (not= column-heading :hidden)
-                     (not= row-heading :hidden))
-            [:th {:style {:border-left 0 :border-right 0 :border-bottom 0}}])
-          [:th {:col-span (- (count columns) (count hide-columns)) :style {:border-left 0 :border-right 0}}
-           (when caption?
-             [:h2.Caption (str sheet-ref)])]])
-       (when-not (empty? title-rows)
-         ;; Title-rows
-         (->> title-rows
-              (map (fn [row]
-                     (let [row-num (u/row-num (:cell-ref (first row)))]
-                       [:tr.Titlerow {:key (str "Titlerow-" row-num)}
-                        (when-not (= row-heading :hidden)
-                          ;; TODO Move to stylesheet
-                          [:th.numeric {:style (if (= column-heading :hidden)
-                                                 {:border-top "1px solid rgb(230,230,230)"}
-                                                 {})} row-num])
-                        (when-not (= row-heading :hidden)
-                          [:th {:style {:border-top 0 :border-bottom 0}}])
-                        (map-indexed (fn [n title]
-                                       (let [n (inc n)]
-                                         (when-not (contains? hide-columns (util/col-ref (:cell-ref title)))
-                                           [:th.Titlecolumn {:key (str "Title-" n)}
-                                            [:span (:value title)]
-                                            (when (= sorted-column (u/col-ref (:cell-ref title)))
-                                              [:span.Arrow
-                                               (if sort-ascending? "↑" "↓")])
-                                            (when (and (= column-heading :hidden)
-                                                       (= row-num 1))
-                                              [:span
-                                               [:button.Dropdown-origin {:on-click (toggle-column-menu (u/col-ref (:cell-ref title)))} "›"]
-                                               [column-menu sheet-ref (u/col-ref (:cell-ref title))]])]))) row)])))))]]]))
+    [:thead
+     ;; Column headings
+     (when-not (= column-heading :hidden)
+       [:tr.Column-headings {:key "Column-headings"}
+        (if (= row-heading :select)
+          [:th.Select {:key "Column-select"} [:input {:type :checkbox}]]
+          (when-not (= row-heading :hidden) [:th {:key "Column-filler" :style {:border 0}}]))
+        (when-not (= row-heading :hidden)
+          [:th {:style {:border-top 0 :border-bottom 0}}])
+        (->> col-refs
+           (map #(when-not (contains? hide-columns (util/col-ref %))
+                  [:th.Column-heading
+                   {:key   (str "Column-" (name column-heading) %)
+                    :class (name column-heading)}
+                   (case column-heading
+                     :numeric (util/col-num %)
+                     :alpha   %)
+                   [:button.Dropdown-origin {:on-click (toggle-column-menu %)} "›"]
+                   [column-menu sheet-ref %]])))])
+     ;; Caption
+     ;; REVIEW Are there any valid reasons why we should use a real caption-element?
+     (when (or caption?
+               (not= column-heading :hidden))
+       [:tr {:key "Column-Spacer"}
+        (when (and (not= column-heading :hidden)
+                   (not= row-heading :hidden))
+          [:th {:style {:border-left 0 :border-right 0}}])
+        (when (and (not= column-heading :hidden)
+                   (not= row-heading :hidden))
+          [:th {:style {:border-left 0 :border-right 0 :border-bottom 0}}])
+        [:th {:col-span (- column-count (count hide-columns)) :style {:border-left 0 :border-right 0}}
+         (when caption?
+           [:h2.Caption (str sheet-ref)])]])
+     (when-not (empty? title-rows)
+       ;; Title-rows
+       (->> title-rows
+          (map (fn [row]
+                 (let [row-num (u/row-num (:cell-ref (first row)))]
+                   [:tr.Titlerow {:key (str "Titlerow-" row-num)}
+                    (when-not (= row-heading :hidden)
+                      ;; TODO Move to stylesheet
+                      [:th.numeric {:style (if (= column-heading :hidden)
+                                             {:border-top "1px solid rgb(230,230,230)"}
+                                             {})} row-num])
+                    (when-not (= row-heading :hidden)
+                      [:th {:style {:border-top 0 :border-bottom 0}}])
+                    (map-indexed (fn [n title]
+                                   (let [n (inc n)]
+                                     (when-not (contains? hide-columns (util/col-ref (:cell-ref title)))
+                                       [:th.Titlecolumn {:key (str "Title-" n)}
+                                        [:span (:value title)]
+                                        (when (= sorted-column (u/col-ref (:cell-ref title)))
+                                          [:span.Arrow
+                                           (if sort-ascending? "↑" "↓")])
+                                        (when (and (= column-heading :hidden)
+                                                   (= row-num 1))
+                                          [:span
+                                           [:button.Dropdown-origin {:on-click (toggle-column-menu (u/col-ref (:cell-ref title)))} "›"]
+                                           [column-menu sheet-ref (u/col-ref (:cell-ref title))]])]))) row)])))))]))
+
+
+
+(defn body-row [sheet-ref {:keys [editable? row-heading number-formatter inst-formatter on-double-click hide-columns lock-columns]
+                        :or   {row-heading      :hidden
+                               number-formatter u/format-number-en
+                               inst-formatter   u/format-inst
+                               hide-columns     #{}
+                               lock-columns     #{}}} row-n]
+  (let [row                   @(subscribe [:row sheet-ref row-n])
+        row-num               (u/row-num (:cell-ref (first row)))
+        sort-ascending?       @(subscribe [:sort-ascending? sheet-ref])
+        on-double-click-local (fn [m] #(on-double-click (merge m {:event %})))]
+    [:tr
+     ;; Row-heading
+     (when-not (= row-heading :hidden)
+       (case row-heading
+         :numeric [:td.numeric {:class (if (>= row-num 100) "smaller" "")} row-num]
+         :select  [:td.select [:input {:type :checkbox}]]
+         [:td]))
+     ;; Add space between row-heading and body-content
+     (when-not (= row-heading :hidden)
+       [:td.spacer {:style {:border-top 0 :border-bottom 0}}])
+     ;; Rows
+     (->> row
+        (map-indexed (fn [x {:keys [cell-ref value align fill] :as c}]
+                       (when-not (contains? hide-columns (util/col-ref cell-ref))
+                         (let [editable? (if (and (meta value)
+                                                  (not (nil? (:editable? (meta value)))))
+                                           (:editable? (meta value))
+                                           editable?)
+                               k         (merge
+                                          {:key             cell-ref
+                                           :style           (merge {}
+                                                                   (when ((complement nil?) align) {:text-align align})
+                                                                   (when ((complement nil?) fill) {:background fill}))
+                                           :on-double-click (on-double-click-local {:editable (and editable? (not (contains? lock-columns (util/col-ref cell-ref))))
+                                                                                    :cell-ref cell-ref})
+                                           :class           (u/names->str [(if editable? :editable :not-editable)
+                                                                           #_(when (and (> (count lock-columns) x)
+                                                                                        (nth lock-columns x)) :Lock-Columns)])}
+                                          (when editable? {:title cell-ref}))]
+                           (cond
+                             (number? value) [:td.cell.number k [:span (number-formatter value)]]
+                             (inst? value)   [:td.cell.date k [:span (inst-formatter value)]]
+                             (vector? value) [:td.cell.custom k value]
+                             (fn? value)     [:td.cell.custom k (value {:row      row
+                                                                        :editable (and editable? (not (contains? lock-columns (util/col-ref cell-ref))))
+                                                                        :cell-ref cell-ref})]
+                             :else           [:td.cell.string k
+                                              (when-not (nil? value)
+                                                (if (str/starts-with? value "http")
+                                                  [:a {:href value} value]
+                                                  [:span value]))])))))
+        (doall))]))
 
 
 (defn body
-  [sheet-ref {:keys [editable? row-heading column-widths number-formatter inst-formatter on-double-click empty-message hide-columns lock-columns]
-              :or   {column-widths    []
-                     row-heading      :hidden
-                     number-formatter u/format-number-en
-                     inst-formatter   u/format-inst
-                     empty-message    " "
-                     hide-columns #{}
-                     lock-columns #{}}}]
-  (let [columns               @(subscribe [:columns sheet-ref])
-        rows                  @(subscribe [:rows sheet-ref])
-        sort-ascending?       @(subscribe [:sort-ascending? sheet-ref])
-        on-double-click-local (fn [m] #(on-double-click (merge m {:event %})))]
-    [:div.Body
-     [table
-      [colgroup "headers"
-       (if (= row-heading :hidden) columns (into [nil nil] columns))
-       (if (= row-heading :hidden) column-widths (into [20 0] column-widths ))
-       hide-columns]
-      (if (empty? rows)
-        [:tbody.empty [:tr [:td empty-message]]]
-        (into [:tbody]
-              (->> rows
-                   (map-indexed (fn [n row]
-                                  (let [row-num (u/row-num (:cell-ref (first row)))]
-                                    (into [:tr {:key (str "Row:" row-num)}
-                                           ;; Row-heading
-                                           (when-not (= row-heading :hidden)
-                                             (case row-heading
-                                               :numeric [:td.numeric {:class (if (>= row-num 100) "smaller" "")} row-num]
-                                               :select  [:td.select [:input {:type :checkbox}]]
-                                               [:td]))
-                                           ;; Add space between row-heading and body-content
-                                           (when-not (= row-heading :hidden)
-                                             [:td.spacer {:style {:border-top 0 :border-bottom 0}}])]
-                                          ;; Rows
-                                          (->> row
-                                               (map-indexed (fn [x {:keys [cell-ref value align fill] :as c}]
-                                                              (when-not (contains? hide-columns (util/col-ref cell-ref))
-                                                                (let [editable? (if (and (meta value)
-                                                                                         (not (nil? (:editable? (meta value)))))
-                                                                                  (:editable? (meta value))
-                                                                                  editable?)
-                                                                      k (merge
-                                                                         {:key             cell-ref
-                                                                          :style           (merge {}
-                                                                                                  (when ((complement nil?) align) {:text-align align})
-                                                                                                  (when ((complement nil?) fill) {:background fill}))
-                                                                          :on-double-click (on-double-click-local {:editable (and editable? (not (contains? lock-columns (util/col-ref cell-ref))))
-                                                                                                                   :cell-ref cell-ref})
-                                                                          :class           (u/names->str [(if editable? :editable :not-editable)
-                                                                                                          #_(when (and (> (count lock-columns) x)
-                                                                                                                     (nth lock-columns x)) :Lock-Columns)])}
-                                                                         (when editable? {:title cell-ref}))]
-                                                                  (cond
-                                                                    (number? value) [:td.cell.number k [:span (number-formatter value)]]
-                                                                    (inst? value)   [:td.cell.date k [:span (inst-formatter value)]]
-                                                                    (vector? value) [:td.cell.custom k value]
-                                                                    (fn? value)     [:td.cell.custom k (value {:row      row
-                                                                                                               :editable (and editable? (not (contains? lock-columns (util/col-ref cell-ref))))
-                                                                                                               :cell-ref cell-ref})]
-                                                                    :else           [:td.cell.string k
-                                                                                     (when-not (nil? value)
-                                                                                       (if (str/starts-with? value "http")
-                                                                                         [:a {:href value} value]
-                                                                                         [:span value]))])))))))))))))]]))
+  [sheet-ref {:keys [editable? row-heading empty-message hide-columns]
+              :or   {empty-message " "}
+              :as   params}]
+  (let [sort-asc  @(subscribe [:sort-ascending?]) ;; This is de-referenced only to make the view re-render
+        row-count @(subscribe [:row-count sheet-ref])]
+    (if (> 0 row-count)
+      [:tbody.empty [:tr [:td empty-message]]]
+      [:tbody
+       (for [n (range 0 (dec row-count))]
+         ^{:key (str "Row:" n)} [body-row sheet-ref (select-keys params [:editable?
+                                                                         :row-heading
+                                                                         :number-formatter
+                                                                         :inst-formatter
+                                                                         :on-double-click
+                                                                         :hide-columns
+                                                                         :lock-columns]) n])])))
+
 
 
 (defn sheet
   [params data]
   (let [sheet-ref (:name params)
-        rows      (subscribe [:rows sheet-ref])]
+        row-count (subscribe [:row-count sheet-ref])
+        columns   (subscribe [:columns sheet-ref])]
     (dispatch [:sheet sheet-ref data])
-    (fn [{:keys [editable? caption? hidden]
-         :or   {editable? false}
+    (fn [{:keys [editable? caption? hidden hide-columns column-widths row-heading]
+         :or   {editable?     false
+                row-heading   :hidden
+                column-widths []
+                hide-columns  #{}}
          :as   params} data]
       (when (and (not hidden)
-                 (not (empty? @rows)))
+                 (some? @row-count))
         (let [classes (u/names->str (into [(when editable? :editable)
                                            (when caption? :caption)]
                                           (:class params)))]
           [:div.Worksheet.fill {:key   sheet-ref
                                 :class classes}
            [:div.Table
-            [headings sheet-ref params]
-            [body sheet-ref params]]])))))
+            [:div.Headers
+             [table
+              [colgroup "headers"
+               (if (= row-heading :hidden) @columns (into [nil nil] @columns))
+               (if (= row-heading :hidden) column-widths (into [20 0] column-widths))
+               hide-columns]
+              [headings sheet-ref (assoc params :column-count (count @columns))]]]
+            [:div.Body
+             [table
+              [colgroup "headers"
+               (if (= row-heading :hidden) @columns (into [nil nil] @columns))
+               (if (= row-heading :hidden) column-widths (into [20 0] column-widths))
+               hide-columns]
+              [body sheet-ref params]]]]])))))
 

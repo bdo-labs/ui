@@ -21,6 +21,7 @@
 (spec/def ::row-heading #{:alpha :numeric :select :hidden})
 (spec/def ::type #{:number :inst :string})
 
+
 (spec/def ::col-ref (spec/with-gen
                       (spec/and keyword? #(re-matches #"[A-Z]+" (name %)))
                       #(spec/gen #{:A :ZA :ABA :ACMK :FOO})))
@@ -29,6 +30,7 @@
 (spec/def ::cell-ref (spec/with-gen
                       (spec/and keyword? #(re-matches #"[A-Z]+[0-9]+" (str (name %))))
                       #(spec/gen #{:A1 :Z999 :AZ3 :BOBBY6 :ME2})))
+
 
 (spec/def ::hide-column (spec/coll-of ::col-ref :into #{}))
 (spec/def ::locked (spec/coll-of ::col-ref :into #{}))
@@ -105,10 +107,12 @@
 
 ;;-----
 
+
 (defn cell-ref
   "Generate a cell-ref from [col-ref] and [index]"
   [col-ref index]
   (keyword (str (name col-ref) index)))
+
 
 (spec/fdef cell-ref
            :args (spec/cat :col-ref :col-ref :num nat-int?)
@@ -178,8 +182,10 @@
  (fn [{:keys [db]} [_ sheet-ref d]]
    (if-let [data (util/conform-or-fail ::data d)]
      {:db (let [columns (->columns data)]
-            (assoc db sheet-ref {:columns columns}))}
-     {:db (assoc db sheet-ref {:columns []})})))
+            (assoc db sheet-ref {:columns   columns
+                                 :row-count (count (:rows (first columns)))}))}
+     {:db (assoc db sheet-ref {:columns   []
+                               :row-count 0})})))
 
 
 (reg-event-db :sort-ascending?
@@ -220,23 +226,12 @@
      {:dispatch [:toggle-filter sheet-ref col-ref k f]})))
 
 
-
-(defn smart-case-includes? [substr s]
-  (if-not (empty? (re-find #"[A-Z]" substr))
-    (str/includes? s substr)
-    (when-not (empty? s)
-     (str/includes? (str/lower-case s) (str/lower-case substr)))))
-
-
-
 (reg-event-fx
  :filter-smart-case
  (fn handle-filter-smart-case [{:keys [db]} [k sheet-ref col-ref s]]
    (let [k (keyword (u/slug (name k) " smart-case" ))
-         f (partial smart-case-includes? s)]
+         f (partial util/smart-case-includes? s)]
      {:dispatch [:toggle-filter sheet-ref col-ref k f]})))
-
-
 
 
 (reg-event-fx :filter-range
