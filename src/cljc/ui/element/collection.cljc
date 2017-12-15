@@ -124,6 +124,7 @@
 
 ;; View -------------------------------------------------------------------
 
+
 (defn- emphasize-match
   "Emphasize the [substr]-match within [s]tring"
   [s substr]
@@ -137,23 +138,28 @@
                            [:span {:key (str "i-" %2 "-" %1 "-no")} %2]))))))
 
 
-
-(def selected* ^{:doc "A sorted-map of sets, of items that's been selected"} (atom (sorted-map)))
-
-
 ;; TODO Scroll list upon navigating using keyboard
 ;; TODO Move keyboard-events out of the component
 ;; TODO Multiple selection using ctrl/shift
-;; TODO Allow hiccup-content in the item?
+;; TODO Allow custom markup in each item?
 (defn collection
   [& args]
-  (let [intended*                  ^{:doc "Items that are intermediately marked for selection"} (atom nil)
-        {:keys [params]}           (util/conform-or-fail ::args args)
+  (let [intended*              ^{:doc "Items that are intermediately marked for selection"} (atom nil)
+        selected*              ^{:doc "A sorted-map of sets of items that's been selected"} (atom (sorted-map))
+        {:keys [params]}       (util/conform-or-fail ::args args)
         {:keys [id
-                multiple]
-         :or   {id (util/gen-id)}} params]
+                multiple
+                selected]
+         :or   {id       (util/gen-id)
+                selected #{}}} params
+        id                     (util/slug id)]
+
+    ;; We ensure that the collection is initialized with whatever
+    ;; selection was passed in
+    (reset! selected* selected)
+
     (fn [& args]
-      (let [{:keys [params items]}        (util/conform-or-fail ::args args)
+      (let [{:keys [params items]}    (util/conform-or-fail ::args args)
             {:keys [emphasize
                     multiple
                     deselectable
@@ -168,28 +174,29 @@
                     add-message   false
                     empty-message false
                     hide-selected false}} params
-            id                            (util/slug id)
-            items                         (apply sorted-set-by (fn [a b] (< (:value a) (:value b))) items)
-            selected                      (get @selected* id)]
+            items                     (apply sorted-set-by (fn [a b] (< (:value a) (:value b))) items)
+            selected                  @selected*]
 
         ;; State management
         (letfn [(set-intended! [item]
                   (reset! intended* item))
                 (remove-item! [item]
-                  (swap! selected* update-in [id] disj item))
+                  (swap! selected* disj item))
                 (add-item! [item]
                   (when-not (empty? item)
                     (if (contains? selected item)
-                      (when deselectable (swap! selected* assoc-in [id] (set/difference selected #{item})))
+                      (when deselectable
+                        (if (= 1 (count selected))
+                          (remove-item! item)
+                          (reset! selected* (set/difference selected #{item}))))
                       (when (or (nil? max-items)
                                 (> max-items (count selected)))
                         (if (or (not multiple)
                                 (empty? selected))
-                          (swap! selected* assoc-in [id] #{item})
-                          (swap! selected* update-in [id] conj item))))
-                    (when (and (fn? on-select)
-                               (not (empty? (get @selected* id))))
-                      (on-select (get @selected* id)))))
+                          (reset! selected* #{item})
+                          (swap! selected* conj item))))
+                    (when (fn? on-select)
+                      (on-select @selected*))))
                 (on-key-down [event]
                   (let [key (util/code->key (.-which event))]
                     (case key

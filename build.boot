@@ -1,30 +1,29 @@
 (def +title+ 'ui)
 (def +description+ "A Straight-Forward Library for Composing User-Interfaces")
-(def +url+ "https://github.com/bdo-labs/ui")
+(def +url+ (str "https://github.com/bdo-labs/" +title+))
 
 
 (set-env!
  :source-paths #{"src/cljc" "src/cljs"}
  :resource-paths #{"resources" "src/cljc" "src/cljs"}
  :dependencies '[;; Project Dependencies
-                 [clj-time "0.14.0"]
                  [com.andrewmcveigh/cljs-time "0.5.1"]
-                 [garden "2.0.0-alpha1"]
-                 [markdown-clj "1.0.1"]
-                 [org.clojure/clojure "1.9.0-RC1" :scope "provided"]
+                 [org.clojure/clojure "1.9.0" :scope "provided"]
                  [org.clojure/clojurescript "1.9.946" :scope "provided"]
                  [org.clojure/core.async "0.3.443"]
                  [venantius/accountant "0.2.0"]
                  [com.cemerick/url "0.1.1"]
-                 [re-frame "0.10.2"]
-                 [reagent "0.8.0-alpha1"]
+                 [clj-time "0.14.0"]
+                 [garden "2.0.0-alpha1"]
+                 [markdown-clj "1.0.1"]
+                 [re-frame "0.10.3-alpha1"]
+                 [reagent "0.8.0-alpha2"]
                  [secretary "1.2.3"]
                  [tongue "0.2.2"]
-                 [com.rpl/specter "1.0.3"]
 
                  ;; Build Dependencies
                  [org.clojars.stumitchell/clairvoyant "0.2.1" :scope "test"]
-                 [day8/re-frame-tracer "0.1.1-SNAPSHOT" :scope "test"]
+                 [day8.re-frame/trace "0.1.13" :scope "test"]
                  [adzerk/boot-cljs "2.1.4" :scope "test"]
                  [adzerk/boot-cljs-repl "0.3.3" :scope "test"]
                  [adzerk/boot-reload "0.5.2" :scope "test"]
@@ -38,12 +37,12 @@
                  [degree9/boot-semver "1.7.0" :scope "test"]
                  [funcool/boot-codeina "0.1.0-SNAPSHOT" :scope "test"]
                  [hendrick/boot-medusa "0.1.1" :scope "test"]
-                 [ns-tracker "0.3.1" :scope "test"]
                  [org.clojure/test.check "0.10.0-alpha2" :scope "test"]
                  [org.martinklepsch/boot-garden "1.3.2-0" :scope "test"]
                  [pandeiro/boot-http "0.8.3" :scope "test"]
                  [afrey/ring-html5-handler "1.1.1" :scope "test"]
                  [powerlaces/boot-cljs-devtools "0.2.0" :scope "test"]
+                 [ns-tracker "0.3.1" :scope "test"]
                  [weasel "0.7.0"  :scope "test"]])
 
 
@@ -84,7 +83,7 @@
  target {:dir #{"target"}}
  autoprefixer {:exec-path "target/node_modules/postcss-cli/bin/postcss"
                :files     ["ui.css" "docs.css"]
-               ;; All browsers that supports flex-box
+               ;; We support all browsers that supports flex-box
                :browsers  "last 2 versions, Explorer >= 10, Android >= 4.1, Safari >= 7, iOS >= 7"})
 
 
@@ -124,6 +123,7 @@
   (comp (pre-requisits)
      (serve :handler 'afrey.ring-html5-handler/handler)
      (watch)
+     (speak)
      (reload :on-jsload 'ui.core/mount-root
              :cljs-asset-path "")
      (styles)
@@ -132,8 +132,10 @@
      (cljs :ids #{"ui"}
            :optimizations :none
            :source-map true
-           :compiler-options {:asset-path "/ui.out"
-                              :preloads '[devtools.preload]})))
+           :compiler-options {:asset-path      "/ui.out"
+                              :preloads        '[devtools.preload
+                                                 day8.re-frame.trace.preload]
+                              :closure-defines {"re_frame.trace.trace_enabled_QMARK_" true}})))
 
 
 (deftask prod

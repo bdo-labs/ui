@@ -193,10 +193,8 @@
                         :searchable      true
                         :add-message     "Add % to members"
                         :empty-message   "No results matching %"
-                        :max-items       1
-                        :on-select       #(do
-                                           (util/log %)
-                                           (reset! selected* %))
+                        :selected        #{{:id 14, :value "Alliser Thorne"} {:id 18, :value "Arya Stark"}}
+                        :on-select       #(reset! selected* %)
                         :items           (set sep-filtered-items)
                         :predicate?      smart-case-includes?
                         :close-on-select false

@@ -57,12 +57,15 @@
 
 (defn chooser
   [& args]
-  (let [{:keys [params]}           (util/conform-or-fail ::args args)
-        {:keys [id]
-         :or   {id (util/gen-id)}} params
-        query*                     ^{:doc "Query to use for filtering and emphasizing the resultset"} (atom "")
-        show*                      ^{:doc "Show or hide the collection-dropdown"} (atom false)
-        selected*                  ^{:doc "Keep track of all selected items"} (atom #{})]
+  (let [{:keys [params]}       (util/conform-or-fail ::args args)
+        {:keys [id selected]
+         :or   {id       (util/gen-id)
+                selected #{}}} params
+        id                     (util/slug id)
+        query*                 ^{:doc "Query to use for filtering and emphasizing the resultset"} (atom "")
+        show*                  ^{:doc "Show or hide the collection-dropdown"} (atom false)
+        selected*              ^{:doc "Keep track of all selected items"} (atom selected)
+        collection-params      {:selected selected}]
 
     (letfn [#_(on-key-down
                 [event]
@@ -93,9 +96,8 @@
                       deselectable true
                       label        ""
                       style        {}}} params
-              id                        (util/slug id)
               textfield-params          (select-keys params (util/keys-from-spec :ui.element.textfield/params))
-              collection-params         (select-keys params (util/keys-from-spec :ui.element.collection/params))
+              collection-params         (merge collection-params (select-keys params (util/keys-from-spec :ui.element.collection/params)))
               filtered-items            (set/select (labels-by-predicate predicate? @query*) items)
               textfield-params          (merge textfield-params
                                                (when searchable {:label     label
@@ -124,6 +126,7 @@
               collection-params         (merge collection-params
                                                {:id           (util/slug id "collection")
                                                 :emphasize    @query*
+                                                :selected     @selected*
                                                 :deselectable deselectable
                                                 :on-select    (fn [items]
                                                                 (when (true? close-on-select) (reset! show* false))
@@ -135,8 +138,7 @@
                          :key   (util/slug id "key")
                          :style style}
            [textfield textfield-params]
-           [dropdown {:open?  @show*
-                      :origin [:top :left]}
+           [dropdown {:open? @show*}
             [collection collection-params
              filtered-items]]
 
