@@ -16,8 +16,7 @@
             [ui.docs.dropdown :as dropdown]
             [ui.docs.inputs :as inputs]
             [ui.docs.date-picker :as date-picker]
-            [ui.docs.sheet :as sheet]
-            #?(:cljs [ui.docs.boundary :as boundary])))
+            [ui.docs.sheet :as sheet]))
 
 
 (defn- menu-item []
@@ -48,9 +47,6 @@
   "Maps the name of a documentation to it's renderer"
   [item-name]
   (case item-name
-    ;; Virtuals
-    :boundary #?(:clj [] :cljs [boundary/documentation])
-
     ;; Layouts
     :centered [centered/documentation]
     :fill [fill/documentation]
@@ -74,7 +70,6 @@
 (defn- doc-panel
   []
   (let [active-item @(re-frame/subscribe [:active-doc-item])
-        virtuals #?(:clj [] :cljs [:boundary])
         layouts     [:centered :horizontally :vertically :fill]
         elements    [:buttons :colors :date-picker :dialog :dropdown :icons :inputs :progress :sheet]]
     [element/sidebar {:locked true}
@@ -82,7 +77,6 @@
       [:menu [menu-item :ui]]
       (into [:menu [:h4 "layout/"]] (for [l layouts] [menu-item l])) [:br]
       (into [:menu [:h4 "elements/"]] (for [elem elements] [menu-item elem])) [:br]
-      #?(:cljs (into [:menu [:h4 "virtuals/"]] (for [v virtuals] [menu-item v])))
       [:br]]
      [doc-item active-item]]))
 
