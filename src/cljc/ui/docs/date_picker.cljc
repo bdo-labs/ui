@@ -4,6 +4,7 @@
             [#?(:clj clj-time.coerce :cljs cljs-time.coerce) :as coerce]
             [#?(:clj clj-time.predicates :cljs cljs-time.predicates) :refer [same-date?]]
             [re-frame.core :as re-frame]
+            [ui.wire.polyglot :refer [translate]]
             [ui.elements :as element]
             [ui.layout :as layout]
             [ui.util :as util]))
@@ -54,9 +55,9 @@
         close-dialog   #(re-frame/dispatch [::close-dialog])
         picker         (or @(re-frame/subscribe [::picker]) :years)
         date           @(re-frame/subscribe [::date])
-        formatted-date (if (= (fmt/unparse (fmt/formatter "dd. MMM. yyyy") (first date)) (fmt/unparse (fmt/formatter "dd. MMM. yyyy") (last date)))
-                         (fmt/unparse (fmt/formatter "dd. MMM. yyyy") (first date))
-                         (str (fmt/unparse (fmt/formatter "dd. MMM. yyyy") (first date)) " - " (fmt/unparse (fmt/formatter "dd. MMM. yyyy") (last date))))
+        formatted-date (if (= (translate :date-full (coerce/to-date (first date))) (translate :date-full (coerce/to-date (last date))))
+                         (translate :date-full (coerce/to-date (first date)))
+                         (str (translate :date-full (coerce/to-date (first date))) " - " (translate :date-full (coerce/to-date (last date)))))
         set-date       #(do (re-frame/dispatch [::set-date %])
                             (close-dialog))]
     [layout/vertically

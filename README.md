@@ -5,21 +5,32 @@
 
 ### Introduction
 
-At the moment, `ui` is geared towards Clojure-projects that
-use [Reagent](//reagent-project.github.io/) on the front-end. If your
-adventurous and would like to use `ui` with some other technology, you
-can download
-the [latest release](//github.com/bdo-labs/ui/releases/latest/) and
-experiment as you please. Guides will be available when the library is
-considered stable.
+At the moment, `ui` is geared towards Clojure-projects that  
+use [Reagent](//reagent-project.github.io/) on the front-end. If your  
+adventurous and would like to use `ui` with some other technology, you  
+can download  
+the [latest release](//github.com/bdo-labs/ui/releases/latest/) and  
+experiment as you please. Guides will be available when the library is  
+considered stable.  
 
 
-## Contributing
+### Project anatomy
 
-To contribute code, you'll need to compile the ting, so below there's
-a short outline of how you might do that. We also have
-some [contribution-guidelines](./.github/CONTRIBUTING.md) that you
-should have in mind.
+There are four verticals to `ui`. Layout, elements, virtuals and
+wires. Layout and elements are quite self-explanetory in their naming
+and then you have virtuals. Virtuals are mostly used in the same
+manner as regular elements, but instead of adding nodes to the DOM,
+they will add functionality to existing nodes. Wires are a bunch of
+initialization, events and subscriptions that makes ui easier to work
+with.
+
+
+### Contributing
+
+To contribute code, you'll need to compile the ting, so below there's  
+a short outline of how you might do that. We also have  
+some [contribution-guidelines](./.github/CONTRIBUTING.md) that you  
+should have in mind.  
 
 
 ### Pre-Requisits

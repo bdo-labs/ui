@@ -4,6 +4,8 @@
             [ui.readme :as readme]
             [ui.elements :as element]
             [ui.layout :as layout]
+            [ui.docs.polyglot :as polyglot]
+            [ui.docs.load :as load]
             [ui.docs.centered :as centered]
             [ui.docs.fill :as fill]
             [ui.docs.horizontally :as horizontally]
@@ -19,14 +21,13 @@
             [ui.docs.sheet :as sheet]))
 
 
-(defn- menu-item []
-  (let [active-doc-item (re-frame/subscribe [:active-doc-item])]
-    (fn [item]
-      [:a {:key      (str "menu-item-" (name item))
-           :on-click #(re-frame/dispatch [:navigate :docs (name item)])
-           :class    (if (= @active-doc-item item) "face-primary" "face-tertiary")
-           :href     (str "./docs/" (name item))}
-       (name item)])))
+(defn- menu-item [item]
+  (let [active-doc-item @(re-frame/subscribe [:active-doc-item])]
+    [:a {:key      (str "menu-item-" (name item))
+         :on-click #(re-frame/dispatch [:navigate :docs (name item)])
+         :class    (if (= active-doc-item item) "face-primary" "face-tertiary")
+         :href     (str "./docs/" (name item))}
+     (name item)]))
 
 
 (defn- intro
@@ -47,6 +48,10 @@
   "Maps the name of a documentation to it's renderer"
   [item-name]
   (case item-name
+    ;; Wires
+    :load     [load/documentation]
+    :polyglot [polyglot/documentation]
+
     ;; Layouts
     :centered [centered/documentation]
     :fill [fill/documentation]
@@ -70,11 +75,13 @@
 (defn- doc-panel
   []
   (let [active-item @(re-frame/subscribe [:active-doc-item])
+        wires       [:load :polyglot]
         layouts     [:centered :horizontally :vertically :fill]
         elements    [:buttons :colors :date-picker :dialog :dropdown :icons :inputs :progress :sheet]]
     [element/sidebar {:locked true}
      [layout/vertically {:role :navigation}
       [:menu [menu-item :ui]]
+      (into [:menu [:h4 "wires/"]] (for [w wires] [menu-item w])) [:br]
       (into [:menu [:h4 "layout/"]] (for [l layouts] [menu-item l])) [:br]
       (into [:menu [:h4 "elements/"]] (for [elem elements] [menu-item elem])) [:br]
       [:br]]

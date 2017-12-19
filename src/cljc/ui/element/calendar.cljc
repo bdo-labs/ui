@@ -9,6 +9,7 @@
             [ui.element.icon :refer [icon]]
             [ui.element.containers :refer [container]]
             [ui.util :as u]
+            [ui.wire.polyglot :refer [translate]]
             [ui.util :as util]
             [clojure.test.check.generators :as gen]
             [clojure.spec.alpha :as spec]))
@@ -21,7 +22,7 @@
   (spec/with-gen fn?
     (gen/return (constantly nil))))
 
-(spec/def ::start-of-week (spec/and pos-int? #(>= 0 %) #(<= 6)))
+(spec/def ::start-of-week (spec/and integer? #(>= % 0) #(<= % 6)))
 (spec/def ::show-weekend? boolean?)
 (spec/def ::nav? boolean?)
 (spec/def ::selectable? boolean?)
@@ -108,9 +109,6 @@
     (subvec (mapv vec (partition 7 days)) 0 6)))
 
 
-(def weekdays (cycle ["Sunday" "Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday"]))
-
-
 (defn- date->day [date]
   (->> (str/split (fmt/unparse (fmt/formatter "d M yyyy") date) #" ")
        (map int)
@@ -164,7 +162,8 @@
 
 (defn- calendar-nav
   [{:keys [id jump on-click format !model]
-    :or   {jump 1 format "MMMM yyyy"}
+    :or   {jump   1
+           format :ui/year-month}
     :as   params}]
   (fn []
     (let [minimum?    #(after? % (:min params))
@@ -183,7 +182,7 @@
                   :space  :between
                   :class  "calendar-nav"}
        ^{:key "previous-month"} [icon {:font "ion" :on-click on-previous} "chevron-left"]
-       ^{:key "current-month"} [:h3 (fmt/unparse (fmt/formatter format) @!model)]
+       ^{:key "current-month"} [:h3 (translate format (coerce/to-date @!model))]
        ^{:key "next-month"} [icon {:font "ion" :on-click on-next} "chevron-right"]])))
 
 
@@ -232,23 +231,24 @@
         [container {:layout :vertically
                     :align  [:center :center]
                     :fill?  true}
-         [calendar-nav {:jump 12 :format "yyyy" :!model !model}]
+         [calendar-nav {:jump 12 :format :ui/year :!model !model}]
          (for [months rows]
            [container {:key (str/join months) :layout :horizontally :fill? true :gap? false}
             (if (= every 1)
               (for [month months]
-                (let [val (fmt/unparse (fmt/formatter "MMMM") month)]
+                (let [val (translate :ui/month (coerce/to-date month))]
                   [button (merge {:key      (str "btn-" val)
                                   :fill    true
                                   :on-click #(on-click [(time/first-day-of-the-month month) (time/last-day-of-the-month month)])}
                                  (when (= (dt->str selected) (dt->str (time/first-day-of-the-month month))) {:class "primary"})) val]))
-              (let [val (str (fmt/unparse (fmt/formatter "MMMM") (first months)) " - " (fmt/unparse (fmt/formatter "MMMM") (last months)))]
+              (let [val (str (translate :ui/month (coerce/to-date (first months))) " - " (translate :ui/month (coerce/to-date (last months))))]
                 [button (merge {:key      (str "btn-" val)
                                 :fill    true
                                 :on-click #(on-click [(time/first-day-of-the-month (first months)) (time/last-day-of-the-month (last months))])}
                                (when (= (dt->str selected) (dt->str (time/first-day-of-the-month (first months)))) {:class "primary"})) val]))])]))))
 
 
+;; FIXME Overriding start of the week fails
 (defn days
   [& args]
   (let [{:keys [params]} (util/conform-or-fail ::days-args args)
@@ -277,9 +277,12 @@
        [:table {:class class}
         [:thead.Weekdays
          [:tr
-          (for [weekday weekdays-num]
-            (let [weekday-name (nth weekdays weekday)]
-              ^{:key (str "weekday-" weekday)} [:th (if short-form? (subs weekday-name 0 3) weekday-name)]))]]
+          (doall
+           (for [weekday weekdays-num]
+             (let [weekday-name (translate (if short-form? :ui/weekday-short :ui/weekday-long)
+                                           (coerce/to-date (str "2016-1-" (+ 3 weekday))))]
+               ^{:key (str "weekday-" weekday)}
+               [:th weekday-name])))]]
         [:tbody
          (for [week (weeks @caret)]
            ^{:key (str "week-" (:month (first week)) "-" (:day (first week)))}

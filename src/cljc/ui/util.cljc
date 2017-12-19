@@ -23,6 +23,12 @@
        (with-out-str)))
 
 
+(defn ->ref-name [event]
+  (let [datom (str/replace (name event) #"^(toggle|set|add|remove)-" "")]
+    (keyword (str (namespace event) "/" datom))))
+
+
+
 (defn extract
   "Extracts [key] from [db]"
   [db [key]]

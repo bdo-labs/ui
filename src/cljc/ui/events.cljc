@@ -34,6 +34,7 @@
  (fn  [_ _]
    {:dispatch-n (list [:init-sheet]
                       [:init-icons]
+                      [:init-polyglot]
                       [:init-inputs])
     :db db/default-db}))
 

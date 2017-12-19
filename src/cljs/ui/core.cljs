@@ -7,6 +7,7 @@
             [ui.events]
             [ui.effects]
             [ui.subs]
+            [ui.wire.polyglot]
             [re-frame.core :as re-frame]))
 
 
