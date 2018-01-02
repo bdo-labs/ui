@@ -1,40 +1,33 @@
-version: 2.0
-
+version: 2
 jobs:
-
-  local-deps:
-    steps:
-      - git clone https://github.com/noprompt/garden && cd garden && git checkout v2.0.0 && lein install
-
-  build:
+  test:
     docker:
       - image: clojure:boot-2.7.1-alpine
     steps:
       - checkout
       - restore_cache:
-          key: build-{{checksum "boot.properties" }}-{{ checksum "build.boot" }}
+          key: test-{{checksum "boot.properties" }}-{{ checksum "build.boot" }}
       - run: boot test-once
       - save_cache:
           paths:
             - ~/.m2
             - ~/.boot/cache/lib
             - ~/.boot/cache/bin
-          key: build-{{checksum "boot.properties" }}-{{ checksum "build.boot" }}
+          key: test-{{checksum "boot.properties" }}-{{ checksum "build.boot" }}
     environment:
       BOOT_JVM_OPTIONS: "-Xms512m -Xmx1024m"
       BOOT_WATCHERS_DISABLE: "yes"
-
   deploy:
+    docker:
+      - image: clojure:boot-2.7.1-alpine
     steps:
-      - echo "Deploy confirguration goes here"
-
+      - checkout
+      - run: echo "Clojars deployment goes here"
 workflows:
   version: 2
-  build-and-deploy:
-    - local-deps
-    - build:
-        requires:
-          - local-deps
-    - deploy:
-        requires:
-          - build
+  test-and-deploy:
+    jobs:
+      - test
+      - deploy:
+          requires:
+          - test
