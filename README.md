@@ -35,7 +35,7 @@ should have in mind.
 
 ### Pre-Requisits
 
-- [clojure 1.9.0-alpha17](https://clojure.org/community/downloads#_development_release_1_9_0_alpha17_may_26_2017)
+- [clojure 1.9.0](https://clojure.org/community/downloads#_stable_release_1_9_0_dec_8_2017)
 - [boot-clj](http://boot-clj.com/)
 - [node](https://nodejs.org/en/download/current/)
 

@@ -98,9 +98,7 @@
 
 (deftask pre-requisits
   []
-  (comp (npm :install {:postcss-cli  "latest"
-                    :autoprefixer "latest"}
-          :cache-key ::cache)
+  (comp (npm :install {:postcss-cli "latest" :autoprefixer "latest"} :cache-key ::cache)
      (readme)
      (target)
      identity))
@@ -110,10 +108,8 @@
   "Compile garden-styles and add browser-prefixes. Note that this
   requires that `postcss-cli` and `autoprefixer` is installed"
   []
-  (comp (garden :output-to "css/ui.css"
-             :styles-var 'ui.styles/screen)
-     (garden :output-to "css/docs.css"
-             :styles-var 'ui.styles/docs)
+  (comp (garden :output-to "css/ui.css" :styles-var 'ui.styles/screen)
+     (garden :output-to "css/docs.css" :styles-var 'ui.styles/docs)
      (autoprefixer)
      identity))
 
@@ -124,8 +120,7 @@
      (serve :handler 'afrey.ring-html5-handler/handler)
      (watch)
      (speak)
-     (reload :on-jsload 'ui.core/mount-root
-             :cljs-asset-path "")
+     (reload :on-jsload 'ui.core/mount-root :cljs-asset-path "")
      (styles)
      (cljs-repl)
      (cljs-devtools)
@@ -152,27 +147,32 @@
                               :optimize-constants true})))
 
 
+(deftask testing
+  []
+  (merge-env! :source-paths #{"test/cljc"})
+  identity)
+
+
 (deftask test-once
   "Run tests once. Typically used by the CI-runner"
-  [s speak? bool "Notify when the build is completed"]
-  (merge-env! :source-paths #{"test"})
-  (comp (if speak? (speak) identity)
-     (test-cljs)))
+  []
+  (comp (testing)
+     (test-cljs :js-env :chrome)))
 
 
 (deftask test-auto
   "Run tests continuously"
-  [s speak? bool "Notify when the build is completed"]
+  []
   (merge-env! :source-paths #{"test"})
-  (comp (watch)
-     (if speak? (speak) identity)
+  (comp (testing)
+     (watch)
      (test-cljs)))
 
 
 (deftask deploy
-  "Bump version and push to Github. Accepted pull-requests are
+  "Bump library-version and push to Github. Accepted pull-requests are
   automatically published to Clojars"
-  [s speak?        bool "Notify when deployment is completed"
-   b bump   VALUE  kw   "What to bump (major minor or patch)"]
+  [b bump   VALUE  kw   "What to bump (major minor or patch)"]
   (comp (version bump 'inc)
-     (git-push)))
+     (git-push)
+     (speak)))
