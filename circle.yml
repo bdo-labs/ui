@@ -1,5 +1,11 @@
-version: 2
+version: 2.0
+
 jobs:
+
+  local-deps:
+    steps:
+      - git clone https://github.com/noprompt/garden && cd garden && git checkout v2.0.0 && lein install
+
   build:
     docker:
       - image: clojure:boot-2.7.1-alpine
@@ -17,3 +23,18 @@ jobs:
     environment:
       BOOT_JVM_OPTIONS: "-Xms512m -Xmx1024m"
       BOOT_WATCHERS_DISABLE: "yes"
+
+  deploy:
+    steps:
+      - echo "Deploy confirguration goes here"
+
+workflows:
+  version: 2
+  build-and-deploy:
+    - local-deps
+    - build:
+        requires:
+          - local-deps
+    - deploy:
+        requires:
+          - build
