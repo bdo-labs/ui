@@ -3,9 +3,6 @@ jobs:
   build:
     docker:
       - image: clojure:boot-2.7.1-alpine
-      environment:
-        BOOT_JVM_OPTIONS: "-Xms512m -Xmx1024m"
-        BOOT_WATCHERS_DISABLE: "yes"
     steps:
       - checkout
       - restore_cache:
@@ -17,3 +14,6 @@ jobs:
             - ~/.boot/cache/lib
             - ~/.boot/cache/bin
           key: build-{{checksum "boot.properties" }}-{{ checksum "build.boot" }}
+    environment:
+      BOOT_JVM_OPTIONS: "-Xms512m -Xmx1024m"
+      BOOT_WATCHERS_DISABLE: "yes"
