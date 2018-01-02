@@ -66,10 +66,11 @@
   (let [{:keys [params icon]} (util/conform-or-fail ::icon-args args)
         {:keys [font size]
          :or   {font @(re-frame/subscribe [:ui/icon-font])
-                size 2}}        params
+                size 2}}      params
         style                 {:font-size (str size "rem")}
         class                 (:class params)
-        params                (dissoc params :size :font :class)]
+        params                (dissoc params :size :font :class)
+        font                  (if (vector? font) (apply hash-map font) font)]
     (if-let [font-name (:font-name font)]
       [:i.Icon (merge {:class (str font-name " " class) :style style} params) icon]
       (let [font-prefix (:font-prefix font)
