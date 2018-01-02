@@ -1,0 +1,23 @@
+version: 2
+jobs:
+  test:
+    docker:
+      - image: 'hkjels/boot-2.7.1-browsers-lein-garden:0.0.1'
+    steps:
+      - checkout
+      - run: boot test-once
+    environment:
+  deploy:
+    docker:
+      - image: 'hkjels/boot-2.7.1-browsers-lein-garden:0.0.1'
+    steps:
+      - checkout
+      - run: echo "Clojars deployment goes here"
+workflows:
+  version: 2
+  test-and-deploy:
+    jobs:
+      - test
+      - deploy:
+          requires:
+          - test

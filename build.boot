@@ -157,7 +157,7 @@
   "Run tests once. Typically used by the CI-runner"
   []
   (comp (testing)
-     (test-cljs :js-env :chrome)))
+     (test-cljs)))
 
 
 (deftask test-auto
