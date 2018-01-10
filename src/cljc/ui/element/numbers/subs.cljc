@@ -136,7 +136,7 @@
             (subscribe [:sorted-column sheet-ref])
             (subscribe [:sort-ascending? sheet-ref])])
          (fn [[filtered-rows sorted-column sort-ascending?] _]
-           (let [sort-fn (if sort-ascending? > <)]
+           (let [sort-fn (if sort-ascending? < >)]
              (if (nil? sorted-column)
                filtered-rows
                (->> filtered-rows
