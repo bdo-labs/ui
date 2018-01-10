@@ -72,6 +72,7 @@
          :transform-origin [[:center :center]]
          :transform        [[(scale 0) (translateX (unit/percent -50)) (translateY (unit/percent -25))]]
          :transition       [[:100ms :ease]]
+         :-webkit-backface-visibility :hidden
          :z-index          2}]
     [:&.indeterminate
      [:i {:transform-origin [[:left :center]]
