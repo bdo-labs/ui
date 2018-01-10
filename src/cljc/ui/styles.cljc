@@ -259,14 +259,14 @@
 
 
 (defn- animations [theme]
-  [pulse-color]
-  [fade]
-  [up]
-  [fade-up]
-  [move-background]
-  [scaled]
-  ;; [scale-ripple]
-  )
+  (map #(into '() %) [[pulse-color]
+                      [fade]
+                      [up]
+                      [fade-up]
+                      [move-background]
+                      [scaled] 
+                      ;; [scale-ripple]
+                      ]))
 
 
 (defn- forms [{:keys [primary secondary]}]

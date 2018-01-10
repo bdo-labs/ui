@@ -58,7 +58,7 @@
     [:&.inline {:display :inline-flex}]
     [:&.rounded {:border-radius (unit/rem 1)}]
     [:&.raised {:box-shadow [[0 (unit/rem 0.2) (unit/rem 0.3) (color/rgba [35 35 35 0.2])]]
-                :overflow   :hidden}]]])
+                :overflow :auto}]]])
 
 
 ;; Parameter specifications
