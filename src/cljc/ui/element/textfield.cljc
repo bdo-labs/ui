@@ -28,8 +28,8 @@
 (spec/def ::read-only boolean?)
 (spec/def ::focus boolean?)
 (spec/def ::params
-  (spec/keys :opt-un [::id
-                      ::value
+  (spec/keys :req-un [::value]
+             :opt-un [::id
                       ::placeholder
                       ::label
                       ::disabled
