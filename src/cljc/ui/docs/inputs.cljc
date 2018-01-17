@@ -196,6 +196,7 @@
                         :selected        #{{:id 14, :value "Alliser Thorne"} {:id 18, :value "Arya Stark"}}
                         :on-select       #(reset! selected* %)
                         :items           (set sep-filtered-items)
+                        :auto-focus      true
                         :predicate?      smart-case-includes?
                         :close-on-select false
                         :multiple        multiple
