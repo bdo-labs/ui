@@ -9,13 +9,6 @@
            (get db sheet-ref)))
 
 
-(reg-sub :row-count
-         (fn [[_ sheet-ref]]
-           (subscribe [:sheet sheet-ref]))
-         (fn [sheet _]
-           (get sheet :row-count)))
-
-
 (reg-sub :columns
          (fn [[_ sheet-ref]]
            (subscribe [:sheet sheet-ref]))
@@ -30,6 +23,21 @@
            (->> columns
                 (filterv #(= (:col-ref %) col-ref))
                 (first))))
+
+
+(reg-sub :checkbox
+         (fn [[_ sheet-ref col-ref]]
+           (subscribe [:column sheet-ref col-ref]))
+         (fn [column [_ _ _ checkbox-id]]
+           (get-in column [:checkboxes checkbox-id] false)))
+
+
+(reg-sub
+ :query
+ (fn [[_ sheet-ref col-ref]]
+   (subscribe [:column sheet-ref col-ref]))
+ (fn [column _]
+   (get column :query nil)))
 
 
 (reg-sub :unique-values
@@ -55,7 +63,7 @@
 ;; Filtering
 ;; FIXME It's not really obvious how this works, needs a bit of clean-up
 (defn filter-rows [columns _]
-  (when (not-empty columns)
+  (when (seq columns)
     (let [filter-fns (map :filters columns)]
       (->> columns
            (map :rows)
@@ -144,6 +152,13 @@
                                    (:sort-value (meta (:value %)))
                                    (:value %)) #(nth % (u/col-num sorted-column)))
                              sort-fn))))))
+
+
+(reg-sub :row-count
+         (fn [[_ sheet-ref]]
+           (subscribe [:rows sheet-ref]))
+         (fn [rows _]
+           (count rows)))
 
 
 (reg-sub

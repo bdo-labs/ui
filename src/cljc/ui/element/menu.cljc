@@ -21,7 +21,8 @@
                 :background       :white
                 :transform        (scale 1)
                 :transform-origin [[:top :right]]
-                :transition       [[:200ms (cubic-bezier 0.770, 0.000, 0.175, 1.000)]]
+                ;; Transition has been temporarily removed due to performance-issues
+                ;; :transition       [[:200ms (cubic-bezier 0.770, 0.000, 0.175, 1.000)]]
                 :z-index          90
                 :font-weight      :normal}
     [:&.not-open {:transform (scale 0)}]
