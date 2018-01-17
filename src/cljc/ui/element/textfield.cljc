@@ -25,12 +25,14 @@
 (spec/def ::label string?)
 (spec/def ::value string?)
 (spec/def ::disabled boolean?)
+(spec/def ::auto-focus boolean?)
 (spec/def ::read-only boolean?)
 (spec/def ::focus boolean?)
 (spec/def ::params
   (spec/keys :req-un [::value]
              :opt-un [::id
                       ::placeholder
+                      ::auto-focus
                       ::label
                       ::disabled
                       ::read-only
