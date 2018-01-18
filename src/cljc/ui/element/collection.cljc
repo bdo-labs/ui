@@ -33,6 +33,7 @@
     :without-label (spec/cat :id ::id :value ::value)
     :with-label (spec/cat :id ::id :value ::value :label ::label)
     :qualified (spec/keys :req-un [::id ::value] :opt-un [::label]))))
+(spec/def ::predicate? ::maybe-fn)
 
 
 ;; Wether you can select multiple items
@@ -82,6 +83,7 @@
                       ::deselectable
                       ::multiple
                       ::keyboard
+                      ::predicate?
                       ::add-message
                       ::empty-message
                       ::hide-selected]))
@@ -164,12 +166,14 @@
                     multiple
                     deselectable
                     keyboard
+                    predicate?
                     add-message
                     empty-message
                     on-select
                     hide-selected
                     max-items]
-             :or   {keyboard      true
+             :or   {predicate?    str/includes?
+                    keyboard      true
                     deselectable  true
                     add-message   false
                     empty-message false
@@ -212,6 +216,7 @@
 
            ;; Add new item
            (when (and (not (empty? emphasize))
+                      (predicate? emphasize emphasize)
                       (not (false? add-message))
                       (not= emphasize (:value (first items))))
              (let [item {:id nil :value emphasize}]
@@ -224,6 +229,7 @@
 
            ;; No results
            (when (and (empty? items)
+                      (predicate? emphasize emphasize)
                       (not (false? empty-message)))
              [:li {:key (util/slug id "empty")}
               (emphasize-match (str/replace-first empty-message "%" emphasize) emphasize)])
