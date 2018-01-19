@@ -77,4 +77,3 @@
      [element/sheet {:name           "Worksheet"
                      :editable?      false}
       content]]))
-

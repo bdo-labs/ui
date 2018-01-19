@@ -1,6 +1,5 @@
 (ns ui.element.textfield
-  (:require [#?(:clj clojure.core :cljs reagent.core) :refer [atom]]
-            [clojure.spec.alpha :as spec]
+  (:require [clojure.spec.alpha :as spec]
             [clojure.test.check.generators :as gen]
             [ui.util :as util]
             [clojure.string :as str]))

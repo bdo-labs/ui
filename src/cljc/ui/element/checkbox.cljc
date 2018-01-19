@@ -1,8 +1,9 @@
 (ns ui.element.checkbox
   #?(:cljs (:require-macros [garden.def :refer [defcssfn]]))
-  (:require [ui.util :as u]
+  (:require #?(:clj [garden.def :refer [defcssfn]])
+            [ui.util :as u]
             [clojure.spec.alpha :as spec]
-            #?(:clj [garden.def :refer [defcssfn]])
+            [clojure.test.check.generators :as gen]
             [garden.units :as unit]
             [garden.color :as color]))
 
@@ -94,16 +95,25 @@
              :border-radius      (unit/rem 0.2)
              :z-index            1}]]])
 
+(spec/def ::maybe-fn
+  (spec/with-gen fn?
+    (gen/return (constantly nil))))
 
 (spec/def ::id (spec/or :numeric int?
                         :textual (spec/and string? not-empty)))
 (spec/def ::checked? boolean?)
 (spec/def ::label string?)
+(spec/def ::value string?)
+
+(spec/def ::on-change ::maybe-fn)
 
 
 (spec/def ::checkbox-params
   (spec/keys
-   :opt-un [::id ::checked?]))
+   :opt-un [::id
+            ::checked?
+            ::value
+            ::on-change]))
 
 
 (spec/def ::checkbox-args
