@@ -27,9 +27,8 @@
 (spec/def ::auto-focus boolean?)
 (spec/def ::read-only boolean?)
 (spec/def ::focus boolean?)
-(spec/def ::params
-  (spec/keys :req-un [::value]
-             :opt-un [::id
+(spec/def ::--params
+  (spec/keys :opt-un [::id
                       ::placeholder
                       ::auto-focus
                       ::label
@@ -41,6 +40,9 @@
                       ::on-blur
                       ::on-key-up
                       ::on-key-down]))
+(spec/def ::params
+  (spec/merge ::--params
+              (spec/keys :req-un [::value])))
 
 
 (spec/def ::args (spec/cat :params ::params))

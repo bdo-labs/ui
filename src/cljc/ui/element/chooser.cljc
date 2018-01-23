@@ -28,14 +28,13 @@
 (spec/def ::searchable boolean?)
 (spec/def ::predicate? ::maybe-fn)
 
-
 (spec/def ::params
-  (spec/merge (spec/keys :opt-un [::close-on-select
+  (spec/merge :ui.element.collection/params
+              :ui.element.textfield/--params
+              (spec/keys :opt-un [::close-on-select
                                   ::searchable
                                   ::labels
-                                  ::predicate?])
-              :ui.element.collection/params
-              :ui.element.textfield/params))
+                                  ::predicate?])))
 
 
 (spec/def ::args
