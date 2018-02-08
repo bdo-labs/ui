@@ -31,6 +31,8 @@
    :ui/month             (tongue/inst-formatter "{month-long}" inst-strings-en)
    :ui/weekday-long      (tongue/inst-formatter "{weekday-long}" inst-strings-en)
    :ui/weekday-short     (tongue/inst-formatter "{weekday-short}" inst-strings-en)
+   :sort-ascending       "Sort Ascending"
+   :sort-descending      "Sort Descending"
    :hello                "hello {1}!"})
 
 
