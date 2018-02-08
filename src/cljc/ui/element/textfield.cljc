@@ -52,30 +52,24 @@
   [{:keys [id]
     :or   {id (util/gen-id)}}]
   (fn [& args]
-    (let [{:keys [params]}            (util/conform-or-fail ::args args)
+    (let [{:keys [params]}            (util/conform! ::args args)
           {:keys [style
                   placeholder
                   label
-                  focus
                   value]
            :or   {style       {}
                   placeholder ""}} params
-          ui-params                   (util/keys-from-spec ::params)
-          class                       (str/join " " [(util/params->classes params)
+          ui-params                   (select-keys params (util/keys-from-spec ::--params))
+          class                       (str/join " " [(util/params->classes ui-params)
                                                      (when (or (not (empty? value))
                                                                (not (empty? placeholder))) "dirty")])]
       [:div.Textfield {:key   (util/slug "textfield" id)
                        :style style
                        :class class}
        [:input (merge
-                (dissoc params :class :style :placeholder :label)
+                (dissoc ui-params :placeholder :label)
                 {:type          :text
                  :placeholder   placeholder
                  :auto-complete "off"})]
        (when-not (empty? label)
          [:label {:for id} label])])))
-
-
-(spec/fdef textfield
-           :args ::args
-           :ret vector?)

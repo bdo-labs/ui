@@ -75,11 +75,10 @@
   (throw (#?(:clj Exception. :cljs js/Error.) error-string)))
 
 
-(defn conform-or-fail
+(defn conform!
   "Conform arguments to specification or throw an exception"
   [spec args]
-  (spec/conform spec args)
-  #_(if (spec/valid? spec args)
+  (if (spec/valid? spec args)
     (spec/conform spec args)
     (exception (spec/explain-str spec args))))
 

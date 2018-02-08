@@ -99,7 +99,7 @@
 
 
 (defn button [& args]
-  (let [{:keys [params content]} (util/conform-or-fail ::args args)
+  (let [{:keys [params content]} (util/conform! ::args args)
         class                    (util/params->classes params)
         ui-params                (conj (util/keys-from-spec ::params) :class)
         params                   (->> (apply dissoc params ui-params)

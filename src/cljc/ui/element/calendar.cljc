@@ -187,7 +187,7 @@
 
 
 (defn years [& args]
-  (let [{:keys [params]}   (util/conform-or-fail ::years-args args)
+  (let [{:keys [params]}   (util/conform! ::years-args args)
         {:keys [on-click]} params
         current-year       (inc (util/parse-int (fmt/unparse (fmt/formatter "yyyy") (time/now))))
         rows               (->> (range (- current-year 4) current-year)
@@ -210,7 +210,7 @@
 (defn months
   "Display the calendar-months of a [selected] year"
   [& args]
-  (let [{:keys [params]}              (util/conform-or-fail ::months-args args)
+  (let [{:keys [params]}              (util/conform! ::months-args args)
         {:keys [every
                 on-click
                 selected]
@@ -218,7 +218,7 @@
         !model                        (atom selected)
         dt->str #(fmt/unparse (fmt/formatter "yyyyMMdd") %)]
     (fn [& args]
-      (let [{:keys [params]}  (util/conform-or-fail ::months-args args)
+      (let [{:keys [params]}  (util/conform! ::months-args args)
             {:keys [every
                     selected]
              :or   {every 1
@@ -251,7 +251,7 @@
 ;; FIXME Overriding start of the week fails
 (defn days
   [& args]
-  (let [{:keys [params]} (util/conform-or-fail ::days-args args)
+  (let [{:keys [params]} (util/conform! ::days-args args)
         {:keys [start-of-week selected show-weekend?
                 jump on-click nav? selectable? multiple?
                 on-navigation class short-form?]

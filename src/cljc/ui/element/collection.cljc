@@ -1,11 +1,9 @@
 (ns ui.element.collection
   (:require [#?(:clj clojure.core :cljs reagent.core) :refer [atom]]
-            [re-frame.core :as re-frame]
             [clojure.spec.alpha :as spec]
             [clojure.test.check.generators :as gen]
             [clojure.string :as str]
             [clojure.set :as set]
-            [ui.element.label :refer [label]]
             [ui.util :as util]))
 
 
@@ -148,7 +146,7 @@
   [& args]
   (let [intended*              ^{:doc "Items that are intermediately marked for selection"} (atom nil)
         selected*              ^{:doc "A sorted-map of sets of items that's been selected"} (atom (sorted-map))
-        {:keys [params]}       (util/conform-or-fail ::args args)
+        {:keys [params]}       (util/conform! ::args args)
         {:keys [id
                 multiple
                 selected]
@@ -161,7 +159,7 @@
     (reset! selected* selected)
 
     (fn [& args]
-      (let [{:keys [params items]}    (util/conform-or-fail ::args args)
+      (let [{:keys [params items]}    (util/conform! ::args args)
             {:keys [emphasize
                     multiple
                     deselectable
@@ -178,8 +176,8 @@
                     add-message   false
                     empty-message false
                     hide-selected false}} params
-            items                     (apply sorted-set-by (fn [a b] (< (:value a) (:value b))) items)
-            selected                  @selected*]
+            selected                  @selected*
+            ui-params                 (select-keys params (util/keys-from-spec ::params))]
 
         ;; State management
         (letfn [(set-intended! [item]
@@ -212,7 +210,8 @@
           #?(:cljs (when keyboard (set! (.-onkeydown js/document) on-key-down)))
 
           [:ul.Collection {:key (util/slug id "collection")
-                           :id  id}
+                           :id  id
+                           :class (util/params->classes ui-params)}
 
            ;; Add new item
            (when (and (not (empty? emphasize))

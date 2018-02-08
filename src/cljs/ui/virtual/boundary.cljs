@@ -15,7 +15,7 @@
 (defn boundary
   "Create a virtual boundary around an element for more fine-grained events"
   [& args]
-  (let [{:keys [params content]} (util/conform-or-fail ::args args)
+  (let [{:keys [params content]} (util/conform! ::args args)
         {:keys [id
                 lift
                 offset]

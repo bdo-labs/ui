@@ -26,7 +26,7 @@
 
 
 (defn- layout [layout & args]
-  (let [{:keys [params content]} (util/conform-or-fail ::layout-args args)
+  (let [{:keys [params content]} (util/conform! ::layout-args args)
         aligned                  (apply hash-map (-> params :aligned))
         align                    [(util/aligned->align (or (-> aligned :x) :left))
                                   (util/aligned->align (or (-> aligned :y) :top))]
@@ -44,7 +44,7 @@
 
 
 (defn centered [& args]
-  (let [{:keys [params content]} (util/conform-or-fail ::layout-args args)
+  (let [{:keys [params content]} (util/conform! ::layout-args args)
         params                   (merge {:align [:center :center]} params)]
     (apply layout :horizontally params content)))
 

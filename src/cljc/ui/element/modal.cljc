@@ -8,7 +8,7 @@
             [clojure.spec.alpha :as spec]
             [garden.units :as unit]
             [garden.color :as color]
-            [ui.util :as u]))
+            [ui.util :as util]))
 
 
 (defcssfn translateX)
@@ -82,13 +82,13 @@
 
 
 (defn dialog [& args]
-  (let [{:keys [params content]}           (u/conform-or-fail ::args args)
+  (let [{:keys [params content]}           (util/conform! ::args args)
         {:keys [show? backdrop? cancel-on-backdrop? close-button? on-cancel]
          :or   {backdrop?           true
                 cancel-on-backdrop? true
                 close-button?       true}} params
-        class                              (u/params->classes params)
-        ui-params                          (conj (u/keys-from-spec ::params) :class)
+        class                              (util/params->classes params)
+        ui-params                          (conj (util/keys-from-spec ::params) :class)
         params                             (->> (apply dissoc params ui-params)
                                                 (merge {:class class}))]
     (when show? [:div.Dialog params
@@ -127,11 +127,11 @@
 
 
 (defn confirm-dialog [& args]
-  (let [{:keys [params content]} (u/conform-or-fail ::confirm-args args)
+  (let [{:keys [params content]} (util/conform! ::confirm-args args)
         {:keys [on-confirm on-cancel cancel-label confirm-label]
          :or {cancel-label "No"
               confirm-label "Yes"}} params
-        ui-params (u/keys-from-spec ::confirm-params)
+        ui-params (util/keys-from-spec ::confirm-params)
         params (assoc (apply dissoc params ui-params) :on-cancel on-cancel)]
     [dialog params
      [container {:layout :vertically}
@@ -142,7 +142,7 @@
 
 
 (defn alert-dialog [& args]
-  (let [{:keys [params content]} (u/conform-or-fail ::alert-args args)
+  (let [{:keys [params content]} (util/conform! ::alert-args args)
         {:keys [alert-label on-cancel]
          :or {alert-label "OK"}} params]
     [dialog params

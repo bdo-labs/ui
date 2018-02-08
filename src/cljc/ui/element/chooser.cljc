@@ -56,7 +56,7 @@
 
 (defn chooser
   [& args]
-  (let [{:keys [params]}       (util/conform-or-fail ::args args)
+  (let [{:keys [params]}       (util/conform! ::args args)
         {:keys [id selected]
          :or   {id       (util/gen-id)
                 selected #{}}} params

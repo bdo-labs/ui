@@ -46,7 +46,7 @@
 
 (defn article
   [& args]
-  (let [{:keys [params content]} (u/conform-or-fail ::article args)]
+  (let [{:keys [params content]} (u/conform! ::article args)]
     [container {:rounded?   true
                 :raised?    true
                 :background :white

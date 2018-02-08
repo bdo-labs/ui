@@ -6,7 +6,7 @@
 
 
 (defn badge [& args]
-  (let [{:keys [params content]} (util/conform-or-fail ::args args)
+  (let [{:keys [params content]} (util/conform! ::args args)
         {:keys [show-count class]
          :or   {show-count true
                 class      ""}}  params

@@ -32,7 +32,7 @@
 
 
 (defn ripple [& args]
-  (let [{:keys [params]} (util/conform-or-fail ::args args)
+  (let [{:keys [params]} (util/conform! ::args args)
         {:keys [ripple]} params
         element*         (atom nil)
         coord*           (r/atom {:r 10 :cy 1 :cx 1})

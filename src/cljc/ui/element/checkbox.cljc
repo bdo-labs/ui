@@ -124,7 +124,7 @@
 (defn checkbox
   [& args]
   (let [{:keys [params label]
-         :or   {label ""}}      (u/conform-or-fail ::checkbox-args args)
+         :or   {label ""}}      (u/conform! ::checkbox-args args)
         {:keys [checked on-click id]
          :or   {id (u/gen-id)}} params]
     [:label {:for   id
