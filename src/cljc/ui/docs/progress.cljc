@@ -1,16 +1,10 @@
 (ns ui.docs.progress
-  (:require [re-frame.core :as re-frame]
-            [ui.elements :as element]
-            [ui.util :as u]))
+  (:require [ui.elements :as element]))
 
 
 (defn documentation []
-  (let [progress-bar (re-frame/subscribe [:progress])
-        set-progress-bar #(re-frame/dispatch [:set-progress %])
-        make-progress #(re-frame/dispatch [:set-progress (+ @progress-bar 10)])
-        on-change #(set-progress-bar (:min %))]
-    [element/article
-     "### Progress
+  [element/article
+   "### Progress
 
      There are a few flavors when it comes to showing progression
 
@@ -21,10 +15,10 @@
 
      Mess with the clamp to make some progress 🤓
      "
-     #_[element/clamp {:id "progress-clamp"
-                     :labels? false
-                     :range :lower
+   #_[element/clamp {:id        "progress-clamp"
+                     :labels?   false
+                     :range     :lower
                      :on-change on-change} (range 101)]
-     "### Spinner
+   "### Spinner
      "
-     [element/spinner]]))
+   [element/spinner]])

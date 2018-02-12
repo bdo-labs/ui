@@ -37,5 +37,5 @@
    parameter, which would become the value of the load instead of the  
    default value of true. This is useful when you would like to report  
    a numeric progress-value or you would like to have a separate  
-   action for when loading fails.  
+   action for when loading fails etc.  
    "])

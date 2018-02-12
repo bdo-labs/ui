@@ -40,35 +40,40 @@
 (re-frame/reg-event-fx
  :init-sheet
  (fn [{:keys [db]} [k]]
-   (let [rows      199
-         body      (mapv vec (map first (drop 49 (spec/exercise ::fixture 199))))
+   (let [body      (mapv vec (map first (drop 49 (spec/exercise ::fixture 499))))
          title-row ["Segment" "Units-Sold" "Manufacturing" "Sales-Price" "Date"]
-         coll      (->> body
-                      (map #(assoc-in % [0]
-                                     (with-meta
-                                       (fn [{:keys [cell-ref]}]
-                                         (letfn [(on-select [event] (let [value (:value (first event))]
-                                                                      (re-frame/dispatch [:set-cell-val "Worksheet" cell-ref value])))]
-                                           (let [segments @(re-frame/subscribe [:range "Segments" :A1 :A10])
-                                                 items    (map-indexed (fn [n {:keys [value]}]
-                                                                         {:id    n
-                                                                          :value value}) segments)]
-                                             [chooser {:label      (first %)
-                                                       :on-select  on-select
-                                                       :searchable true
-                                                       :items      (set items)}])))
-                                       {:sort-value (first %)
-                                        :editable?  true}))))]
+         ;; coll      (->> body
+         ;;              (map #(assoc-in % [0]
+         ;;                             (with-meta
+         ;;                               (fn [{:keys [cell-ref]}]
+         ;;                                 (letfn [(on-select [event] (let [value (:value (first event))]
+         ;;                                                              (re-frame/dispatch [:set-cell-val "Worksheet" cell-ref value])))]
+         ;;                                   (let [segments @(re-frame/subscribe [:range "Segments" :A1 :A10])
+         ;;                                         items    (map-indexed (fn [n {:keys [value]}]
+         ;;                                                                 {:id    n
+         ;;                                                                  :value value}) segments)]
+         ;;                                     [chooser {:label      (first %)
+         ;;                                               :on-select  on-select
+         ;;                                               :searchable true
+         ;;                                               :items      (set items)}])))
+         ;;                               {:sort-value (first %)
+         ;;                                :editable?  true}))))
+         ]
      {:db (-> db
              (assoc ::title-row title-row)
-             (assoc ::collection coll))})))
+             (assoc ::collection body))})))
 
 
 (defn documentation []
   (let [content  @(re-frame/subscribe [::content])
         segments (mapv (fn [segment] [{:value      segment
                                       :title-row? false}]) (spec/describe ::segment))]
-    [element/article
+    [layout/vertically {:rounded? true
+                        :raised? true
+                        :background :white
+                        :style {:margin "2em"}
+                        :fill? true}
+     [:h1 "sheet"]
      [element/sheet {:name           "Segments"
                      :hidden         true
                      :column-heading :alpha

@@ -55,9 +55,9 @@
         close-dialog   #(re-frame/dispatch [::close-dialog])
         picker         (or @(re-frame/subscribe [::picker]) :years)
         date           @(re-frame/subscribe [::date])
-        formatted-date (if (= (translate :date-full (coerce/to-date (first date))) (translate :date-full (coerce/to-date (last date))))
-                         (translate :date-full (coerce/to-date (first date)))
-                         (str (translate :date-full (coerce/to-date (first date))) " - " (translate :date-full (coerce/to-date (last date)))))
+        formatted-date (if (= (translate :ui/date-full (coerce/to-date (first date))) (translate :ui/date-full (coerce/to-date (last date))))
+                         (translate :ui/date-full (coerce/to-date (first date)))
+                         (str (translate :ui/date-full (coerce/to-date (first date))) " - " (translate :ui/date-full (coerce/to-date (last date)))))
         set-date       #(do (re-frame/dispatch [::set-date %])
                             (close-dialog))]
     [layout/vertically
