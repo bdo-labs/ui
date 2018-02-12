@@ -48,6 +48,7 @@
 (spec/def ::max ::scale)
 
 
+(spec/def ::freeze-title-rows? boolean?)
 (spec/def ::caption? boolean?)
 (spec/def ::editable? boolean?)
 (spec/def ::sortable? boolean?)
@@ -96,7 +97,7 @@
 (spec/def ::params
   (spec/keys :req-un [::name]
              :opt-un [::column-heading ::row-heading ::editable? ::caption?
-                      ::hidden]))
+                      ::hidden ::freeze-title-rows?]))
 
 
 (spec/def ::args
