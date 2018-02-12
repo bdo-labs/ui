@@ -1,13 +1,11 @@
 (ns ui.events
-  (:require #_[clojure.test.check.generators :as gen]
-            [clojure.spec.alpha :as spec]
+  (:require [clojure.spec.alpha :as spec]
             [re-frame.core :as re-frame]
             [ui.db :as db]
-            [ui.util :as u]
             [ui.element.numbers.events]))
 
 
-(defn- check-and-throw
+(defn- check!
   "Check specification against the current database"
   [a-spec db]
   (when-not (spec/valid? a-spec db)
@@ -18,7 +16,7 @@
 
 (def ^{:private true}
   check-spec
-  (re-frame/after (partial check-and-throw :ui.db/db)))
+  (re-frame/after (partial check! :ui.db/db)))
 
 
 (def ^{:private true
@@ -71,18 +69,3 @@
                      frag)]
      {:navigate-to fragments
       :db          (assoc db :fragments fragments)})))
-
-
-(re-frame/reg-event-db
- :key-pressed
- [interceptors]
- (fn [db [key]]
-   (assoc db :key-pressed key)))
-
-
-(re-frame/reg-event-db
- :no-key-pressed
- [interceptors]
- (fn [db _]
-   (dissoc db :key-pressed)))
-

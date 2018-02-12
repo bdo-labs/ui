@@ -15,13 +15,17 @@
     :dayperiods      ["AM" "PM"]})
 
 
+(def format-inst
+  (tongue/inst-formatter "{month-short} {day}, {year} {hour24-padded}.{minutes-padded}" inst-strings-en))
+
+
 (def format-number-en
   (tongue/number-formatter { :group ","
                              :decimal "." }))
 
 
 (def en
-  {:tongue/format-inst   (tongue/inst-formatter "{month-short} {day}, {year} {hour24-padded}.{minutes-padded}" inst-strings-en)
+  {:tongue/format-inst   format-inst
    :tongue/format-number format-number-en
    :ui/time-ago-plural   (fn [s] (str s "s"))
    :ui/date-full         (tongue/inst-formatter "{month-long} {day}, {year}" inst-strings-en)
@@ -31,9 +35,9 @@
    :ui/month             (tongue/inst-formatter "{month-long}" inst-strings-en)
    :ui/weekday-long      (tongue/inst-formatter "{weekday-long}" inst-strings-en)
    :ui/weekday-short     (tongue/inst-formatter "{weekday-short}" inst-strings-en)
-   :sort-ascending       "Sort Ascending"
-   :sort-descending      "Sort Descending"
-   :hello                "hello {1}!"})
+   :ui/sort-ascending    "Sort Ascending"
+   :ui/sort-descending   "Sort Descending"
+   :ui/hello             "hello {1}!"})
 
 
 ;; Events -----------------------------------------------------------------

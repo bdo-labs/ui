@@ -80,7 +80,7 @@
         elements    [:buttons :colors :date-picker :dialog :dropdown :icons :inputs :progress :sheet]]
     [element/sidebar {:locked true}
      [layout/vertically {:role :navigation}
-      [:menu [menu-item :ui]]
+      [:menu [:h1 [menu-item :ui]]]
       (into [:menu [:h4 "wires/"]] (for [w wires] [menu-item w])) [:br]
       (into [:menu [:h4 "layout/"]] (for [l layouts] [menu-item l])) [:br]
       (into [:menu [:h4 "elements/"]] (for [elem elements] [menu-item elem])) [:br]
@@ -127,9 +127,7 @@
 
 (defn main-panel []
   (let [active-panel @(re-frame/subscribe [:active-panel])
-        progress     @(re-frame/subscribe [:progress])
         fragments    @(re-frame/subscribe [:fragments])]
     [:div {:style {:height "100vh"
                    :width  "100vw"}}
-     [element/progress-bar {:progress progress}]
      [panels active-panel]]))

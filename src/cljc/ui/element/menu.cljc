@@ -1,13 +1,13 @@
 (ns ui.element.menu
   #?(:cljs (:require-macros [garden.def :refer [defcssfn]]))
   (:require #?(:clj [garden.def :refer [defcssfn]])
-            [re-frame.core :as re-frame]
             [ui.util :as util]
             [clojure.string :as str]
             [clojure.spec.alpha :as spec]
-            [garden.units :as unit]
-            [garden.color :as color]
             [ui.element.containers :refer [container]]))
+
+
+;; FIXME Close drop-down upon clicking outside the menu or holding the mouse outside for a longer period of time
 
 
 (defcssfn cubic-bezier)

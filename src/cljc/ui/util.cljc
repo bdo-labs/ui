@@ -3,7 +3,6 @@
             [clojure.string :as str]
             [clojure.spec.alpha :as spec]
             [markdown.core :as markdown]
-            [tongue.core :as tongue]
             [garden.color :as color]
             [ui.spec-helper :as h]))
 
@@ -144,18 +143,27 @@
 )
 
 
+(def col-nums
+  (range (count col-refs)))
+
+
+(def col-ref->col-num
+  (apply hash-map (interleave col-refs col-nums)))
+
+
 (defn col-num [cell-ref]
-  (let [col-ref (keyword (str/replace (str cell-ref) #"[^A-Z]" ""))]
+  (let [col-ref (keyword (subs (name cell-ref) 0 1))]
+    (get col-ref->col-num col-ref))
+  #_(let [col-ref (keyword (str/replace (str cell-ref) #"[^A-Z]" ""))]
     (parse-int (.indexOf col-refs col-ref))))
 
 
 (defn row-num [cell-ref]
-  (let [cell-ref (if (keyword? cell-ref) (name cell-ref) (str cell-ref))]
-    (parse-int (str/replace cell-ref #"[^0-9]" ""))))
+  (parse-int (re-find #"\d+" (name cell-ref))))
 
 
 (defn col-ref [cell-ref]
-  (keyword (str/replace (name cell-ref) #"[^A-Z]*" "")))
+  (keyword (re-find #"\w+" (name cell-ref))))
 
 
 (defn ref->cell-ref [ref]
@@ -188,27 +196,6 @@
          ;; A - Z
          (let [alphacodes (range 65 (inc 90))]
            (zipmap alphacodes (map char alphacodes)))))
-
-
-(def inst-strings-en
-  {:weekdays-narrow ["S" "M" "T" "W" "T" "F" "S"]
-   :weekdays-short  ["Sun" "Mon" "Tue" "Wed" "Thu" "Fri" "Sat"]
-   :weekdays-long   ["Sunday" "Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday"]
-   :months-narrow   ["J" "F" "M" "A" "M" "J" "J" "A" "S" "O" "N" "D"]
-   :months-short    ["Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"]
-   :months-long     ["January" "February" "March" "April" "May" "June" "July" "August" "September" "October" "November" "December"]
-   :dayperiods      ["AM" "PM"]
-   :eras-short      ["BC" "AD"]
-   :eras-long       ["Before Christ" "Anno Domini"]})
-
-
-(def format-inst
-  (tongue/inst-formatter "{day}. {month-short}, {year}" inst-strings-en))
-
-
-(def format-number-en
-  (tongue/number-formatter {:group ","
-                            :decimal "."}))
 
 
 (defn dark?
@@ -251,28 +238,6 @@
        (str/trim)))
 
 
-(defn aligned->align [v]
-  (case v
-    (:top :left)     :start
-    (:bottom :right) :end
-    :center))
-
-
-(defn route [& fragments]
-  (str/join "/" fragments))
-
-
-(defn debounce
-  [f delay]
-  #?(:clj f
-     :cljs (if (nat-int? delay)
-             (let [timeout* (atom nil)]
-               (fn [event]
-                 (js/clearTimeout @timeout*)
-                 (reset! timeout* (js/setTimeout (partial f event) delay))))
-             f)))
-
-
 (defn js->cljs [obj]
   #?(:clj obj
      :cljs
@@ -282,9 +247,11 @@
          (js->clj :keywordize-keys true))))
 
 
+;; Predicates -------------------------------------------------------------
+
+
 (defn smart-case-includes? [substr s]
   (if-not (empty? (re-find #"[A-Z]" substr))
     (str/includes? s substr)
     (when-not (empty? s)
      (str/includes? (str/lower-case s) (str/lower-case substr)))))
-

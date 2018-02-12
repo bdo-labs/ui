@@ -6,7 +6,6 @@
             [clojure.string :as str]
             [garden.units :as unit]
             [garden.color :as color]
-            [garden.selectors :as selectors]
             [ui.element.ripple :refer [ripple]]
             [ui.util :as util]))
 
@@ -38,7 +37,7 @@
                   :min-width     (unit/rem 3.5)}
      [:.Icon {:margin-right 0}]]
     [:&.disabled {:opacity 0.3
-                  :cursor :not-allowed}]
+                  :cursor  :not-allowed}]
     [:&.secondary {:background-color secondary
                    :border-color     secondary
                    :color            (if (util/dark? secondary) :white :black)}
@@ -58,6 +57,11 @@
     [:&.flat {:background-color :transparent
               :border           [[:solid (unit/em 0.1) :inherit]]}]
     [:&.rounded {:border-radius (unit/em 2)}]
+    [:&.raised {:box-shadow [[0 (unit/rem 0.2) (unit/rem 0.3) (color/rgba [0 0 0 0.05])]]
+                :transition [[:50ms :ease-in-out]]
+                :transform  (translateY (unit/em -0.15))}
+     [:&:active {:box-shadow [[0 (unit/rem 0.05) (unit/rem 0.08) (color/rgba [0 0 0 0.1])]]
+                 :transform (translateY 0)}]]
     [:.Icon {:font-size      (unit/rem 2)
              :color          :inherit
              :vertical-align :middle
@@ -73,6 +77,7 @@
 
 (spec/def ::fill boolean?)
 (spec/def ::flat boolean?)
+(spec/def ::raised boolean?)
 (spec/def ::rounded boolean?)
 (spec/def ::circular boolean?)
 (spec/def ::content (spec/* (spec/or :str string? :vec vector?)))
@@ -82,6 +87,7 @@
 (spec/def ::params
   (spec/merge (spec/keys :opt-un [::flat
                                   ::fill
+                                  ::raised
                                   ::rounded
                                   ::circular])
               :ui.element.ripple/params))

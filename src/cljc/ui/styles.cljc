@@ -1,7 +1,7 @@
 (ns ui.styles
   #?(:cljs (:require-macros [garden.def :refer [defcssfn defkeyframes]]))
   (:require #?(:clj [garden.def :refer [defcssfn defkeyframes]])
-            [garden.stylesheet :as stylesheet]
+            [garden.stylesheet :as stylesheet :refer [calc]]
             [garden.units :as unit]
             [garden.color :as color]
             [garden.selectors :as selector :refer [defpseudoelement]]
@@ -57,7 +57,7 @@
              :positive (color/rgb [34 192 100])
              :negative (color/rgb [232 83 73])
              :font-weight 100
-             :font-base (unit/rem 1.8)
+             :font-base (unit/rem 1.6)
              :font-scale :augmented-fourth}})
 
 
@@ -128,10 +128,12 @@
     [:.Slider {:width          (unit/percent 100)
                :height         (unit/percent 100)
                :position       :relative}]
-    [:sidebar {:width       (unit/px 360)
+    [:sidebar {:width       (calc (- (unit/px 360) (unit/rem 6)))
                :overflow :auto
                :background  background
+               :box-shadow  [[(unit/em 0.1) (unit/em 0.1) (unit/em 0.5) (color/rgba [0 0 0 0.2])]]
                :height      (unit/percent 100)
+               :padding [[0 (unit/rem 3)]]
                :position    :absolute
                :top 0
                :z-index     9
@@ -397,8 +399,7 @@
       [:span {:background primary}]]]]])
 
 
-(defn- numbers [{:keys [primary secondary]
-             :as   theme}]
+(defn- numbers [{:keys [primary secondary tertiary]}]
   [[:.Worksheet {:width       (unit/percent 100)
                  :user-select :none}
     [:.Row
@@ -492,8 +493,8 @@
                    :height        (unit/em 0.4)
                    :width         (unit/em 0.4)
                    :background    (color/rgb [245 228 90])}]]]
-    [:.Headers {:width (unit/percent 100)}]
-    [:.Body {:max-height (unit/vh 70)
+    [:.Table-Header {:width (unit/percent 100)}]
+    [:.Table-Body {:max-height (unit/vh 70)
              :background :white
              :width      (unit/percent 100)
              :overflow   :auto}
@@ -538,8 +539,10 @@
                       :display       :inline-block
                       :border-radius (unit/rem 0.25)
                       :overflow      :hidden
-                      :text-align    :center}
-      [:.Swatch (merge {:margin             [[0 :auto]]
+                      :text-align    :center} 
+      [:&.raised {:box-shadow [[(unit/rem 0) (unit/rem 0.1) (unit/rem 0.8) (color/rgba [0 0 0 0.2])]]}]
+      [:.Swatch (merge {:cursor             :pointer
+                        :margin             [[0 :auto]]
                         :padding            0
                         :position           :relative
                         :-webkit-appearance :none
@@ -552,7 +555,7 @@
                 :padding   (unit/em 0.5)}]]]))
 
 
-(defn- in-doc [{:keys [primary]}]
+(defn- in-doc [{:keys [primary secondary]}]
   (let [contrast (u/gray 240)
         triangle [(linear-gradient (unit/deg 45)
                                    [contrast (unit/percent 25)]
@@ -593,7 +596,9 @@
                   :padding          (unit/rem 2)}]
      [:body {
              ;; :background (linear-gradient (unit/deg 145) (color/rgb [201 220 241]) (color/rgb [171 190 211]))
-             :background                (linear-gradient (unit/deg 45) (color/rgb [65 88 208]) (color/rgb [200 80 192]) (color/rgb [255 204 112]))
+             ;; :background                (linear-gradient (unit/deg 45) (color/rgb [65 88 208]) (color/rgb [200 80 192]) (color/rgb [255 204 112]))
+             ;; :background                (linear-gradient (unit/deg 45) (color/rgb [90 154 238]) (color/rgb [119 177 255]) (color/rgb [95 230 250]))
+             :background                (linear-gradient (unit/deg 45) primary secondary)
              :background-size           [[(unit/percent 400) (unit/percent 400)]]
              :animation                 [[:move-background :30s :ease]]
              :animation-iteration-count :infinite}]
@@ -630,3 +635,15 @@
 (def screen
   (let [theme (:default theme)]
     (custom theme)))
+
+
+(defn inject [document id style]
+  #?(:clj (println "Injecting styles only work interactively")
+     :cljs (let [new-styles-el (.createElement document "style")]
+             (.setAttribute new-styles-el "id" id)
+             (.setAttribute new-styles-el "type" "text/css")
+             (-> new-styles-el (.-innerHTML) (set! style))
+             (if-let [styles-el (.getElementById document id)]
+               (-> styles-el (.-parentNode) (.replaceChild new-styles-el styles-el))
+               (do (.appendChild (.-head document) new-styles-el)
+                   new-styles-el)))))
