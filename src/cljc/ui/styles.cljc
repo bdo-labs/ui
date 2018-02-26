@@ -455,19 +455,19 @@
       [:&:before {:border-bottom [[:solid (unit/px 1) (color/rgb [235 200 0])]]}]]]
                                         ; FIXME Replace with :not selector ones stable
     [#{:.locked} {:cursor [[:default :!important]]
-                 :color  [[(color/rgb (doall (vec (repeat 3 120)))) :!important]]}
+                  :color  [[(color/rgb (doall (vec (repeat 3 120)))) :!important]]}
      [:&:after {:display [[:none :!important]]}]]
     [:th [:span {:display :inline-block}]]
     [:td [:span {:display :block}]]
     [#{:td :th} [:span {:overflow      :hidden
-                       :white-space   :nowrap
-                       :text-overflow :ellipsis}]
+                        :white-space   :nowrap
+                        :text-overflow :ellipsis}]
      [:&.number {:text-align :right}]
      [#{:&.numeric :&.Alpha} {:font-size   (unit/em 0.7)
-                             :font-weight 100}]
+                              :font-weight 100}]
      [:&.smaller {:font-size (unit/em 0.45)}]
      [#{:&.numeric :&.select :&.alpha} {:text-align :center}]]
-    [:.not-editable {:background (u/gray 250)}]
+    [:.not-editable {:background (u/gray 245)}]
     [:.editable
      [:&.cell {:cursor :cell}]
      [:&:hover {:position :relative}
