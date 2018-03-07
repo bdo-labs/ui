@@ -1,5 +1,5 @@
 (ns ui.subs-test
-  (:require [clojure.test #?(:clj :refer :cljs :refer-macros) [deftest testing is]]
+  (:require [clojure.test :refer [deftest testing is]]
             [ui.subs :as subs]))
 
 (deftest fake-test

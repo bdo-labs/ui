@@ -18,7 +18,7 @@
     language.  
   
     ```
-    (dispatch [:ui/add-language :en {:hello \"hello {1}!\"}])  
+    (dispatch [:ui/add-language :en {:ui/hello \"hello {1}!\"}])  
     (dispatch [:ui/set-current-language :en])  
     ```
   
@@ -26,10 +26,10 @@
     translate-function and your good.  
   
     ```
-    (ui.wires.polyglot/translate :hello \"jon\")
+    (ui.wires.polyglot/translate :ui/hello \"jon\")
     ```  
     "
-   [:pre [:code "=> " (translate :hello "jon")]] "  
+   [:pre [:code "=> " (translate :ui/hello "jon")]] "  
   
     If a translation is missing, that will become obvious in your  
     `gui`, but you can also register an event-handler named  

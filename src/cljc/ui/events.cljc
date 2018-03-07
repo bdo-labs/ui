@@ -2,7 +2,7 @@
   (:require [clojure.spec.alpha :as spec]
             [re-frame.core :as re-frame]
             [ui.db :as db]
-            [ui.element.numbers.events]))
+            [ui.wire.load]))
 
 
 (defn- check!
@@ -23,7 +23,7 @@
        :doc "This is an interceptor-pipeline that every handler must run
              through for validation against the application-state."}
   interceptors
-  [check-spec
+  [;; check-spec
    re-frame/trim-v])
 
 

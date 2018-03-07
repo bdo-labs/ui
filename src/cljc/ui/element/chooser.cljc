@@ -13,7 +13,6 @@
             [ui.util :as util]
             [clojure.set :as set]))
 
-
 ;; Specification ----------------------------------------------------------
 
 
@@ -21,24 +20,23 @@
   (spec/with-gen fn?
     (gen/return (constantly nil))))
 
-
 (spec/def ::close-on-select boolean?)
 (spec/def ::labels boolean?)
 (spec/def ::searchable boolean?)
 (spec/def ::predicate? ::maybe-fn)
+(spec/def ::deletable boolean?)
 
 (spec/def ::params
   (spec/merge :ui.element.collection/params
               :ui.element.textfield/--params
               (spec/keys :opt-un [::close-on-select
+                                  ::deletable
                                   ::searchable
                                   ::labels
                                   ::predicate?])))
 
-
 (spec/def ::args
   (spec/cat :params ::params))
-
 
 ;; Helper functions -------------------------------------------------------
 
@@ -49,18 +47,18 @@
                     (:value item))]
       (predicate? label query))))
 
-
 ;; Views ------------------------------------------------------------------
 
 
 (defn chooser
   [& args]
   (let [{:keys [params]}       (util/conform! ::args args)
-        {:keys [id selected]
+        {:keys [id selected deletable
+                on-key-up on-change on-focus on-blur on-select]
          :or   {id       (util/gen-id)
                 selected #{}}} params
         id                     (util/slug id)
-        query*                 ^{:doc "Query to use for filtering and emphasizing the resultset"} (atom "")
+        query*                 ^{:doc "Query to use for filtering and emphasizing the resultset"} (atom (if deletable (str/join ", " (map :value selected)) ""))
         show*                  ^{:doc "Show or hide the collection-dropdown"} (atom false)
         selected*              ^{:doc "Keep track of all selected items"} (atom selected)
         collection-params      {:selected selected}]
@@ -76,20 +74,21 @@
                     deselectable
                     keyboard
                     predicate?
-                    on-change
-                    on-focus
-                    on-blur
-                    on-select
                     style]
              :or   {predicate?   str/includes?
                     labels       false
                     deselectable true
                     label        ""
                     style        {}}} params
-            filtered-items            (set/select (labels-by-predicate predicate? @query*) items)
+            current-query             (str/trim (last (str/split @query* ",")))
+            filtered-items            (set/select (labels-by-predicate predicate? current-query) items)
             textfield-params          (merge params
                                              {:id       (util/slug id "textfield")
                                               :value    @query*
+                                              ;; Remove incomplete items
+                                              :on-key-up #(let [candidates (->> (str/split (.-value (.-target %)) ",") (mapv str/trim) (set))]
+                                                            (reset! selected* (remove (fn [x] (not (contains? candidates (str (:value x))))) @selected*))
+                                                            (when (fn? on-key-up) (on-key-up %)))
                                               :on-focus #(do (reset! show* true)
                                                              (when (fn? on-focus) (on-focus %)))
                                               :on-blur  #(do (when (fn? on-blur) (on-blur %))
@@ -97,28 +96,31 @@
                                                                  (when @show* (reset! show* false))))}
                                              (if searchable
                                                {:label     label
-                                                :on-change (fn [event]
-                                                             (reset! query* (.-value (.-target event)))
-                                                             (when (fn? on-change) (on-change event)))}
+                                                :on-change #(do (reset! query* (.-value (.-target %)))
+                                                                (when (fn? on-change) (on-change %)))}
                                                {:label       ""
                                                 :placeholder label
                                                 :class       "read-only"
                                                 :read-only   true})
-                                             (when (and (false? multiple)
+                                             (when (and (not deletable)
+                                                        (false? multiple)
                                                         (not-empty @selected*))
                                                {:placeholder (-> (first @selected*) :value)})
-                                             (when (and multiple
+                                             (when (and (not deletable)
+                                                        multiple
                                                         (false? labels)
                                                         (not (empty? @selected*)))
-                                               {:placeholder (str/join ", " (map :value @selected*))}))
+                                               {:placeholder (str (str/join ", " (map :value @selected*)))}))
             collection-params         (merge params
                                              {:id           (util/slug id "collection")
-                                              :emphasize    @query*
+                                              :emphasize    current-query
                                               :selected     @selected*
                                               :deselectable deselectable
                                               :on-select    (fn [items]
                                                               (when (true? close-on-select) (reset! show* false))
-                                                              (reset! query* "")
+                                                              (if deletable
+                                                                (reset! query* (str (str/join ", " (map :value items)) (when multiple ", ")))
+                                                                (reset! query* ""))
                                                               (reset! selected* items)
                                                               (when (fn? on-select) (on-select items)))})]
 

@@ -51,24 +51,13 @@
       (let [primary   (str @primary)
             secondary (str @secondary)]
         #?(:cljs
-           (let [background (css [:body {:background                (linear-gradient (unit/deg 45) primary secondary)
-                                         :background-size           [[(unit/percent 400) (unit/percent 400)]]
-                                         :animation                 [[:move-background :30s :ease]]
-                                         :animation-iteration-count :infinite}])]
+           (let [background (css [:body {:background primary}])]
              (styles/inject js/document "--colors" background)))
         [article
          "### Color-picker
-      Pick and choose colors that can easily be persisted as a theme "
+          Pick and choose colors that can easily be persisted as a theme "
          [layout/horizontally
-          [layout/vertically
-           [:span "Primary"]
+          [layout/centered {:class "demo"}
            [color-picker {:hex       primary
                           :class     "raised"
-                          :on-change set-primary}]]
-          [layout/vertically
-           [:span "Secondary"]
-           [color-picker {:hex       secondary
-                          :class     "raised"
-                          :on-change set-secondary}]]]
-         [layout/centered
-          [:small [:em (str "Note that clicking the color-value changes it's type, so you can copy the version you prefer to your clip-board")]]]]))))
+                          :on-change set-primary}]]]]))))

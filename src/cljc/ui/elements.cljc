@@ -13,6 +13,7 @@
             [ui.element.checkbox :as checkbox]
             [ui.element.calendar :as calendar]
             [ui.element.date-picker :as date-picker]
+            [ui.element.period-picker :as period-picker]
             [ui.element.toggle :as toggle]
             [ui.element.modal :as modal]
             [ui.element.menu :as menu]
@@ -59,6 +60,7 @@
 (def months calendar/months)
 (def years calendar/years)
 (def date-picker date-picker/date-picker)
+(def period-picker period-picker/period-picker)
 
 
 ;; In your face Elements

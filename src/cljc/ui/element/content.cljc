@@ -16,9 +16,10 @@
 
 
 (spec/def ::content
-  (spec/or :str string?
-           :vec vector?
-           :nil nil?))
+  (spec/nonconforming
+   (spec/or :str string?
+            :vec vector?
+            :nil nil?)))
 
 
 (spec/def ::article
@@ -56,8 +57,7 @@
                 :background :white
                 :style {:margin "2em"}}
      (into [:article (merge {:role :article} params)]
-           (->> (map last content)
-                (map section)))]))
+           (map section content))]))
 
 
 (defn vr [] [:div.Vertical-rule])

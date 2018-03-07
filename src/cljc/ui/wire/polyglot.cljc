@@ -25,19 +25,25 @@
 
 
 (def en
-  {:tongue/format-inst   format-inst
-   :tongue/format-number format-number-en
-   :ui/time-ago-plural   (fn [s] (str s "s"))
-   :ui/date-full         (tongue/inst-formatter "{month-long} {day}, {year}" inst-strings-en)
-   :ui/date-short        (tongue/inst-formatter "{month-numeric}/{day}/{year-2digit}" inst-strings-en)
-   :ui/year-month        (tongue/inst-formatter "{month-long} {year}" inst-strings-en)
-   :ui/year              (tongue/inst-formatter "{year}" inst-strings-en)
-   :ui/month             (tongue/inst-formatter "{month-long}" inst-strings-en)
-   :ui/weekday-long      (tongue/inst-formatter "{weekday-long}" inst-strings-en)
-   :ui/weekday-short     (tongue/inst-formatter "{weekday-short}" inst-strings-en)
-   :ui/sort-ascending    "Sort Ascending"
-   :ui/sort-descending   "Sort Descending"
-   :ui/hello             "hello {1}!"})
+  {:tongue/format-inst      format-inst
+   :tongue/format-number    format-number-en
+   :ui/time-ago-plural      (fn [s] (str s "s"))
+   :ui/date-full            (tongue/inst-formatter "{month-long} {day}, {year}" inst-strings-en)
+   :ui/date-short           (tongue/inst-formatter "{month-numeric}/{day}/{year-2digit}" inst-strings-en)
+   :ui/year-month           (tongue/inst-formatter "{month-long} {year}" inst-strings-en)
+   :ui/year                 (tongue/inst-formatter "{year}" inst-strings-en)
+   :ui/month                (tongue/inst-formatter "{month-long}" inst-strings-en)
+   :ui/weekday-long         (tongue/inst-formatter "{weekday-long}" inst-strings-en)
+   :ui/weekday-short        (tongue/inst-formatter "{weekday-short}" inst-strings-en)
+   :ui/sort-ascending       "Sort Ascending"
+   :ui/sort-descending      "Sort Descending"
+   :ui/optional             "Optional"
+   :ui/required             "Required"
+   :ui/show-rows-containing "Show only rows containing:"
+   :ui/time-period          "Time-period"
+   :ui/date-period          "Date-period"
+   :ui/hello                "hello {1}!"})
+
 
 
 ;; Events -----------------------------------------------------------------

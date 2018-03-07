@@ -26,9 +26,9 @@
          "Horizontally"
          "Vertically")]
       (if horizontally?
-        [layout/horizontally {:class "demo" :fill? true}
+        [layout/horizontally {:class "demo fill-demo" :fill? true}
          [layout/fill]
          [:div.Demo-box "Box"]]
-        [layout/vertically {:class "demo" :fill? true}
+        [layout/vertically {:class "demo fill-demo" :fill? true}
          [layout/fill]
          [:div.Demo-box "Box"]])]]))

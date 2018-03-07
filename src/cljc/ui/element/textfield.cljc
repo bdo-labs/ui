@@ -68,6 +68,7 @@
                        :class class}
        [:input (merge
                 (dissoc ui-params :placeholder :label)
+                (when (some? value) {:value value})
                 {:type          :text
                  :placeholder   placeholder
                  :auto-complete "off"})]

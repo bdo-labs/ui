@@ -1,6 +1,7 @@
 (ns ui.element.menu
   #?(:cljs (:require-macros [garden.def :refer [defcssfn]]))
   (:require #?(:clj [garden.def :refer [defcssfn]])
+            [garden.color :as color]
             [ui.util :as util]
             [clojure.string :as str]
             [clojure.spec.alpha :as spec]
@@ -31,7 +32,9 @@
     [:&.origin-top-center {:transform-origin [[:top :center]]}]
     [:&.origin-bottom-left {:transform-origin [[:bottom :left]]}]
     [:&.origin-bottom-right {:transform-origin [[:bottom :right]]}]
-    [:&.origin-bottom-center {:transform-origin [[:bottom :center]]}]]])
+    [:&.origin-bottom-center {:transform-origin [[:bottom :center]]}]
+    [:.Button.flat {:border-color :transparent}]
+    [:small {:color (color/rgb [170 170 170])}]]])
 
 
 (spec/def ::open? boolean?)

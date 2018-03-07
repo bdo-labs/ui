@@ -61,7 +61,7 @@
 (spec/def ::number-formatter fn?)
 
 
-(spec/def ::value (spec/and any?))
+(spec/def ::value any?)
 (spec/def ::values (spec/coll-of ::value))
 
 
@@ -109,4 +109,3 @@
   :args (spec/cat :col-ref :col-ref
                   :num nat-int?)
   :ret keyword?)
-

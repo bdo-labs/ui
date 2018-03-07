@@ -1,7 +1,6 @@
 (ns ui.views
   (:require [clojure.string :as str]
             [re-frame.core :as re-frame]
-            [ui.readme :as readme]
             [ui.elements :as element]
             [ui.layout :as layout]
             [ui.docs.polyglot :as polyglot]
@@ -18,22 +17,20 @@
             [ui.docs.dropdown :as dropdown]
             [ui.docs.inputs :as inputs]
             [ui.docs.date-picker :as date-picker]
+            [ui.docs.period-picker :as period-picker]
             [ui.docs.sheet :as sheet]))
-
 
 (defn- menu-item [item]
   (let [active-doc-item @(re-frame/subscribe [:active-doc-item])]
-    [:a {:key      (str "menu-item-" (name item))
-         :on-click #(re-frame/dispatch [:navigate :docs (name item)])
-         :class    (if (= active-doc-item item) "face-primary" "face-tertiary")
-         :href     (str "./docs/" (name item))}
+    [:a.Button.nav (merge {:key      (str "menu-item-" (name item))
+                           :on-click #(re-frame/dispatch [:navigate :docs (name item)])
+                           :href     (str "./docs/" (name item))}
+                          (when (= active-doc-item item) {:class "active"}))
      (name item)]))
-
 
 (defn- intro
   []
   [element/article
-   readme/content
    [element/sheet
     {:name           "Release History"
      :caption?       true
@@ -42,7 +39,6 @@
      [#inst "2017-06-07"
       [:a.Label {:href "https://github.com/bdo-labs/ui/releases/0.0.1"} "0.0.1"]
       "It's early days, things will break"]]]])
-
 
 (defn- doc-item
   "Maps the name of a documentation to it's renderer"
@@ -62,6 +58,7 @@
     :buttons [buttons/documentation]
     :colors [colors/documentation]
     :date-picker [date-picker/documentation]
+    :period-picker [period-picker/documentation]
     :dialog [dialog/documentation]
     :dropdown [dropdown/documentation]
     :icons [icons/documentation]
@@ -71,22 +68,24 @@
     ;; :sidebar [sidebar/documentation]
     [intro]))
 
-
 (defn- doc-panel
   []
   (let [active-item @(re-frame/subscribe [:active-doc-item])
         wires       [:load :polyglot]
         layouts     [:centered :horizontally :vertically :fill]
-        elements    [:buttons :colors :date-picker :dialog :dropdown :icons :inputs :progress :sheet]]
+        elements    [:buttons :colors :date-picker :period-picker :dialog :dropdown :icons :inputs :progress :sheet]
+        ;; logo-style  {:font-size :8rem :font-weight :bold :text-transform :uppercase :margin 0}
+]
     [element/sidebar {:locked true}
      [layout/vertically {:role :navigation}
-      [:menu [:h1 [menu-item :ui]]]
+      [:img {:src "/ui-logo.svg"
+             :style {:margin "4rem 0" :width "8rem"}}]
+      #_[:menu [:h1 {:style logo-style} [menu-item :ui]]]
       (into [:menu [:h4 "wires/"]] (for [w wires] [menu-item w])) [:br]
       (into [:menu [:h4 "layout/"]] (for [l layouts] [menu-item l])) [:br]
       (into [:menu [:h4 "elements/"]] (for [elem elements] [menu-item elem])) [:br]
       [:br]]
      [doc-item active-item]]))
-
 
 (defn marketing-panel
   []
@@ -112,10 +111,8 @@
       - Have a say!
       "]])
 
-
 (defn- not-found-panel []
   [:h1 "Not found"])
-
 
 (defn- panels [panel-name]
   (case panel-name
@@ -123,7 +120,6 @@
     :marketing-panel [marketing-panel]
     :not-found [not-found-panel]
     [:div]))
-
 
 (defn main-panel []
   (let [active-panel @(re-frame/subscribe [:active-panel])

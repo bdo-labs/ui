@@ -1,5 +1,7 @@
 (ns ui.util
+  #?(:cljs (:require-macros [cljs.core.async.macros :as a]))
   (:require #?(:cljs [cljs.core :refer [random-uuid]])
+            [clojure.core.async :as async]
             [clojure.string :as str]
             [clojure.spec.alpha :as spec]
             [markdown.core :as markdown]
@@ -77,7 +79,8 @@
 (defn conform!
   "Conform arguments to specification or throw an exception"
   [spec args]
-  (if (spec/valid? spec args)
+  (spec/conform spec args)
+  #_(if (spec/valid? spec args)
     (spec/conform spec args)
     (exception (spec/explain-str spec args))))
 
@@ -220,7 +223,8 @@
        (mapv (comp keyword name))))
 
 
-(defn param->class [[k v]]
+(defn param->class
+  [[k v]]
   (-> (cond
         (vector? v)  (str (name k) "-" (str/join "-" (map name v)))
         (keyword? v) (str (name k) "-" (name v))
@@ -230,7 +234,8 @@
       (str/replace #"\?" "")))
 
 
-(defn params->classes [params]
+(defn params->classes
+  [params]
   (->> params
        (keep param->class)
        (str/join " ")

@@ -176,6 +176,7 @@
                     add-message   false
                     empty-message false
                     hide-selected false}} params
+            items                     (apply sorted-set-by (fn [a b] (< (:value a) (:value b))) items)
             selected                  @selected*
             ui-params                 (select-keys params (util/keys-from-spec ::params))]
 
