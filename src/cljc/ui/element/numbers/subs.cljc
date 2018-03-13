@@ -135,16 +135,21 @@
    [(re-frame/subscribe [:filtered-rows id])
     (re-frame/subscribe [:sorted-column id])
     (re-frame/subscribe [:sort-ascending? id])])
- (fn [[rows sorted-column ascending?]]
-   (let [sort-fn (if ascending? < >)
-         rows    (if (nil? sorted-column)
-                   rows
-                   (->> rows
-                        (sort-by
-                         (comp #(if-some [sort-value (:value (:value %))]
-                                  sort-value
-                                  (:value %)) #(nth % (util/col-num sorted-column)))
-                         sort-fn)))] rows)))
+ (fn [[rows sorted-column ascending]]
+   (if (nil? sorted-column)
+     rows
+     (let [col (nth (first rows) (util/col-num sorted-column))
+           f   (case (:type col)
+                 :string (if ascending
+                           #(.localeCompare %2 %1)
+                           #(.localeCompare %1 %2))
+                 (if ascending < >))]
+       (->> rows
+            (sort-by
+             (comp #(if-some [sort-value (:value (:value %))]
+                      sort-value
+                      (:value %)) #(nth % (util/col-num sorted-column))) f)
+            (doall))))))
 
 (re-frame/reg-sub :row-count sheet-extract)
 

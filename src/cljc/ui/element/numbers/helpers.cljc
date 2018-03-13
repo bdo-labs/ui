@@ -46,7 +46,7 @@
   "Apply formatting to [value] based on the supplied [type]"
   [value type]
   (case type
-    :number (format "%.2f" (polyglot/format-number-en value))
+    :number (polyglot/format-number-en (format "%.2f" value))
     :inst (polyglot/format-inst value)
     :map (or (:display-value value) (:value value))
     value))
