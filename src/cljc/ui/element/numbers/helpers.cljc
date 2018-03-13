@@ -51,7 +51,7 @@
     :map (or (:display-value value) (:value value))
     value))
 
-(defn- data->columns
+(defn data->columns
   "Transform the [data] passed in; to manageable columns"
   [data]
   (->> (apply map list data)
@@ -74,12 +74,12 @@
                            :rows    col}))))
        (vec)))
 
-(defn- csv-no-title->columns
+(defn csv-no-title->columns
   [{:keys [rows]}]
   (->> rows
        (mapv #(mapv (fn [col] {:value col :title-row? false}) %))))
 
-(defn- csv->columns
+(defn csv->columns
   [{:keys [title-rows rows] :as data}]
   (let [title-rows (->> title-rows
                         (mapv #(mapv (fn [col] {:value col :title-row? true}) %)))

@@ -298,7 +298,8 @@
               :transform        [[(translateY (unit/percent -100)) (scale 0.75)]]
               :transform-origin [[:top :left]]}]]
     [:&.read-only [:* {:cursor :pointer}]]
-    [:&.disabled [:* {:cursor :not-allowed}]
+    [:&.disabled [:* {:cursor :not-allowed
+                      :pointer-events :none}]
      [:label {:color :silver}]]
     [:label {:position      :absolute
              :color         :silver
@@ -333,7 +334,8 @@
                    :left             0
                    :transform        [[(translateY (unit/percent -100)) (scale 0.75)]]
                    :transform-origin [[:top :left]]}]]]
-     [:&:disabled {:cursor :not-allowed}]
+     [:&:disabled {:cursor :not-allowed
+                   :pointer-events :none}]
      [:&:required
       [:&.invalid {:border-color :red}]]]
     [:.Ghost {:color    (color/rgba [0 0 0 0.3])
@@ -557,7 +559,8 @@
       [:&.demo {:background          (vec (repeat 2 triangle))
                 :background-position [[0 0] [(unit/px 10) (unit/px 10)]]
                 :background-size     [[(unit/px 20) (unit/px 20)]]
-                :box-shadow          [[:inset 0 (unit/px 2) (unit/px 8) (color/rgba [0 0 0 0.3])]]}]
+                :box-shadow          [[:inset 0 (unit/px 2) (unit/px 8) (color/rgba [0 0 0 0.3])]]
+                :min-width           (unit/px 300)}]
       [:&.fill-demo
        [:.fill {:background (-> theme :default :primary)
                 :border     [[:dashed (unit/px 1) (color/rgba [0 0 0 0.2])]]}]]]

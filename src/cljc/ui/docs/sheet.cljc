@@ -69,7 +69,7 @@
                      :hidden         true}
       segments]
      [element/sheet {:name           "Worksheet"
-                     :column-widths [100 500 100]
+                     :column-widths [150 :auto 150 200]
                      :hide-columns #{:C}
                      :editable?      false}
       content]]))

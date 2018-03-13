@@ -98,6 +98,7 @@
                                     :multiple   false
                                     :searchable true
                                     :deletable true
+                                    :predicate? util/case-insensitive-includes?
                                     :selected (filter #(= (:value %) display-value) items)
                                     :items      items
                                     :on-blur    (--on-blur cell-ref (partial on-blur row cell-ref))

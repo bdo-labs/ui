@@ -6,11 +6,12 @@
  :source-paths #{"src/cljc" "src/cljs"}
  :resource-paths #{"resources" "src/cljc" "src/cljs"}
  :dependencies '[[com.andrewmcveigh/cljs-time "0.5.2"]
-                 [org.clojure/clojure "1.9.0" :scope "provided"]
+                 [org.clojure/clojure "1.10.0-alpha4" :scope "provided"]
                  ;; Unfortunately; AOT version can not be used, since we need `clojure.spec`
-                 [org.clojure/clojurescript "1.9.946" :scope "provided"]
-                 [metosin/spec-tools "0.6.1"]
-                 [org.clojure/core.async "0.4.474"]
+                 [org.clojure/clojurescript "1.9.946" :scope "provided" :exclusions [org.clojure/clojure]]
+                 ;; [metosin/spec-tools "0.6.1"]
+                 [org.clojure/tools.namespace "0.3.0-alpha4"]
+                 [org.clojure/core.async "0.4.474" :exclusions [org.clojure/clojure]]
                  [venantius/accountant "0.2.3"]
                  [com.cemerick/url "0.1.1"]
                  [clj-time "0.14.2"]
@@ -33,7 +34,7 @@
                  [danielsz/boot-autoprefixer "0.1.0" :scope "test"]
                  [degree9/boot-npm "1.9.0" :scope "test"]
                  [degree9/boot-semgit "1.2.1" :scope "test"]
-                 [degree9/boot-semver "1.7.0" :scope "test"]
+                 [degree9/boot-semver "1.7.0" :scope "test" :exclusions [org.clojure/clojure]]
                  [funcool/boot-codeina "0.1.0-SNAPSHOT" :scope "test"]
                  [hendrick/boot-medusa "0.1.1" :scope "test"]
                  [org.clojure/test.check "0.10.0-alpha2" :scope "test"]

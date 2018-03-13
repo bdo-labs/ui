@@ -3,7 +3,6 @@
   (:require #?(:clj [garden.def :refer [defcssfn]])
             [clojure.core :refer [atom]]
             [clojure.spec.alpha :as spec]
-            [spec-tools.core :as st]
             [clojure.string :as str]
             [garden.units :as unit]
             [garden.color :as color]
@@ -41,17 +40,14 @@
                 :line-height 2.5}
       [:&:hover {:background-color (util/gray 250)}]
       [:&.disabled {:opacity 0.3
+                    :pointer-events :none
                     :cursor  :not-allowed}]
       [:.Icon {:font-size      (unit/rem 2)
                :color          :inherit
                :vertical-align :middle
                :min-width      (unit/rem 1)
-               :line-height    0}]
-
-     ;; Default Colors
-      (map colored colors)
-
-     ;; Variations
+               :line-height    0}];; Default Colors
+      (map colored colors);; Variations
       [:&.circular {:border-radius (unit/percent 50)
                     :padding       (unit/rem 0.25)
                     :min-width     (unit/rem 3.5)}]
