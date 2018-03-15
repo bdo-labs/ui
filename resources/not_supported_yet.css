@@ -50,34 +50,39 @@ in 2.0, but at-least our upgrade-path is way easier now.
 
 
 .Label input:focus + label {
-opacity: 1;
+    opacity: 1;
 }
 
 /* IE overrides */
 @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
-.Container div.fill,
-.Table .Titlerow button {
-    /* Flex bug */
-    flex: 1 0 auto !important;
-}
+    .Container div.fill,
+    .Table .Titlerow button {
+        /* Flex bug */
+        flex: 1 0 auto !important;
+    }
 }
 
 
 
 /* Textfield */
 .Textfield input::-webkit-input-placeholder {
-color: rgb(210,210,210);
+    color: rgb(210,210,210);
+}
+
+
+.Textfield.dirty input::-webkit-input-placeholder {
+    color: rgb(0,0,0);
 }
 
 .Textfield input:focus::-webkit-input-placeholder {
-color: rgb(117,117,117);
+    color: rgb(117,117,117);
 }
 
 
 /* Button */
 .Button:not(.circular) .Icon {
-margin-right: 1rem;
+    margin-right: 1rem;
 }
 .Button:not(.flat) {
-border-radius: 0.5rem;
+    border-radius: 0.5rem;
 }
