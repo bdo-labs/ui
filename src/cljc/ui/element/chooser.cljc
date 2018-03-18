@@ -15,7 +15,6 @@
 
 ;; Specification ----------------------------------------------------------
 
-
 (spec/def ::maybe-fn
   (spec/with-gen fn?
     (gen/return (constantly nil))))
@@ -40,7 +39,6 @@
 
 ;; Helper functions -------------------------------------------------------
 
-
 (defn- labels-by-predicate [predicate? query]
   (fn [item]
     (let [label (or (:label item)
@@ -48,7 +46,6 @@
       (predicate? label query))))
 
 ;; Views ------------------------------------------------------------------
-
 
 (defn chooser
   [& args]
@@ -91,9 +88,9 @@
                                                             (when (fn? on-key-up) (on-key-up %)))
                                               :on-focus #(do (reset! show* true)
                                                              (when (fn? on-focus) (on-focus %)))
-                                              :on-blur  #(do (when (fn? on-blur) (on-blur %))
-                                                             (go (<! (timeout 200))
-                                                                 (when @show* (reset! show* false))))}
+                                              :on-blur  #(go (<! (timeout 60))
+                                                             (when @show* (reset! show* false))
+                                                             (when (fn? on-blur) (on-blur %)))}
                                              (if searchable
                                                {:label     label
                                                 :on-change #(do (reset! query* (.-value (.-target %)))
@@ -146,4 +143,3 @@
                                                           (case key
                                                             ("backspace" "delete") (util/log "Remove " (:value label-params))))})]
                  [l/label label-params])))])]))))
-

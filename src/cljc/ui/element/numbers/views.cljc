@@ -72,10 +72,13 @@
         hidden?      (partial hidden? id)
         select-cell  (fn [cell-ref event] (re-frame/dispatch [:set-first-selection id cell-ref]))
         edit-cell    (fn [cell-ref event] (re-frame/dispatch [:set-editing id cell-ref]))
-        --on-blur    (fn [cell-ref f] #(do (go (<! (timeout 100)) (re-frame/dispatch [:set-editing id nil]))
-                                           (when (fn? f) (f %))))
+        --on-blur    (fn [cell-ref f] (fn [event]
+                                       (do
+                                         (.persist event)
+                                         (re-frame/dispatch [:set-editing id nil])
+                                         (when (fn? f) (f event)))))
         --on-change  (fn [cell-ref f] #(do (re-frame/dispatch [:set-cell-val id cell-ref (:value (first %))])
-                                           (when (fn? f) (f %))))]
+                                          (when (fn? f) (f %))))]
     [:tr.Body-row {:key   (util/slug id "body" "row" n)
                    :class (util/slug "row" n)
                    :style {:height (str row-height "px")}}
@@ -94,22 +97,23 @@
                  :fn  (value {:row row :editable true :cell-ref cell-ref})
                  :map (if (= editing cell-ref)
                         (if-let [{:keys [items on-select on-change on-blur]} value]
-                          [chooser {:labels     false
+                          [chooser {:id         (util/slug "chooser" cell-ref)
+                                    :labels     false
                                     :multiple   false
                                     :searchable true
-                                    :deletable true
+                                    :deletable  true
                                     :predicate? util/case-insensitive-includes?
-                                    :selected (filter #(= (:value %) display-value) items)
+                                    :selected   (filter #(= (:value %) display-value) items)
                                     :items      items
                                     :on-blur    (--on-blur cell-ref (partial on-blur row cell-ref))
                                     :on-select  (--on-change cell-ref (partial on-select row cell-ref))
-                                    :on-change #(when (fn? on-change) (on-change %))
+                                    :on-change  #(when (fn? on-change) (on-change %))
                                     :auto-focus true}]
                           (let [{:keys [on-change]} value]
                             [textfield {:placeholder display-value
                                         :on-change   (--on-change cell-ref (partial on-change row))}]))
                         [:span.Has-chooser {:on-click (partial edit-cell cell-ref)}
-                                            ;; :on-click        (partial select-cell cell-ref)
+                         ;; :on-click        (partial select-cell cell-ref)
                          display-value])
                  [:span display-value])]))))
        (doall

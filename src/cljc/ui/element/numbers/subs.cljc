@@ -140,9 +140,10 @@
      rows
      (let [col (nth (first rows) (util/col-num sorted-column))
            f   (case (:type col)
-                 :string (if ascending
-                           #(.localeCompare %2 %1)
-                           #(.localeCompare %1 %2))
+                 (:map :string)
+                 (if ascending
+                   #(.localeCompare %1 %2)
+                   #(.localeCompare %2 %1))
                  (if ascending < >))]
        (->> rows
             (sort-by

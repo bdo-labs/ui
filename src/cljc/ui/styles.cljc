@@ -407,7 +407,7 @@
                   :right      0}]
      [:.Dropdown-origin {:opacity    0
                          :transform  [[(translateY (unit/percent -50)) (rotateZ (unit/deg 90))]]
-                         :transition [[:200ms :ease]]
+                         ;; :transition [[:200ms :ease]]
                          :cursor     :pointer
                          :outline    :none
                          :border     :none
@@ -486,8 +486,15 @@
                    :width      (unit/percent 100)
                    :overflow   :auto}
      [:tr:last-child [:td {:border-bottom 0}]]]
-    [:.Body-cell [:span {:animation [[:200ms :fade :ease-in-out]]}]]
-    [:.Has-chooser {:min-width (unit/percent 100)
+    [:.Body-cell [:span {:animation [[:200ms :fade :ease-in-out]]}]
+     [:&.map {:padding 0}
+      [:.Textfield {:width (calc (- (unit/percent 100) (unit/rem 1)))
+                    :margin-top (unit/em 0.5)
+                    :margin-left (unit/em 0.5)}]
+      [:.Dropdown {:margin-top (unit/em 1)}]]]
+    [:.Has-chooser {:line-height (unit/em 3)
+                    :padding [[0 (unit/em 0.5)]]
+                    :min-width (unit/percent 100)
                     :min-height (calc (- (unit/percent 100) (unit/rem 1)))}]
     [:table {:border-collapse :separate
              :table-layout    :fixed

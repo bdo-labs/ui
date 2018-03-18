@@ -222,11 +222,12 @@
 
 (defn case-insensitive-includes?
   [s substr]
-  (when-not (empty? s)
-    (str/includes? (str/lower-case s) (str/lower-case substr))))
+  (if (and (empty? substr) (empty? s)) s
+      (str/includes? (str/lower-case s) (str/lower-case substr))))
 
 (defn smart-case-includes? [substr s]
-  (if-not (empty? (re-find #"[A-Z]" substr))
-    (str/includes? s substr)
-    (when-not (empty? s)
-      (str/includes? (str/lower-case s) (str/lower-case substr)))))
+  (if (and (empty? substr) (empty? s)) s
+      (if-not (empty? (re-find #"[A-Z]" substr))
+        (str/includes? s substr)
+        (when-not (empty? s)
+          (str/includes? (str/lower-case s) (str/lower-case substr))))))
