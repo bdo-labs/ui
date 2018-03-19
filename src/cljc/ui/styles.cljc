@@ -494,7 +494,6 @@
       [:.Dropdown {:margin-top (unit/em 1)}]]]
     [:.Has-chooser {:line-height (unit/em 3)
                     :padding [[0 (unit/em 0.5)]]
-                    :min-width (unit/percent 100)
                     :min-height (calc (- (unit/percent 100) (unit/rem 1)))}]
     [:table {:border-collapse :separate
              :table-layout    :fixed

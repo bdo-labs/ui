@@ -4,11 +4,9 @@
             [ui.util :as util]
             [clojure.string :as str]))
 
-
 (spec/def ::maybe-fn
   (spec/with-gen fn?
     (gen/return (constantly nil))))
-
 
 ;; Events
 (spec/def ::on-change ::maybe-fn)
@@ -16,7 +14,6 @@
 (spec/def ::on-blur ::maybe-fn)
 (spec/def ::on-key-up ::maybe-fn)
 (spec/def ::on-key-down ::maybe-fn)
-
 
 ;; Parameters
 (spec/def ::id (spec/and string? #(re-find #"(?i)(\w+)" %)))
@@ -44,9 +41,7 @@
   (spec/merge ::--params
               (spec/keys :req-un [::value])))
 
-
 (spec/def ::args (spec/cat :params ::params))
-
 
 (defn textfield
   [{:keys [id]
@@ -61,8 +56,7 @@
                   placeholder ""}} params
           ui-params                   (select-keys params (util/keys-from-spec ::--params))
           class                       (str/join " " [(util/params->classes ui-params)
-                                                     (when (or (not (empty? value))
-                                                               (not (empty? placeholder))) "dirty")])]
+                                                     (when (not (empty? value)) "dirty")])]
       [:div.Textfield {:key   (util/slug "textfield" id)
                        :style style
                        :class class}

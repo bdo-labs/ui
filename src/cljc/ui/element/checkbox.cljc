@@ -7,12 +7,10 @@
             [garden.units :as unit]
             [garden.color :as color]))
 
-
 (defcssfn linear-gradient)
 (defcssfn scale)
 (defcssfn translateX)
 (defcssfn translateY)
-
 
 (defn style
   [{:keys [primary primary]}]
@@ -23,7 +21,9 @@
     [:input {:-webkit-appearance :none
              :background         :white
              :border             [[:solid (unit/px 1) :silver]]
-             :outline            :none}]]
+             :outline            :none
+             :transition [[:200ms :ease]]}
+     [:&:active {:transform (scale 0.8)}]]]
    [:.Radio
     [:.Shape {:border-radius (unit/percent 50)}]]
    [:.toggle
@@ -107,7 +107,6 @@
 
 (spec/def ::on-change ::maybe-fn)
 
-
 (spec/def ::checkbox-params
   (spec/keys
    :opt-un [::id
@@ -115,11 +114,9 @@
             ::value
             ::on-change]))
 
-
 (spec/def ::checkbox-args
   (spec/cat :params ::checkbox-params
             :label ::label))
-
 
 (defn checkbox
   [& args]
@@ -145,7 +142,6 @@
                       :type    :checkbox
                       :checked checked})]] label]))
 
-
 (spec/fdef checkbox
-        :args ::checkbox-args
-        :ret vector?)
+           :args ::checkbox-args
+           :ret vector?)
