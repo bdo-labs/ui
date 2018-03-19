@@ -13,11 +13,9 @@
             [#?(:clj clj-time.coerce :cljs cljs-time.coerce) :as coerce]
             [re-frame.core :as re-frame]))
 
-
 (spec/def ::stub
   (spec/with-gen fn?
     (gen/return (constantly nil))))
-
 
 (spec/def ::id (spec/and string? #(not (= "" %))))
 (spec/def ::from inst?)
@@ -27,30 +25,26 @@
 (spec/def ::start-of-week (spec/and integer? #(>= % 0) #(<= % 6)))
 (spec/def ::formatter-args (spec/cat :format string? :time inst?))
 
-
 (defn formatter [format inst]
   (when (inst? inst)
-   (fmt/unparse (fmt/formatter format) (coerce/from-date inst))))
+    (fmt/unparse (fmt/formatter format) (coerce/from-date inst))))
 (spec/fdef formatter
            :args ::formatter-args
            :ret string?)
 
-
 (defn display-formatter
   [format from to]
   (let [formatter (partial formatter format)]
-   (str (formatter from) " - " (formatter to))) )
+    (str (formatter from) " - " (formatter to))))
 (spec/fdef display-formatter
            :args (spec/cat :formatter ::formatter-args :from ::from :to ::to)
            :ret string?
            :fn #(< (:from (:args %)) (:to (:args %))))
 
-
-
 (spec/def ::format
   (spec/with-gen string?
     #(spec/gen #{"E MMM d yyyy H:m" "E MMM d yyyy" "yyyyMMdd" "yyyyMMdd'T'HHmmss.SSSZ"
-                "yyyyMMdd'T'HHmmssZ yyyy-MM-dd'T'HH" "yyyy-MM-dd"})))
+                 "yyyyMMdd'T'HHmmssZ yyyy-MM-dd'T'HH" "yyyy-MM-dd"})))
 (spec/def ::time-picker boolean?)
 (spec/def ::read-only boolean?)
 (spec/def ::disabled boolean?)
@@ -65,31 +59,25 @@
                       ::time-picker ::read-only ::disabled
                       ;; Listeners
                       ;; ::on-change ::on-selected
-                      ]))
-
+]))
 
 (spec/def ::args
   (spec/cat :params ::params))
-
 
 (re-frame/reg-event-db
  ::init
  (fn [db [_ id state]]
    (assoc-in db [:period-picker] (hash-map [id (merge {:show-picker false} state)]))))
 
-
 (re-frame/reg-event-db
  ::toggle-show-picker
  (fn [db [_ id]]
    (update-in db [:period-picker id :show-picker] not)))
 
-
-
 (re-frame/reg-sub
  ::show-picker
  (fn [db [_ id]]
    (get-in db [:period-picker id :show-picker])))
-
 
 ;; Period-picker interaction
 ;; Clicking the field when there's no period set, should bring up a
@@ -99,10 +87,10 @@
 ;; up at a time could be benefitial
 
 (defn period-picker
-  "### period-picker"
   [params]
+  "### period-picker"
   (let [{:keys [id from to time-picker format]
-         :or   {format (if time-picker "E MMM d yyyy H:m" "E MMM d yyyy")}}
+         :or   {format "E MMM d yyyy H:m" #_(if time-picker "E MMM d yyyy H:m" "E MMM d yyyy")}}
         (util/conform! ::params params)
         show-picker        @(re-frame/subscribe [::show-picker id])
         toggle-show-picker #(re-frame/dispatch [::toggle-show-picker id])]
