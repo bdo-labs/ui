@@ -12,6 +12,7 @@
             [ui.docs.buttons :as buttons]
             [ui.docs.icons :as icons]
             [ui.docs.progress :as progress]
+            [ui.docs.numberfield :as numberfield]
             [ui.docs.colors :as colors]
             [ui.docs.dialog :as dialog]
             [ui.docs.dropdown :as dropdown]
@@ -63,6 +64,7 @@
     :dropdown [dropdown/documentation]
     :icons [icons/documentation]
     :inputs [inputs/documentation]
+    :numberfield [numberfield/documentation]
     :progress [progress/documentation]
     :sheet [sheet/documentation]
     ;; :sidebar [sidebar/documentation]
@@ -73,7 +75,7 @@
   (let [active-item @(re-frame/subscribe [:active-doc-item])
         wires       [:load :polyglot]
         layouts     [:centered :horizontally :vertically :fill]
-        elements    [:buttons :colors :date-picker :period-picker :dialog :dropdown :icons :inputs :progress :sheet]
+        elements    [:buttons :colors :date-picker :period-picker :dialog :dropdown :icons :inputs :numberfield :progress :sheet]
         ;; logo-style  {:font-size :8rem :font-weight :bold :text-transform :uppercase :margin 0}
 ]
     [element/sidebar {:locked true}

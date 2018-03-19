@@ -8,6 +8,7 @@
             [ui.element.progress-bar :as progress-bar]
             [ui.element.loaders :as loaders]
             [ui.element.textfield :as textfield]
+            [ui.element.numberfield :as numberfield]
             [ui.element.collection :as collection]
             [ui.element.label :as label]
             [ui.element.checkbox :as checkbox]
@@ -54,6 +55,7 @@
 (def checkbox checkbox/checkbox)
 (def toggle toggle/toggle)
 (def textfield textfield/textfield)
+(def numberfield numberfield/numberfield)
 (def chooser chooser/chooser)
 (def collection collection/collection)
 (def days calendar/days)
