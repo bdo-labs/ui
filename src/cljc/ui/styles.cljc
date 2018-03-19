@@ -453,7 +453,7 @@
                               :font-weight 100}]
      [:&.smaller {:font-size (unit/em 0.45)}]
      [#{:&.numeric :&.select :&.alpha} {:text-align :center}]]
-    [:.not-editable {:background (u/gray 250)}]
+    [:.not-editable {:background (u/gray 245)}]
     [:.can-edit {:background (u/gray 250)}]
     [:.editable
      [:&.cell {:cursor :cell}]
