@@ -88,7 +88,7 @@
                                                             (when (fn? on-key-up) (on-key-up %)))
                                               :on-focus #(do (reset! show* true)
                                                              (when (fn? on-focus) (on-focus %)))
-                                              :on-blur  #(go (<! (timeout 60))
+                                              :on-blur  #(go (<! (timeout 160))
                                                              (when @show* (reset! show* false))
                                                              (when (fn? on-blur) (on-blur %)))}
                                              (if searchable
