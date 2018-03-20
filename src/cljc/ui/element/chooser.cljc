@@ -80,17 +80,18 @@
             current-query             (str/trim (last (str/split @query* ",")))
             filtered-items            (set/select (labels-by-predicate predicate? current-query) items)
             textfield-params          (merge params
-                                             {:id       (util/slug id "textfield")
-                                              :value    @query*
+                                             {:id        (util/slug id "textfield")
+                                              :value     @query*
                                               ;; Remove incomplete items
                                               :on-key-up #(let [candidates (->> (str/split (.-value (.-target %)) ",") (mapv str/trim) (set))]
                                                             (reset! selected* (remove (fn [x] (not (contains? candidates (str (:value x))))) @selected*))
                                                             (when (fn? on-key-up) (on-key-up %)))
-                                              :on-focus #(do (reset! show* true)
-                                                             (when (fn? on-focus) (on-focus %)))
-                                              :on-blur  #(go (<! (timeout 160))
-                                                             (when @show* (reset! show* false))
-                                                             (when (fn? on-blur) (on-blur %)))}
+                                              :on-focus  #(do (reset! show* true)
+                                                              (when (fn? on-focus) (on-focus %)))
+                                              :on-blur   #(do (.persist %)
+                                                              (go (<! (timeout 160))
+                                                                  (when @show* (reset! show* false))
+                                                                  (when (fn? on-blur) (on-blur %))))}
                                              (if searchable
                                                {:label     label
                                                 :on-change #(do (reset! query* (.-value (.-target %)))
