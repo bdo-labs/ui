@@ -59,7 +59,7 @@
   "Create a unique-id"
   []
   #?(:clj (str (java.util.UUID/randomUUID))
-     :cljs (random-uuid)))
+     :cljs (str (random-uuid))))
 
 (defn exception
   "Throw exceptions independently of environment"
@@ -236,5 +236,6 @@
           (str/includes? (str/lower-case s) (str/lower-case substr))))))
 
 (defn ratom? [x]
-  #?(:cljs (= (type x) reagent.ratom/RAtom)
+  #?(:cljs (or (= (type x) reagent.ratom/RAtom)
+               (= (type x) reagent.ratom/RCursor))
      :clj  true))

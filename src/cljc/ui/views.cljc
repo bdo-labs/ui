@@ -1,25 +1,25 @@
 (ns ui.views
-  (:require [clojure.string :as str]
-            [re-frame.core :as re-frame]
-            [ui.elements :as element]
-            [ui.layout :as layout]
-            [ui.docs.polyglot :as polyglot]
-            [ui.docs.load :as load]
-            [ui.docs.centered :as centered]
-            [ui.docs.fill :as fill]
-            [ui.docs.horizontally :as horizontally]
-            [ui.docs.vertically :as vertically]
+  (:require [re-frame.core :as re-frame]
             [ui.docs.buttons :as buttons]
-            [ui.docs.icons :as icons]
-            [ui.docs.progress :as progress]
-            [ui.docs.numberfield :as numberfield]
+            [ui.docs.centered :as centered]
             [ui.docs.colors :as colors]
+            [ui.docs.date-picker :as date-picker]
             [ui.docs.dialog :as dialog]
             [ui.docs.dropdown :as dropdown]
+            [ui.docs.fill :as fill]
+            [ui.docs.form :as form]
+            [ui.docs.horizontally :as horizontally]
+            [ui.docs.icons :as icons]
             [ui.docs.inputs :as inputs]
-            [ui.docs.date-picker :as date-picker]
+            [ui.docs.load :as load]
+            [ui.docs.numberfield :as numberfield]
             [ui.docs.period-picker :as period-picker]
-            [ui.docs.sheet :as sheet]))
+            [ui.docs.polyglot :as polyglot]
+            [ui.docs.progress :as progress]
+            [ui.docs.sheet :as sheet]
+            [ui.docs.vertically :as vertically]
+            [ui.elements :as element]
+            [ui.layout :as layout]))
 
 (defn- menu-item [item]
   (let [active-doc-item @(re-frame/subscribe [:active-doc-item])]
@@ -46,6 +46,7 @@
   [item-name]
   (case item-name
     ;; Wires
+    :form     [form/documentation]
     :load     [load/documentation]
     :polyglot [polyglot/documentation]
 
@@ -73,7 +74,7 @@
 (defn- doc-panel
   []
   (let [active-item @(re-frame/subscribe [:active-doc-item])
-        wires       [:load :polyglot]
+        wires       [:form :load :polyglot]
         layouts     [:centered :horizontally :vertically :fill]
         elements    [:buttons :colors :date-picker :period-picker :dialog :dropdown :icons :inputs :numberfield :progress :sheet]
         ;; logo-style  {:font-size :8rem :font-weight :bold :text-transform :uppercase :margin 0}

@@ -102,7 +102,7 @@
                            :class class}
          [:input (merge
                   (dissoc ui-params :placeholder :label)
-                  {:value         (or @model "")
+                  {:value         (or (do @model) "")
                    :type          :number
                    :placeholder   placeholder
                    :on-change     on-change'
