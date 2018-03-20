@@ -98,8 +98,7 @@
       ### A Straight-Forward Library for Composing User-Interfaces
       "
     [element/button {:class    "primary"
-                     :on-click #(re-frame/dispatch [:navigate :docs])
-                     :rounded  true} "Get Started"]
+                     :on-click #(re-frame/dispatch [:navigate :docs])} "Get Started"]
 
     "
 

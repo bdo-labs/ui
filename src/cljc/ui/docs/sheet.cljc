@@ -4,7 +4,7 @@
             [clojure.spec.alpha :as spec]
             [clojure.string :as str]
             [ui.elements :as element]
-            [ui.element.chooser :refer [chooser]]
+            [ui.element.chooser.views :refer [chooser]]
             [ui.layout :as layout]
             [tongue.core :as tongue]
             [re-frame.core :as re-frame]

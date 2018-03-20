@@ -5,28 +5,23 @@
             [garden.color :as color]
             [garden.units :as unit]
             [garden.core :refer [css]]
-            [ui.element.content :refer [article]]
             [ui.styles :as styles]
             [ui.layout :as layout]
-            [ui.element.color-picker :refer [color-picker]]
+            [ui.element.content.views :refer [article]]
+            [ui.element.color-picker.views :refer [color-picker]]
             [ui.util :as util]))
 
-
-
 (defcssfn linear-gradient)
-
 
 (re-frame/reg-event-db
  ::set-primary
  (fn [db [_ hex]]
    (assoc db ::primary hex)))
 
-
 (re-frame/reg-event-db
  ::set-secondary
  (fn [db [_ hex]]
    (assoc db ::secondary hex)))
-
 
 (re-frame/reg-sub
  ::primary
@@ -34,13 +29,11 @@
    (or (get db k)
        (str (color/hex (-> styles/theme :default :primary))))))
 
-
 (re-frame/reg-sub
  ::secondary
  (fn [db [k]]
    (or (get db k)
        (str (color/hex (-> styles/theme :default :secondary))))))
-
 
 (defn documentation []
   (let [primary       (re-frame/subscribe [::primary])

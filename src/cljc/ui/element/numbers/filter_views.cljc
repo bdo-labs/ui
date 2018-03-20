@@ -1,10 +1,10 @@
 (ns ui.element.numbers.filter-views
   (:require [re-frame.core :as re-frame]
-            [ui.element.menu :as menu]
-            [ui.element.checkbox :refer [checkbox]]
+            [ui.element.menu.views :as menu]
+            [ui.element.checkbox.views :refer [checkbox]]
+            [ui.element.button.views :refer [button]]
+            [ui.element.containers.views :refer [container]]
             [ui.wire.polyglot :refer [translate]]
-            [ui.element.button :refer [button]]
-            [ui.element.containers :refer [container]]
             [ui.util :as util]))
 
 (defn- string-filter

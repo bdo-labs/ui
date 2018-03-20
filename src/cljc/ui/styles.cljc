@@ -5,16 +5,16 @@
             [garden.units :as unit]
             [garden.color :as color]
             [garden.selectors :as selector :refer [defpseudoelement]]
-            [ui.util :as u]
-            [ui.element.badge :as badge]
-            [ui.element.checkbox :as checkbox]
-            [ui.element.containers :as containers]
-            [ui.element.menu :as menu]
-            [ui.element.ripple :as ripple]
-            [ui.element.button :as button]
-            [ui.element.clamp :as clamp]
-            [ui.element.progress-bar :as progress-bar]
-            [ui.element.modal :as modal]))
+            [ui.util :as util]
+            [ui.element.badge.styles :as badge]
+            [ui.element.checkbox.styles :as checkbox]
+            [ui.element.containers.styles :as containers]
+            [ui.element.menu.styles :as menu]
+            #_[ui.element.ripple :as ripple]
+            [ui.element.button.styles :as button]
+            #_[ui.element.clamp :as clamp]
+            [ui.element.progress-bar.styles :as progress-bar]
+            [ui.element.modal.styles :as modal]))
 
 ;;
 ;; Realizations that should be materialized
@@ -208,8 +208,8 @@
     (selector/> :*) {:margin-right (unit/rem 1)}]])
 
 (defkeyframes pulse-color
-  [:from {:background (u/gray 240)}]
-  [:to {:background (u/gray 220)}])
+  [:from {:background (util/gray 240)}]
+  [:to {:background (util/gray 220)}])
 
 (defkeyframes fade-up
   [:from {:opacity 0
@@ -235,8 +235,8 @@
   [100 {:background-position [[(unit/percent 0) (unit/percent 50)]]}])
 
 (defkeyframes can-edit
-  [0 {:background (u/gray 200)}]
-  [100 {:background (u/gray 240)}])
+  [0 {:background (util/gray 200)}]
+  [100 {:background (util/gray 240)}])
 
 ;; (defkeyframes scale-ripple
 ;;   [:from {:opacity          0
@@ -393,14 +393,14 @@
                         :text-overflow :ellipsis
                         :white-space   :nowrap
                         :overflow      :hidden}]]
-    [:.Table {:border-bottom [[:solid (unit/px 1) (u/gray 230)]]
+    [:.Table {:border-bottom [[:solid (unit/px 1) (util/gray 230)]]
               :width         (unit/percent 100)}]
-    [:.Arrow {:color         (u/gray 150)
+    [:.Arrow {:color         (util/gray 150)
               :font-size     (unit/em 0.7)
               :padding-left  (unit/rem 1)
               :padding-right (unit/rem 1)}]
     [:.Column-headings {:background :white}
-     [#{:th :td} {:border-top [[:solid (unit/px 1) (u/gray 230)]]}]]
+     [#{:th :td} {:border-top [[:solid (unit/px 1) (util/gray 230)]]}]]
     [#{:th} {:position :relative}
      [:.Dropdown {:background :white
                   :position   [[:absolute :!important]]
@@ -412,7 +412,7 @@
                          :outline    :none
                          :border     :none
                          :background :transparent
-                         :color      (u/gray 130)
+                         :color      (util/gray 130)
                          :font-size  (unit/rem 1.5)
                          :position   :absolute
                          :right      (unit/rem 1)
@@ -420,7 +420,7 @@
      [:&:hover
       [:.Dropdown-origin {:opacity 1}]]]
     [:tr
-     [#{:td:first-child :th:first-child} {:border-left [[:solid (unit/px 1) (u/gray 230)]]}]]
+     [#{:td:first-child :th:first-child} {:border-left [[:solid (unit/px 1) (util/gray 230)]]}]]
     [:.duplicate {:position   :relative
                   :background :yellow}
      [:&:before {:content      "' '"
@@ -453,15 +453,15 @@
                               :font-weight 100}]
      [:&.smaller {:font-size (unit/em 0.45)}]
      [#{:&.numeric :&.select :&.alpha} {:text-align :center}]]
-    [:.not-editable {:background (u/gray 250)}]
-    [:.can-edit {:background (u/gray 250)}]
+    [:.not-editable {:background (util/gray 250)}]
+    [:.can-edit {:background (util/gray 250)}]
     [:.editable
      [:&.cell {:cursor :cell}]
      [:&:hover {:position :relative}
       [:&:before {:content        "' '"
                   :box-sizing     :content-box
                   :display        :block
-                  :border         [[:solid (unit/px 1) (u/gray 185)]]
+                  :border         [[:solid (unit/px 1) (util/gray 185)]]
                   :width          (unit/percent 100)
                   :height         (unit/percent 100)
                   :top            (unit/px -1)
@@ -470,7 +470,7 @@
                   :position       :absolute}]
       #_[:&:after {:content       "' '"
                    :border-radius (unit/percent 50)
-                   :border        [[:solid (unit/px 1) (u/gray 150)]]
+                   :border        [[:solid (unit/px 1) (util/gray 150)]]
                    :display       :block
                    :position      :absolute
                    :bottom        0
@@ -503,11 +503,11 @@
     [:&.selectable
      [:tr
       [:&:hover
-       [:td {:background-color (u/gray 245)}]]
+       [:td {:background-color (util/gray 245)}]]
       [:&.selected
-       [#{:td :th} {:background-color (u/gray 245)}]]]]
-    [#{:th :td} {:border-bottom [[:solid (unit/px 1) (u/gray 230)]]
-                 :border-right  [[:solid (unit/px 1) (u/gray 230)]]
+       [#{:td :th} {:background-color (util/gray 245)}]]]]
+    [#{:th :td} {:border-bottom [[:solid (unit/px 1) (util/gray 230)]]
+                 :border-right  [[:solid (unit/px 1) (util/gray 230)]]
                  :padding       (unit/rem 1)}]
     [:.Chooser
      [:span {:display :inline}]
@@ -550,7 +550,7 @@
                 :padding   (unit/em 0.5)}]]]))
 
 (defn- in-doc [{:keys [primary secondary]}]
-  (let [contrast (u/gray 240)
+  (let [contrast (util/gray 240)
         triangle [(linear-gradient (unit/deg 45)
                                    [contrast (unit/percent 25)]
                                    [:transparent (unit/percent 25)]
@@ -616,13 +616,13 @@
                       (color-picker theme)
                       (calendar theme)
                       (typography theme)
-                      (ripple/style theme)
+                      ;; (ripple/style theme)
                       (badge/style theme)
                       (button/style theme)
                       (menu/style theme)
                       (checkbox/style theme)
                       (modal/style theme)
-                      (clamp/style theme)
+                      ;; (clamp/style theme)
                       (progress-bar/style theme)]))
 
 (def screen
