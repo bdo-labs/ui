@@ -1,6 +1,5 @@
 (ns ui.element.icon
-  (:require #_[clojure.test.check.generators :as gen]
-            [clojure.spec.alpha :as spec]
+  (:require [clojure.spec.alpha :as spec]
             [clojure.string :as str]
             [clojure.string :as str]
             [ui.util :as util]
@@ -54,7 +53,7 @@
 (re-frame/reg-event-db
  :ui/icon-font
  (fn [db [k font]]
-   (let [font (apply hash-map (util/conform-or-fail ::font font))]
+   (let [font (apply hash-map (util/conform! ::font font))]
      (assoc db k font))))
 
 
@@ -63,7 +62,7 @@
 
 (defn icon
   [& args]
-  (let [{:keys [params icon]} (util/conform-or-fail ::icon-args args)
+  (let [{:keys [params icon]} (util/conform! ::icon-args args)
         {:keys [font size]
          :or   {font @(re-frame/subscribe [:ui/icon-font])
                 size 2}}      params

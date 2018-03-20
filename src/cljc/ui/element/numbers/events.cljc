@@ -1,321 +1,190 @@
 (ns ui.element.numbers.events
-  (:require [re-frame.core :refer [reg-event-db reg-event-fx]]
-            [#?(:clj clojure.core
-                :cljs reagent.core) :refer [atom]]
-            [clojure.spec.alpha :as spec]
-            [ui.util :as u]
-            [clojure.string :as str]
+  (:require [ui.element.numbers.specs :as spec]
+            [re-frame.core :as re-frame]
+            [ui.element.numbers.helpers :refer [->columns sheet-path]]
             [ui.util :as util]))
 
-
-(def numbers-only #"^[\d,\.]+$")
-
-
-(spec/def ::name (spec/and string? not-empty))
-(spec/def ::title
-  (spec/and string?
-            #(not (str/starts-with? % "http"))
-            #(not (str/starts-with? % "="))
-            #(nil? (re-matches numbers-only %))))
-(spec/def ::titles (spec/coll-of ::title))
-(spec/def ::title-row? boolean)
-(spec/def ::column-heading #{:alpha :numeric :hidden})
-(spec/def ::row-heading #{:alpha :numeric :select :hidden})
-(spec/def ::type #{:number :inst :string})
-
-
-(spec/def ::col-ref
-  (spec/with-gen (spec/and keyword? #(re-matches #"[A-Z]+" (name %)))
-                 #(spec/gen #{:A :ZA :ABA :ACMK :FOO})))
-
-
-(spec/def ::cell-ref
-  (spec/with-gen (spec/and keyword?
-                           #(re-matches #"[A-Z]+[0-9]+" (str (name %))))
-                 #(spec/gen #{:A1 :Z999 :AZ3 :BOBBY6 :ME2})))
-
-
-(spec/def ::hide-column (spec/coll-of ::col-ref :into #{}))
-(spec/def ::locked (spec/coll-of ::col-ref :into #{}))
-
-
-#_(spec/def ::rows (spec/map-of ::cell-ref any?))
-(spec/def ::rows (spec/coll-of map?))
-
-
-(spec/def ::scale (spec/or :inst inst? :number number?))
-(spec/def ::min ::scale)
-(spec/def ::max ::scale)
-
-
-(spec/def ::caption? boolean?)
-(spec/def ::editable? boolean?)
-(spec/def ::sortable? boolean?)
-(spec/def ::filterable? boolean?)
-(spec/def ::freeze? boolean?)
-(spec/def ::hidden boolean?)
-
-
-(spec/def ::inst-formatter fn?)
-(spec/def ::number-formatter fn?)
-
-
-(spec/def ::value (spec/and any? #(not (map? %))))
-(spec/def ::values (spec/coll-of ::value))
-
-
-(spec/def ::csv
-  (spec/and (spec/coll-of vector?)
-            (spec/cat :title-rows (spec/* ::titles)
-                      :rows (spec/* ::values))))
-
-
-(spec/def ::csv-no-title
-  (spec/and (spec/coll-of vector?)
-            (spec/cat :rows
-                      (spec/* ::values))))
-
-
-(spec/def ::unq-column (spec/coll-of map?))
-(spec/def ::unq-columns (spec/coll-of ::unq-column))
-
-
-(spec/def ::data
-  (spec/or :data ::unq-columns :csv ::csv :csv-no-title ::csv-no-title))
-
-
-(spec/def ::column
-  (spec/keys :req-un [::type ::col-ref ::rows]
-             :opt-un [::min ::max ::freeze? ::editable? ::sortable?
-                      ::filterable? ::locked ::hide-column]))
-
-
-(spec/def ::columns (spec/coll-of ::column))
-
-
-(spec/def ::params
-  (spec/keys :req-un [::name]
-             :opt-un [::column-heading ::row-heading ::editable? ::caption?
-                      ::hidden]))
-
-
-(spec/def ::args
-  (spec/cat :params ::params
-            :content ::data))
-
-
-;;-----
-
-
-(defn cell-ref
-  "Generate a cell-ref from [col-ref] and [index]"
-  [col-ref index]
-  (keyword (str (name col-ref) index)))
-
-
-(spec/fdef cell-ref
-  :args (spec/cat :col-ref :col-ref
-                  :num nat-int?)
-  :ret keyword?)
-
-
-;; Each column will need to be typed in order to perform
-;; sorting and filtering. The type-inference is based on the
-;; first, non title-row value, so if you try to mix and match
-;; values, you will probably encounter breakage.
-(defn infer-column
-  [col]
-  (let [rows (->> (:rows col)
-                  (remove :title-row?)
-                  (map :value))
-        first-val (first rows)]
-    (if-let [meta-type (:type (meta first-val))]
-      meta-type
-      (merge
-        col
-        (cond (number? first-val)
-                {:type :number, :min (reduce min rows), :max (reduce max rows)}
-              (inst? first-val)
-                {:type :inst, :min (reduce < rows), :max (reduce > rows)}
-              (string? first-val) {:type :string}
-              :else {:type :any})))))
-
-
-(defn data->columns
-  "Transform the [data] passed in; to manageable columns"
-  [data]
-  (let [res
-          (->>
-            (apply map list data)
-            (map-indexed
-              (fn [n col]
-                (let [col-ref (u/col-refs n)
-                      col (vec (map-indexed
-                                 #(merge {:cell-ref (cell-ref col-ref (inc %1))}
-                                         %2)
-                                 col))]
-                  (infer-column {:col-ref col-ref, :filters {}, :rows col}))))
-            (vec))]
-    res))
-
-
-(defn csv-no-title->columns
-  [{:keys [rows]}]
-  (->> rows
-       (mapv #(mapv (fn [col] {:value col, :title-row? false}) %))))
-
-
-(defn csv->columns
-  [{:keys [title-rows rows], :as data}]
-  (let [title-rows (->> title-rows
-                        (mapv #(mapv (fn [col] {:value col, :title-row? true})
-                                %)))
-        rows (csv-no-title->columns data)]
-    (into title-rows rows)))
-
-
-(defn ->columns
-  [[k v]]
-  (data->columns (case k
-                   :csv (csv->columns v)
-                   :csv-no-title (csv-no-title->columns v)
-                   v)))
-
-
-;; Handlers
-(reg-event-fx
-  :sheet
-  (fn [{:keys [db]} [_ sheet-ref d]]
-    (if-let [data (util/conform-or-fail ::data d)]
-      {:db (let [columns (->columns data)]
-             (assoc db
-               sheet-ref {:columns columns,
-                          :row-count (count (:rows (first columns)))}))}
-      {:db (assoc db sheet-ref {:columns [], :row-count 0})})))
-
-
-(reg-event-db :sort-ascending?
-              (fn handle-sort-ascending? [db [_ sheet-ref]]
-                (update-in db [sheet-ref :sort-ascending?] not)))
-
-
-(reg-event-db :sort-column
-              (fn handle-sort-column [db [_ sheet-ref col-ref ascending?]]
-                (update-in db
-                           [sheet-ref]
-                           assoc
-                           :sorted-column col-ref
-                           :sort-ascending? ascending?)))
-
-
-(reg-event-db
-  :add-filter
-  (fn handle-add-filter [db [_ sheet-ref col-ref filter-name filter-fn]]
-    (update-in db
-               [sheet-ref :columns (u/col-num col-ref) :filters]
-               assoc
-               filter-name
-               filter-fn)))
-
-
-(reg-event-db :remove-filter
-              (fn handle-remove-filter [db [_ sheet-ref col-ref filter-name]]
-                (update-in db
-                           [sheet-ref :columns (u/col-num col-ref) :filters]
-                           dissoc
-                           filter-name)))
-
-
-(reg-event-fx
-  :toggle-filter
-  (fn handle-toggle-filter [{:keys [db]}
-                            [_ sheet-ref col-ref filter-name filter-fn]]
-    (if (some? (get-in db [sheet-ref :columns (u/col-num col-ref) :filters filter-name] nil))
-      {:dispatch [:remove-filter sheet-ref col-ref filter-name]}
-      {:dispatch [:add-filter sheet-ref col-ref filter-name filter-fn]})))
-
-
-(reg-event-fx :filter-eq
-              (fn handle-filter-eq [{:keys [db]} [k sheet-ref col-ref s id]]
-                (let [k (keyword (u/slug (name k) " " s))
-                      f (partial = s)]
-                  {:dispatch [:toggle-filter sheet-ref col-ref k f]
-                   :db (update-in db [sheet-ref :columns (u/col-num col-ref) :checkboxes id] not)})))
-
-
-(reg-event-fx
+;; Data Manipulation ------------------------------------------------------
+
+
+(re-frame/reg-event-fx
+ :sheet
+ (fn [{:keys [db]} [_ id d state]]
+   (if-let [data (util/conform! ::spec/data d)]
+     {:db (let [columns    (->columns data)
+                hide       (:hide-columns state)
+                rows       (->> columns (map :rows) (apply map list))
+                title-rows (remove #((complement :title-row?) (first %)) rows)
+                body-rows  (remove #(:title-row? (first %)) rows)
+                state      (merge {:buffer-pos  0
+                                   :buffer-size 40
+                                   :scroll-pos 0
+                                   :row-height  60} state)
+                state      (assoc state :table-height (* (count body-rows) (:row-height state)))]
+            (assoc-in db (sheet-path id) {:columns    columns
+                                          :unique-values (->>  columns (map :rows) (map :value) (distinct) (sort <))
+                                          :title-rows title-rows
+                                          :rows       body-rows
+                                          :state      state
+                                          :column-count (->> columns (remove #(contains? hide (:col-ref %))) (count))
+                                          :row-count  (count body-rows)}))}
+     {:db (assoc-in db (sheet-path id) {:columns []})})))
+
+(re-frame/reg-event-db
+ :set-cell-val
+ (fn [db [_ id cell-ref value]]
+   (let [col-n (util/col-num cell-ref)
+         row-n (dec (util/row-num cell-ref))]
+     (-> db
+         (assoc-in (sheet-path [:columns col-n :rows row-n :display-value] id) value)
+         (assoc-in (sheet-path [:columns col-n :rows row-n :value :display-value] id) value)
+         (assoc-in (sheet-path [:columns col-n :rows row-n :value :value] id) value)))))
+
+(re-frame/reg-event-db
+ :merge-cell
+ (fn [db [_ id cell-ref new-cell]]
+   (let [col-n (util/col-num cell-ref)
+         row-n (dec (util/row-num cell-ref))]
+     (let [current-cell (get-in db (sheet-path [:columns col-n :rows row-n] id))
+           cell         (merge current-cell new-cell)]
+       (assoc-in db (sheet-path [:columns col-n :rows row-n] id) cell)))))
+
+(re-frame/reg-event-db
+ :set-buffer-pos
+ (fn [db [k id buffer-pos]]
+   (let [row-count             (get-in db (sheet-path [:row-count] id))
+         {:keys [buffer-size]} (get-in db (sheet-path [:state] id))
+         clamped               (min (max 0 (int buffer-pos)) (int (- row-count buffer-size)))]
+     (assoc-in db (sheet-path [:state :buffer-pos] id) clamped))))
+
+(re-frame/reg-event-fx
+ :scroll-top
+ (fn [{:keys [db]} [k id top]]
+   (let [{:keys [buffer-pos buffer-size row-height]} (get-in db (sheet-path [:state] id))
+         f (if (and (<= (/ top row-height) (- buffer-pos (* buffer-size 0.3)))
+                    (< top 0)) + -)]
+     {:dispatch [:set-buffer-pos id (int (f (/ top row-height) (* buffer-size 0.3)))]})))
+
+(re-frame/reg-event-db
+ :set-editing
+ (fn [db [k id cell-ref]]
+   (assoc-in db (sheet-path [:state :editing] id) cell-ref)))
+
+;; Sorting ----------------------------------------------------------------
+
+
+(re-frame/reg-event-db
+ :sort-ascending?
+ (fn [db [_ id]]
+   (update-in db (sheet-path [:state :sort-ascending?] id) not)))
+
+(re-frame/reg-event-db
+ :sort-column
+ (fn [db [_ id col-ref ascending?]]
+   (update-in db (sheet-path [:state :sort-column] id) assoc
+              :sorted-column col-ref
+              :sort-ascending? ascending?)))
+
+;; Filtering --------------------------------------------------------------
+
+
+(re-frame/reg-event-db
+ :add-filter
+ (fn [db [_ id col-ref filter-name filter-fn]]
+   (let [col-n (util/col-num col-ref)]
+     (update-in db
+                (sheet-path [:columns col-n :filters] id)
+                assoc filter-name filter-fn))))
+
+(re-frame/reg-event-db
+ :remove-filter
+ (fn [db [_ id col-ref filter-name]]
+   (let [col-n (util/col-num col-ref)]
+     (update-in db
+                (sheet-path [:columns col-n :filters] id)
+                dissoc
+                filter-name))))
+
+(re-frame/reg-event-fx
+ :toggle-filter
+ (fn [{:keys [db]}
+      [_ id col-ref filter-name filter-fn]]
+   (if (some? (get-in db (sheet-path [:columns (util/col-num col-ref) :filters filter-name] id) nil))
+     {:dispatch [:remove-filter id col-ref filter-name]}
+     {:dispatch [:add-filter id col-ref filter-name filter-fn]})))
+
+(re-frame/reg-event-fx
+ :filter-eq
+ (fn [{:keys [db]} [k sheet-id col-ref s id]]
+   (let [k (keyword (util/slug (name k) " " s))
+         f (partial = s)]
+     {:dispatch [:toggle-filter id col-ref k f]
+      :db       (update-in db (sheet-path [:columns (util/col-num col-ref) :checkboxes id] sheet-id) not)})))
+
+(re-frame/reg-event-fx
  :filter-smart-case
- (fn [{:keys [db]} [k sheet-ref col-ref s]]
-   (let [k (keyword (u/slug (name k) " smart-case"))
-         f (partial util/smart-case-includes? s)]
-     {:dispatch [:toggle-filter sheet-ref col-ref k f]
-      :db       (assoc-in db [sheet-ref :columns (u/col-num col-ref) :query] s)})))
+ (fn [{:keys [db]} [k id col-ref s]]
+   (let [k     (keyword (util/slug (name k) " smart-case"))
+         f     (partial util/smart-case-includes? s)
+         col-n (util/col-num col-ref)]
+     {:dispatch [:toggle-filter id col-ref k f]
+      :db       (assoc-in db (sheet-path [:columns col-n :query] id)  s)})))
+
+(re-frame/reg-event-fx
+ :filter-range
+ (fn [{:keys [db]} [k id col-ref v]]
+   (let [f #(and (<= (:min v) %) (>= (:max v) %))]
+     {:dispatch [:toggle-filter id col-ref k f]})))
+
+(re-frame/reg-event-fx
+ :set-filter-min
+ (fn [{:keys [db]} [_ id col-ref val]]
+   {:db (update-in db
+                   [id :columns (util/col-num col-ref) :filter-min]
+                   val)}))
+
+(re-frame/reg-event-fx
+ :set-filter-max
+ (fn [{:keys [db]} [_ id col-ref val]]
+   {:db (update-in db
+                   [id :columns (util/col-num col-ref) :filter-max]
+                   val)}))
+
+(re-frame/reg-event-fx
+ :toggle-filter-term
+ (fn [{:keys [db]} [_ id col-ref val]]
+   {:db (update-in db
+                   (sheet-path [:columns (util/col-num col-ref) :filter-terms] id)
+                   #(if (contains? % val) (disj % val) (conj % val)))}))
+
+;; Column menu ------------------------------------------------------------
 
 
-(reg-event-fx :filter-range
-              (fn handle-filter-range [{:keys [db]} [k sheet-ref col-ref v]]
-                (let [f #(and (<= (:min v) %) (>= (:max v) %))]
-                  {:dispatch [:toggle-filter sheet-ref col-ref k f]})))
+(re-frame/reg-event-db
+ :show-column-menu
+ (fn [db [_ id col-ref]]
+   (update-in db (sheet-path [:state :show-column-menu] id)
+              #(if-not (= col-ref %) col-ref nil))))
+
+;; Selection --------------------------------------------------------------
 
 
-(reg-event-fx
-  :set-filter-min
-  (fn [{:keys [db]} [_ sheet-ref col-ref val]]
-    {:db (update-in db
-                    [sheet-ref :columns (u/col-num col-ref) :filter-min]
-                    val)}))
+(re-frame/reg-event-db
+ :unselect
+ (fn [db [_ id]]
+   (update-in db [id] dissoc :selection)))
 
+(re-frame/reg-event-db
+ :set-first-selection (fn [db [_ id cell-ref]]
+                        (let [col-n (util/col-num cell-ref)
+                              row-n (util/row-num cell-ref)]
+                          (assoc-in db
+                                    (sheet-path [:state :selection] id)
+                                    {:column col-n :rows row-n}))))
 
-(reg-event-fx
-  :set-filter-max
-  (fn [{:keys [db]} [_ sheet-ref col-ref val]]
-    {:db (update-in db
-                    [sheet-ref :columns (u/col-num col-ref) :filter-max]
-                    val)}))
-
-
-(reg-event-fx
-  :toggle-filter-term
-  (fn [{:keys [db]} [_ sheet-ref col-ref val]]
-    {:db (update-in db
-                    [sheet-ref :columns (u/col-num col-ref) :filter-terms]
-                    #(if (contains? % val) (disj % val) (conj % val)))}))
-
-
-(reg-event-db :show-column-menu
-              (fn handle-show-column-menu [db [_ sheet-ref col-ref]]
-                (update-in db
-                           [sheet-ref :show-column-menu]
-                           #(if-not (= col-ref %) col-ref nil))))
-
-
-(reg-event-db :hide-column-menu
-              (fn handle-hide-column-menu [db [_ sheet-ref]]
-                (update-in db [sheet-ref] dissoc :show-column-menu)))
-
-
-(reg-event-db :unselect
-              (fn handle-unselect [db [_ sheet-ref]]
-                (update-in db [sheet-ref] dissoc :selection)))
-
-
-(reg-event-db :set-first-selection
-              (fn handle-set-selection [db [_ sheet-ref cell-ref]]
-                (assoc-in db
-                  [sheet-ref :selection]
-                  {:column (u/col-num cell-ref), :rows (u/row-num cell-ref)})))
-
-
-(reg-event-db :add-to-selection
-              (fn handle-set-selection [db [_ sheet-ref cell-ref]]
-                (update-in db
-                           [sheet-ref :selection :rows]
-                           #(range (first %) (u/row-num cell-ref)))))
-
-
-(reg-event-db :set-cell-val
-              (fn handle-set-cell-val [db [_ sheet-ref cell-ref value]]
-                (assoc-in db
-                  [sheet-ref :columns (u/col-num cell-ref) :rows
-                   (dec (u/row-num cell-ref)) :value]
-                  value)))
+(re-frame/reg-event-db
+ :add-to-selection
+ (fn [db [_ id cell-ref]]
+   (update-in db
+              [id :selection :rows]
+              #(range (first %) (util/row-num cell-ref)))))

@@ -4,22 +4,17 @@
             [accountant.core :as accountant]
             [ui.util :as util]))
 
-
 (defroute "/" []
   (re-frame/dispatch [:set-active-panel :marketing-panel]))
 
-
-(defroute "/docs" []
+(defroute #"/docs/?" []
   (re-frame/dispatch [:set-active-panel :doc-panel]))
 
-
-(defroute "/docs/:item" [item]
+(defroute #"/docs/([^\/]+)/?" [item]
   (re-frame/dispatch [:set-active-doc-item (keyword item)]))
-
 
 (defroute "*" []
   (re-frame/dispatch [:set-active-panel :not-found]))
-
 
 (defn init []
   ;; (secretary/set-config! :prefix "#")

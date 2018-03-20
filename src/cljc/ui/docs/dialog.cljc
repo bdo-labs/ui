@@ -24,10 +24,10 @@
       Think quick feedback!
      "
      [layout/horizontally
-      [element/button {:class    "secondary"
+      [element/button {:class    "primary"
                        :on-click #(re-frame/dispatch [::set-show 1])}
        "Show dialog"]
-      [element/button {:class    "secondary"
+      [element/button {:class    "primary"
                        :on-click (show-dialog 3)}
        "Show confirmation"]]
      [element/dialog (-> {:show?     (= show 1)

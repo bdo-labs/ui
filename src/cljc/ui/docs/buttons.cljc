@@ -1,35 +1,13 @@
 (ns ui.docs.buttons
-  (:require [ui.elements :as element]
+  (:require [ui.element.button :as button]
+            [ui.elements :as element]
             [ui.layout :as layout]
-            [clojure.spec.alpha :as spec]
-            [clojure.pprint :as pprint]
-            [ui.util :as util]))
+            [ui.element.showcase :refer [showcase]]))
+
 
 (defn documentation []
-  [element/article
-   "### Button  
-   Create Actionable Items of Different Flavours
-
-   "
-   [layout/horizontally
-    [element/button {:flat true
-                     :fill true} "Foo"]
-    [element/button {:class "primary"
-                     :ripple true} [:span "Bar"]]
-    [element/button {:class "secondary" :rounded true :disabled true} "Baz"]
-    [element/button {:rounded true :flat true} "Qux"]
-    [element/button {:class "secondary"}
-     [element/icon {:font "ion"} "ios-settings"]
-     "Settings"]
-    [element/button {:flat     true
-                     :circular true
-                     :title     "Un-lock"}
-     [element/icon {:font "material-icons"} "fingerprint"]]] 
-   [:p
-    [:em
-     [:small
-      "Note that ui does not come with an icon-library of it's own, so
-    you'll need to include one yourself and register it with ui. Have
-    a look at the icon-element for further explanation."]]]])
-
-
+  [layout/vertically {:raised? true :background :white :rounded? true
+                      :style {:margin "2em"
+                              :padding "3em"
+                              :flex "1 1 80%"}}
+   [showcase #'ui.element.button/button ::button/params]])

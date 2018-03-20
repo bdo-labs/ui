@@ -5,9 +5,16 @@
   A set of functions that will work for 99% of your layout-needs.
   "
   (:require [ui.elements :as element]
-            #_[clojure.test.check.generators :as gen]
             [clojure.spec.alpha :as spec]
             [ui.util :as util]))
+
+
+(defn aligned->align [v]
+  (case v
+    (:top :left)     :start
+    (:bottom :right) :end
+    :center))
+
 
 (spec/def ::aligned (spec/or :x ::horizontal-alignment
                              :y ::vertical-alignment))
@@ -26,10 +33,10 @@
 
 
 (defn- layout [layout & args]
-  (let [{:keys [params content]} (util/conform-or-fail ::layout-args args)
+  (let [{:keys [params content]} (util/conform! ::layout-args args)
         aligned                  (apply hash-map (-> params :aligned))
-        align                    [(util/aligned->align (or (-> aligned :x) :left))
-                                  (util/aligned->align (or (-> aligned :y) :top))]
+        align                    [(aligned->align (or (-> aligned :x) :left))
+                                  (aligned->align (or (-> aligned :y) :top))]
         align                    (if (= layout :vertically) [(last align) (first align)] align)
         params                   (merge {:layout layout :align align} (dissoc params))]
     (apply element/container (into [params] (map last content)))))
@@ -44,7 +51,7 @@
 
 
 (defn centered [& args]
-  (let [{:keys [params content]} (util/conform-or-fail ::layout-args args)
+  (let [{:keys [params content]} (util/conform! ::layout-args args)
         params                   (merge {:align [:center :center]} params)]
     (apply layout :horizontally params content)))
 

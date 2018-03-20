@@ -6,7 +6,7 @@
 ;; FIXME size & color
 
 (defn spinner [& args]
-  (let [{:keys [params]} (util/conform-or-fail ::spinner-args args)
+  (let [{:keys [params]} (util/conform! ::spinner-args args)
         {:keys [color size]
          :or   {color "rgb(70,111,226)"
                 size 1}} params]

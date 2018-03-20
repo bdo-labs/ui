@@ -5,14 +5,33 @@
             [garden.color :as color]))
 
 
+(spec/def ::show-count boolean?)
+
+
+(spec/def ::params
+  (spec/keys :opt-un [::show-count]))
+
+
+(spec/def ::content
+  (spec/nonconforming
+   (spec/or :num nat-int?
+            :nil nil?)))
+
+
+(spec/def ::args
+  (spec/cat :params (spec/? ::params)
+            :content ::content))
+
+
+
 (defn badge [& args]
-  (let [{:keys [params content]} (util/conform-or-fail ::args args)
+  (let [{:keys [params content]} (util/conform! ::args args)
         {:keys [show-count class]
          :or   {show-count true
                 class      ""}}  params
         ui-params                (util/keys-from-spec ::params)
         class                    (util/params->classes params)]
-    (when (> content 0)
+    (when (some? content)
       [:div.Badge (merge {:class class}
                          (apply dissoc params (conj ui-params :class)))
        (when show-count content)])))
@@ -34,21 +53,3 @@
                    :height      (unit/px 6)
                    :line-height (unit/px 7)
                    :padding     (unit/em 0.5)}]]])
-
-
-(spec/def ::show-count boolean?)
-
-
-(spec/def ::params
-  (spec/keys :opt-un [::show-count]))
-
-
-(spec/def ::content
-  (spec/nonconforming
-   (spec/or :num nat-int?
-            :nil nil?)))
-
-
-(spec/def ::args
-  (spec/cat :params (spec/? ::params)
-            :content ::content))

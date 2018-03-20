@@ -9,45 +9,35 @@
             [ui.layout :as layout]
             [ui.util :as util]))
 
-
 (re-frame/reg-event-db ::set-date (fn [db [_ date]] (assoc db ::date date)))
 (re-frame/reg-event-db ::toggle-short-form (fn [db [_]] (update-in db [::short-form?] not)))
 (re-frame/reg-event-db ::set-jump (fn [db [_ jump]] (assoc db ::jump (int jump))))
 (re-frame/reg-event-db ::set-period (fn [db [_ period]] (assoc db ::period period)))
-
 
 (re-frame/reg-sub ::date (fn [db] (or (::date db) [(t/now) (t/now)])))
 (re-frame/reg-sub ::jump (fn [db] (or (::jump db) 1)))
 (re-frame/reg-sub ::short-form? (fn [db] ^boolean (::short-form? db)))
 (re-frame/reg-sub ::period (fn [db] (::period db)))
 
-
-
-
 (re-frame/reg-sub
  ::show-dialog
  (fn [db _] (or (::show-dialog db) false)))
-
 
 (re-frame/reg-sub
  ::picker
  util/extract)
 
-
 (re-frame/reg-event-db
  ::toggle-dialog
  (fn [db _] (update db ::show-dialog not)))
-
 
 (re-frame/reg-event-db
  ::close-dialog
  (fn [db _] (assoc db ::show-dialog false)))
 
-
 (re-frame/reg-event-db
  ::set-picker
  (fn [db [_ picker]] (assoc db ::picker picker)))
-
 
 (defn datepicker []
   (let [show-dialog    @(re-frame/subscribe [::show-dialog])
@@ -55,9 +45,9 @@
         close-dialog   #(re-frame/dispatch [::close-dialog])
         picker         (or @(re-frame/subscribe [::picker]) :years)
         date           @(re-frame/subscribe [::date])
-        formatted-date (if (= (translate :date-full (coerce/to-date (first date))) (translate :date-full (coerce/to-date (last date))))
-                         (translate :date-full (coerce/to-date (first date)))
-                         (str (translate :date-full (coerce/to-date (first date))) " - " (translate :date-full (coerce/to-date (last date)))))
+        formatted-date (if (= (translate :ui/date-full (coerce/to-date (first date))) (translate :ui/date-full (coerce/to-date (last date))))
+                         (translate :ui/date-full (coerce/to-date (first date)))
+                         (str (translate :ui/date-full (coerce/to-date (first date))) " - " (translate :ui/date-full (coerce/to-date (last date)))))
         set-date       #(do (re-frame/dispatch [::set-date %])
                             (close-dialog))]
     [layout/vertically
@@ -95,7 +85,6 @@
                           :selected (first date)
                           :on-click set-date}]
          [element/years {:on-click set-date}])]]]))
-
 
 (defn documentation []
   (let [date @(re-frame/subscribe [::date])]

@@ -1,7 +1,5 @@
 (ns ui.element.link
-  (:require #_[clojure.test.check.generators :as gen]
-            [clojure.spec.alpha :as spec]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [re-frame.core :as re-frame]
             [ui.util :as u]))
 

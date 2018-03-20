@@ -1,10 +1,19 @@
 (ns ui.docs.colors
-  (:require [re-frame.core :as re-frame]
+  #?(:cljs (:require-macros [garden.def :refer [defcssfn defkeyframes]]))
+  (:require #?(:clj [garden.def :refer [defcssfn defkeyframes]])
+            [re-frame.core :as re-frame]
             [garden.color :as color]
+            [garden.units :as unit]
+            [garden.core :refer [css]]
             [ui.element.content :refer [article]]
             [ui.styles :as styles]
             [ui.layout :as layout]
-            [ui.element.color-picker :refer [color-picker]]))
+            [ui.element.color-picker :refer [color-picker]]
+            [ui.util :as util]))
+
+
+
+(defcssfn linear-gradient)
 
 
 (re-frame/reg-event-db
@@ -23,35 +32,32 @@
  ::primary
  (fn [db [k]]
    (or (get db k)
-       (color/hex (-> styles/theme :default :primary)))))
+       (str (color/hex (-> styles/theme :default :primary))))))
 
 
 (re-frame/reg-sub
  ::secondary
  (fn [db [k]]
    (or (get db k)
-       (color/hex (-> styles/theme :default :secondary)))))
+       (str (color/hex (-> styles/theme :default :secondary))))))
 
 
 (defn documentation []
-  (let [primary       @(re-frame/subscribe [::primary])
-        secondary     @(re-frame/subscribe [::secondary])
+  (let [primary       (re-frame/subscribe [::primary])
+        secondary     (re-frame/subscribe [::secondary])
         set-primary   #(re-frame/dispatch [::set-primary %])
         set-secondary #(re-frame/dispatch [::set-secondary %])]
-    [article
-     "### Color-picker
-      Pick and choose colors that can easily be persisted as a theme "
-     [layout/vertically {:rounded? true
-                         :raised?  true
-                         :style    {:background "rgb(250,250,250)"}}
-      [layout/horizontally
-       [layout/vertically
-        [:span "Primary"]
-        [color-picker {:hex       primary
-                       :on-change set-primary}]]
-       [layout/vertically
-        [:span "Secondary"]
-        [color-picker {:hex       secondary
-                       :on-change set-secondary}]]]
-      [layout/centered
-       [:small [:em (str "Note that clicking the color-value changes it's type, so you can copy the version you prefer to your clip-board")]]]]]))
+    (fn []
+      (let [primary   (str @primary)
+            secondary (str @secondary)]
+        #?(:cljs
+           (let [background (css [:body {:background primary}])]
+             (styles/inject js/document "--colors" background)))
+        [article
+         "### Color-picker
+          Pick and choose colors that can easily be persisted as a theme "
+         [layout/horizontally
+          [layout/centered {:class "demo"}
+           [color-picker {:hex       primary
+                          :class     "raised"
+                          :on-change set-primary}]]]]))))

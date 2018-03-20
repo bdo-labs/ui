@@ -8,12 +8,13 @@
             [clojure.spec.alpha :as spec]
             [garden.units :as unit]
             [garden.color :as color]
-            [ui.util :as u]))
+            [ui.util :as util]))
+
+;; TODO Share backdrop between opening dialogs
 
 
 (defcssfn translateX)
 (defcssfn translateY)
-
 
 (defn style [{:keys [primary secondary background]}]
   [[:.Dialog {:position :fixed
@@ -51,11 +52,9 @@
     [:&:hover {:color (color/darken secondary 30)}
      [:&.primary {:color primary}]]]])
 
-
 (spec/def ::stub
   (spec/with-gen fn?
     (gen/return (constantly nil))))
-
 
 (spec/def ::show? boolean?)
 (spec/def ::backdrop? boolean?)
@@ -64,7 +63,6 @@
 (spec/def ::on-cancel ::stub)
 (spec/def ::hide ::stub)
 
-
 (spec/def ::params
   (spec/keys :req-un [::on-cancel]
              :opt-un [::show?
@@ -72,47 +70,43 @@
                       ::backdrop?
                       ::cancel-on-backdrop?]))
 
-
 (spec/def ::content (spec/* (spec/or :str string? :vec vector?)))
-
 
 (spec/def ::args
   (spec/cat :params ::params
             :content ::content))
 
-
 (defn dialog [& args]
-  (let [{:keys [params content]}           (u/conform-or-fail ::args args)
+  (let [{:keys [params content]}        (util/conform! ::args args)
         {:keys [show? backdrop? cancel-on-backdrop? close-button? on-cancel]
          :or   {backdrop?           true
                 cancel-on-backdrop? true
                 close-button?       true}} params
-        class                              (u/params->classes params)
-        ui-params                          (conj (u/keys-from-spec ::params) :class)
-        params                             (->> (apply dissoc params ui-params)
-                                                (merge {:class class}))]
-    (when show? [:div.Dialog params
-                 [:div.Content
-                  (when close-button?
-                    [icon {:font     "ion"
-                           :size     3
-                           :class    "Close"
-                           :on-click on-cancel} "ios-close-empty"])
-                  (into [container {:raised?  true
-                                    :rounded? true
-                                    :inline?  true
-                                    :gap?     false
-                                    :layout   :vertically
-                                    :style    {:background :white}}]
-                        (mapv last content))]
-                 (when backdrop?
-                   [:div.Backdrop (when cancel-on-backdrop? {:on-click on-cancel})])])))
-
+        class                           (util/params->classes params)
+        ui-params                       (conj (util/keys-from-spec ::params) :class)
+        params                          (->> (apply dissoc params ui-params)
+                                             (merge {:class class}))]
+    (when show?
+      [:div.Dialog params
+       [:div.Content
+        (into [container {:raised?  true
+                          :rounded? true
+                          :inline?  true
+                          :gap?     false
+                          :layout   :vertically
+                          :style    {:background :white}}
+               (when close-button?
+                 [icon {:font     "ion"
+                        :size     3
+                        :class    "Close"
+                        :on-click on-cancel} "ios-close-empty"])]
+              (mapv last content))]
+       (when backdrop?
+         [:div.Backdrop (when cancel-on-backdrop? {:on-click on-cancel})])])))
 
 (spec/def ::confirm-label string?)
 (spec/def ::cancel-label string?)
 (spec/def ::on-confirm ::stub)
-
 
 (spec/def ::confirm-params
   (spec/keys :opt-un [::confirm-label
@@ -120,18 +114,16 @@
              :req-un [::on-confirm
                       ::on-cancel]))
 
-
 (spec/def ::confirm-args
   (spec/cat :params ::confirm-params
             :content ::content))
 
-
 (defn confirm-dialog [& args]
-  (let [{:keys [params content]} (u/conform-or-fail ::confirm-args args)
+  (let [{:keys [params content]} (util/conform! ::confirm-args args)
         {:keys [on-confirm on-cancel cancel-label confirm-label]
          :or {cancel-label "No"
               confirm-label "Yes"}} params
-        ui-params (u/keys-from-spec ::confirm-params)
+        ui-params (util/keys-from-spec ::confirm-params)
         params (assoc (apply dissoc params ui-params) :on-cancel on-cancel)]
     [dialog params
      [container {:layout :vertically}
@@ -140,9 +132,8 @@
        [button {:on-click on-confirm} confirm-label]
        [button {:on-click on-cancel} cancel-label]]]]))
 
-
 (defn alert-dialog [& args]
-  (let [{:keys [params content]} (u/conform-or-fail ::alert-args args)
+  (let [{:keys [params content]} (util/conform! ::alert-args args)
         {:keys [alert-label on-cancel]
          :or {alert-label "OK"}} params]
     [dialog params

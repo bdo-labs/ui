@@ -1,13 +1,14 @@
 (ns ui.element.menu
   #?(:cljs (:require-macros [garden.def :refer [defcssfn]]))
   (:require #?(:clj [garden.def :refer [defcssfn]])
-            [re-frame.core :as re-frame]
+            [garden.color :as color]
             [ui.util :as util]
             [clojure.string :as str]
             [clojure.spec.alpha :as spec]
-            [garden.units :as unit]
-            [garden.color :as color]
             [ui.element.containers :refer [container]]))
+
+
+;; FIXME Close drop-down upon clicking outside the menu or holding the mouse outside for a longer period of time
 
 
 (defcssfn cubic-bezier)
@@ -31,7 +32,9 @@
     [:&.origin-top-center {:transform-origin [[:top :center]]}]
     [:&.origin-bottom-left {:transform-origin [[:bottom :left]]}]
     [:&.origin-bottom-right {:transform-origin [[:bottom :right]]}]
-    [:&.origin-bottom-center {:transform-origin [[:bottom :center]]}]]])
+    [:&.origin-bottom-center {:transform-origin [[:bottom :center]]}]
+    [:.Button.flat {:border-color :transparent}]
+    [:small {:color (color/rgb [170 170 170])}]]])
 
 
 (spec/def ::open? boolean?)
@@ -53,7 +56,7 @@
 
 
 (defn dropdown [& args]
-  (let [{:keys [params content]}   (util/conform-or-fail ::dropdown-args args)
+  (let [{:keys [params content]}   (util/conform! ::dropdown-args args)
         {:keys [id
                 open?
                 origin]

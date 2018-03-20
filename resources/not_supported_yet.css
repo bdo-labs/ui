@@ -61,3 +61,28 @@ in 2.0, but at-least our upgrade-path is way easier now.
         flex: 1 0 auto !important;
     }
 }
+
+
+
+/* Textfield */
+.Textfield input::-webkit-input-placeholder {
+    color: rgb(210,210,210);
+}
+
+
+.Textfield.dirty input::-webkit-input-placeholder {
+    color: rgb(0,0,0);
+}
+
+.Textfield input:focus::-webkit-input-placeholder {
+    color: rgb(117,117,117);
+}
+
+
+/* Button */
+.Button:not(.circular) .Icon {
+    margin-right: 1rem;
+}
+.Button:not(.flat) {
+    border-radius: 0.5rem;
+}

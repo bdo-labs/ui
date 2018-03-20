@@ -14,7 +14,7 @@
 
 (defn label
   [& args]
-  (let [{:keys [params]}               (util/conform-or-fail ::args args)
+  (let [{:keys [params]}               (util/conform! ::args args)
         {:keys [id value on-key-down]} params
         id                             (util/slug id value "label")]
     [:span.Label {:key (util/gen-id)}

@@ -18,18 +18,21 @@
       [:div.Value {:on-mouse-down mouse-down
                    :on-mouse-move mouse-move
                    :on-mouse-up   mouse-up}
-       (let [{:keys [r g b]} (color/hex-str->rgb (str hex))]
-         (case @!output
-           :rgb (str "rgb(" r "," g "," b ")")
-           :hsl (let [{:keys [h s l]} (color/rgb->hsl r g b)]
-                  (str "hsl(" (u/parse-int h) "," (u/parse-int s) "," (u/parse-int l) ")"))
-           :hex (str hex)))])))
+       (when (string? hex)
+        (let [{:keys [r g b]} (color/hex-str->rgb hex)]
+          (case @!output
+            :rgb (str "rgb(" r "," g "," b ")")
+            :hsl (let [{:keys [h s l]} (color/rgb->hsl r g b)]
+                   (str "hsl(" (u/parse-int h) "," (u/parse-int s) "," (u/parse-int l) ")"))
+            :hex (str hex))))])))
 
 
 (defn color-picker
-  [{:keys [hex disabled readonly on-change] :as params}]
+  [{:keys [hex disabled readonly on-change class]
+    :or {class ""} :as params}]
   (let [classes (u/names->str [(when (true? disabled) "disabled")
-                               (when (true? readonly) "readonly")])]
+                               (when (true? readonly) "readonly")
+                               class])]
     [:div.Color-picker (merge (dissoc params :disabled :readonly :hex)
                               {:class classes})
      [color-swatch hex on-change true]
