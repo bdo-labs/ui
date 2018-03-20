@@ -5,6 +5,8 @@
             [clojure.string :as str]
             [clojure.spec.alpha :as spec]
             [markdown.core :as markdown]
+            #?(:cljs [reagent.ratom])
+            #?(:cljs [ui.config :refer [debug?]])
             [garden.color :as color]
             [ui.spec-helper :as h]))
 
@@ -67,10 +69,11 @@
 (defn conform!
   "Conform arguments to specification or throw an exception"
   [spec args]
-  (spec/conform spec args)
-  #_(if (spec/valid? spec args)
+  (if-not #?(:cljs debug? :clj false)
+    (spec/conform spec args)
+    (if (spec/valid? spec args)
       (spec/conform spec args)
-      (exception (spec/explain-str spec args))))
+      (exception (spec/explain-str spec args)))))
 
 (def ^:private +slug-tr-map+
   (zipmap "ąàáäâãåæăćčĉęèéëêĝĥìíïîĵłľńňòóöőôõðøśșšŝťțŭùúüűûñÿýçżźž"
@@ -231,3 +234,7 @@
         (str/includes? s substr)
         (when-not (empty? s)
           (str/includes? (str/lower-case s) (str/lower-case substr))))))
+
+(defn ratom? [x]
+  #?(:cljs (= (type x) reagent.ratom/RAtom)
+     :clj  true))
