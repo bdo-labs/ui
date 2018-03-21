@@ -1,17 +1,19 @@
 (ns ui.docs.form
-  (:require [ui.elements :as element]
+  (:require [clojure.spec.alpha :as spec]
+            [ui.elements :as element]
             [ui.element.form :as form :refer [defform]]
             [ui.layout :as layout]))
 
 
+(spec/def ::number1-valid #(> % 30))
+
 (defform testform
-  {:on-valid println}
+  {:on-valid (fn [data _] #?(:cljs (js/alert (pr-str data))))}
   [{:type ::element/numberfield
-    :name :number1}
+    :name :number1
+    :spec ::number1-valid}
    {:type element/numberfield
     :name :number2}])
-
-;;(form/as-table {:on-valid :test} (testform {} {}))
 
 (defn documentation[]
   (let [f (testform {} {})]

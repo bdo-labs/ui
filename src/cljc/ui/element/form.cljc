@@ -1,19 +1,14 @@
 (ns ui.element.form
   (:require [clojure.spec.alpha :as spec]
             #?(:cljs [reagent.core :refer [atom] :as reagent])
+            [re-frame.core :as re-frame]
             [ui.elements :as element]
+            [ui.element.form.table :as form.table]
             [ui.util :as util]))
 
 
 (spec/def ::id (spec/and string? #(re-find #"(?i)(\w+)" %)))
 (spec/def ::on-valid (spec/or :fn? fn? :keyword? keyword?))
-(spec/def ::form map?)
-
-(spec/def ::table-params
-  (spec/keys :opt-un [::id]
-             :req-un [::on-valid]))
-
-(spec/def ::table-args (spec/cat :params ::table-params :form-map ::form))
 
 (defmulti ^:private get-field-fn (fn [field]
                                    (cond (fn? (:type field))      :fn
@@ -27,6 +22,38 @@
 (defmethod get-field-fn :default [field]
   (:type field))
 
+(defn- get-validation-errors [form-map old-state]
+  (fn [out [k v]]
+    (let [field (get-in form-map [:fields k])]
+      ;; when there is a spec
+      ;; AND, there has been a change in value
+      (if (and (:spec field)
+               (not= v (get old-state k)))
+        (if (spec/valid? (:spec field) v)
+          ;; if the spec is valid we change it to hold zero errors
+          (conj out [k []])
+          ;; if the spec is invalid we give an explanation to
+          ;; what's wrong
+          (conj out [k (spec/explain-str (:spec field) v)]))
+        ;; if not true, just pass along out as normal
+        out))))
+
+(defn- add-validation-watcher
+  "Add validation checks for the RAtom as it changes"
+  [form-map]
+  (let [{{on-valid :on-valid} :options} form-map]
+    (add-watch (:data form-map) (str "form-watcher-" (:id form-map))
+               (fn [_ _ old-state new-state]
+                 ;; get all errors for all fields
+                 (let [field-errors (reduce (get-validation-errors form-map old-state) [] new-state)]
+                   ;; update the RAtoms for the error map
+                   (doseq [[k errors] field-errors]
+                     (reset! (get-in form-map [:errors k]) errors))
+                   ;; if there are no errors then the form is valid and we can fire off the function
+                   (when (every? empty? (map second field-errors))
+                     (if (fn? on-valid)
+                       (on-valid new-state form-map)
+                       (re-frame/dispatch [on-valid new-state form-map]))))))))
 
 (defn form [fields form-options override-options data]
   (let [options (merge form-options override-options)
@@ -42,54 +69,19 @@
                          (assoc out name (atom [])))
                        {} map-fields)
         data (atom (reduce (fn [out [name field]]
-                             (assoc out name :value fields))
+                             (assoc out name (:value field)))
                            {} map-fields))
         form-map {:fields  map-fields
                   :options options
                   :errors  errors
                   :data data}]
-    (add-watch (:data form-map) :foobar
+    #_(add-watch (:data form-map) :foobar
                (fn [k _ old-state new-state]
                  (println new-state)))
+    (add-validation-watcher form-map)
     form-map))
 
-(comment
-  (-> [{:type ::element/numberfield
-       :name :number1}
-      {:type element/numberfield
-       :name :number2}]
-     (form {} {} {})
-     (println))
-  )
-
-(defn render-field [{:keys [field-fn name] :as field} form-map]
-  [field-fn (assoc field :model #?(:cljs (reagent/cursor (:data form-map) [name])
-                                   :clj  (get-in form-map [:data name])))])
-
-
-(defn- table-row [field {:keys [label?] :as form-map}]
-  (if-not label?
-    [:tr {:key (str "tr-" (:id field))} [:td (render-field field form-map)]]
-    [:tr {:key (str "tr-" (:id field))}
-     [:td [:label {:for (:id field)} (or (:label field) (:name field))]]
-     [:td (render-field (dissoc field :label) form-map)]]))
-
-(defn as-table
-  [& args]
-  (let [{:keys [params form-map]} (util/conform! ::table-args args)
-        {:keys [id]
-         :or   {id (util/gen-id)}} params]
-    (fn [& args]
-      (let [{:keys [params]} (util/conform! ::table-args args)
-            {:keys [style
-                    class]
-             :or {style {}
-                  class ""}} params]
-        [:table {:key (util/slug "form-table" id)
-                 :style style
-                 :class class}
-         [:tbody (map #(table-row % form-map) (map second (:fields form-map)))]]))))
-
+(def as-table form.table/as-table)
 
 (defmacro defform [-name options fields]
   (let [form-name (name -name)]
