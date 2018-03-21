@@ -32,8 +32,7 @@
         id                     (util/slug id)
         query*                 ^{:doc "Query to use for filtering and emphasizing the resultset"} (atom (if deletable (str/join ", " (map :value selected)) ""))
         show*                  ^{:doc "Show or hide the collection-dropdown"} (atom false)
-        selected*              ^{:doc "Keep track of all selected items"} (atom selected)
-        collection-params      {:selected selected}]
+        selected*              ^{:doc "Keep track of all selected items"} (atom selected)]
 
     (fn [& args]
       (let [{:keys [params]}          (util/conform! ::spec/args args)
@@ -55,17 +54,20 @@
             current-query             (str/trim (last (str/split @query* ",")))
             filtered-items            (set/select (labels-by-predicate predicate? current-query) items)
             textfield-params          (merge params
-                                             {:id       (util/slug id "textfield")
-                                              :value    @query*
+                                             {:id        (util/slug id "textfield")
+                                              :value     @query*
                                               ;; Remove incomplete items
-                                              :on-key-up #(let [candidates (->> (str/split (.-value (.-target %)) ",") (mapv str/trim) (set))]
-                                                            (reset! selected* (remove (fn [x] (not (contains? candidates (str (:value x))))) @selected*))
-                                                            (when (fn? on-key-up) (on-key-up %)))
-                                              :on-focus #(do (reset! show* true)
-                                                             (when (fn? on-focus) (on-focus %)))
-                                              :on-blur  #(go (<! (timeout 60))
-                                                             (when @show* (reset! show* false))
-                                                             (when (fn? on-blur) (on-blur %)))}
+                                              :on-key-up #(do (let [candidates (->> (str/split (.-value (.-target %)) ",") (mapv str/trim) (set))
+                                                                    valid-ones (remove (fn [x] (not (contains? candidates (str (:value x))))) @selected*)]
+                                                                (when (not= @selected* valid-ones)
+                                                                  (reset! selected* valid-ones)))
+                                                              (when (fn? on-key-up) (on-key-up %)))
+                                              :on-focus  #(do (reset! show* true)
+                                                              (when (fn? on-focus) (on-focus %)))
+                                              :on-blur   #(do (.persist %)
+                                                              (go (<! (timeout 160))
+                                                                  (when @show* (reset! show* false))
+                                                                  (when (fn? on-blur) (on-blur %))))}
                                              (if searchable
                                                {:label     label
                                                 :on-change #(do (reset! query* (.-value (.-target %)))
@@ -86,7 +88,7 @@
             collection-params         (merge params
                                              {:id           (util/slug id "collection")
                                               :emphasize    current-query
-                                              :selected     @selected*
+                                              :model        selected*
                                               :deselectable deselectable
                                               :on-select    (fn [items]
                                                               (when (true? close-on-select) (reset! show* false))

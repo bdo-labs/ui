@@ -16,7 +16,8 @@
                   placeholder ""}} params
           ui-params                   (select-keys params (util/keys-from-spec ::spec/--params))
           class                       (str/join " " [(util/params->classes ui-params)
-                                                     (when (not (empty? value)) "dirty")])]
+                                                     (when (or (not (empty? value))
+                                                               (not (empty? placeholder))) "dirty")])]
       [:div.Textfield {:key   (util/slug "textfield" id)
                        :style style
                        :class class}

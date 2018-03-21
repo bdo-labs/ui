@@ -1,6 +1,7 @@
 (ns ui.element.collection.spec
   (:require [clojure.spec.alpha :as spec]
-            [clojure.test.check.generators :as gen]))
+            [clojure.test.check.generators :as gen]
+            [ui.util :refer [ratom?]]))
 
 (spec/def ::maybe-fn
   (spec/with-gen fn?
@@ -22,6 +23,7 @@
     :with-label (spec/cat :id ::id :value ::value :label ::label)
     :qualified (spec/keys :req-un [::id ::value] :opt-un [::label]))))
 (spec/def ::predicate? ::maybe-fn)
+(spec/def ::model ratom?)
 
 ;; Wether you can select multiple items
 (spec/def ::multiple boolean?)
@@ -64,7 +66,8 @@
                       ::predicate?
                       ::add-message
                       ::empty-message
-                      ::hide-selected]))
+                      ::hide-selected
+                      ::model]))
 
 (spec/def ::args
   (spec/cat :params ::params :items ::items))

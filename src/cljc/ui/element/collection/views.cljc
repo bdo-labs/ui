@@ -48,37 +48,28 @@
                            [:strong {:key (str "i-" %2 "-" %1 "-emp")} %2]
                            [:span {:key (str "i-" %2 "-" %1 "-no")} %2]))))))
 
-;; FIXME These needs to be part of the component
-;; The component re-runs all life-cycle-events upon each change, why?
-(def intended* (atom nil))
-(def selected* (atom (sorted-map)))
-
 ;; TODO Scroll list upon navigating using keyboard
-;; TODO Move keyboard-events out of the component
 ;; TODO Multiple selection using ctrl/shift
 ;; TODO Allow custom markup in each item?
 #?(:clj (defn collection [] [:span "Not implemented"])
    :cljs
    (defn collection
      [& args]
-     (let [;; intended*                  ^{:doc "Items that are intermediately marked for selection"} (atom nil)
-           ;; selected*                  ^{:doc "A sorted-map of sets of items that's been selected"} (atom (sorted-map))
+     (let [intended*                  ^{:doc "Items that are intermediately marked for selection"} (atom nil)
            {:keys [params items]}     (util/conform! ::spec/args args)
            {:keys [id
                    deselectable
                    multiple
-                   selected
+                   model
                    keyboard
                    on-select
                    max-items
-                   multiple
                    predicate?
                    add-message
                    empty-message
                    hide-selected]
             :or   {id            (util/gen-id)
                    deselectable  true
-                   selected      #{}
                    keyboard      true
                    predicate?    str/includes?
                    add-message   false
@@ -92,22 +83,22 @@
        (letfn [(set-intended! [item]
                  (reset! intended* item))
                (remove-item! [item]
-                             (swap! selected* disj item))
+                             (swap! model disj item))
                (add-item! [item]
                           (when-not (empty? item)
-                            (if (contains? selected item)
+                            (if (contains? @model item)
                               (when deselectable
-                                (if (= 1 (count selected))
+                                (if (= 1 (count @model))
                                   (remove-item! item)
-                                  (reset! selected* (set/difference selected #{item}))))
+                                  (reset! model (set/difference @model #{item}))))
                               (when (or (nil? max-items)
-                                        (> max-items (count selected)))
+                                        (> max-items (count @model)))
                                 (if (or (not multiple)
-                                        (empty? selected))
-                                  (reset! selected* #{item})
-                                  (swap! selected* conj item))))
+                                        (empty? @model))
+                                  (reset! model #{item})
+                                  (swap! model conj item))))
                             (when (fn? on-select)
-                              (on-select @selected*))))
+                              (on-select @model))))
                (on-key-down [event]
                             (let [key (util/code->key (.-which event))]
                               (case key
@@ -120,14 +111,12 @@
           {:display-name           "collection"
            ;; We ensure that the collection is initialized with whatever
            ;; selection was passed in
-           :component-did-mount    #(do (reset! selected* selected)
-                                        (when keyboard (.addEventListener js/document "keydown" on-key-down)))
+           :component-did-mount    #(when keyboard (.addEventListener js/document "keydown" on-key-down))
            :component-will-unmount #(.removeEventListener js/document "keydown" on-key-down)
            :reagent-render
            (fn [& args]
              (let [{:keys [params]}    (util/conform! ::spec/args args)
-                   {:keys [emphasize]} params
-                   selected            @selected*]
+                   {:keys [emphasize]} params]
                [:ul.Collection {:key   (util/slug id "collection")
                                 :id    id
                                 :class (util/params->classes ui-params)}
@@ -139,7 +128,7 @@
                   (let [item {:id nil :value emphasize}]
                     [:li {:key            (util/slug id "adder")
                           :class          (str/join " " [(when (= item @intended*) "intended")
-                                                         (when (contains? selected item) "selected")])
+                                                         (when (contains? @model item) "selected")])
                           :on-mouse-enter #(set-intended! item)
                           :on-click       #(add-item! item)}
                      (emphasize-match (str/replace-first add-message "%" emphasize) emphasize)]))
@@ -156,16 +145,16 @@
                           :or   {label value}
                           :as   item} items]
                      (when (or (false? hide-selected)
-                               (not (contains? selected item)))
+                               (not (contains? @model item)))
                        [:li {:key            (util/gen-id)
                              ;; (util/slug id (:id item) "listitem")
                              :class          (str/join " " [(when (and (= item @intended*)
                                                                        (or (nil? max-items)
-                                                                           (< (count selected) max-items))) "intended")
-                                                            (when (contains? selected item) "selected")
-                                                            (when (and (not (contains? selected item))
+                                                                           (< (count @model) max-items))) "intended")
+                                                            (when (contains? @model item) "selected")
+                                                            (when (and (not (contains? @model item))
                                                                        (and (not (nil? max-items))
-                                                                            (>= (count selected) max-items))) "readonly")])
+                                                                            (>= (count @model) max-items))) "readonly")])
                              :on-mouse-enter #(set-intended! item)
                              :on-click       #(add-item! item)}
                         (emphasize-match label emphasize)]))))]))})))))
