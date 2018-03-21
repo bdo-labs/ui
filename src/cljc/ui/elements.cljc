@@ -16,6 +16,7 @@
             [ui.element.loaders :as loaders]
             [ui.element.menu :as menu]
             [ui.element.modal :as modal]
+            [ui.element.notification :as notification]
             [ui.element.numberfield :as numberfield]
             [ui.element.numbers.views :as numbers]
             [ui.element.period-picker :as period-picker]
@@ -47,6 +48,8 @@
 (def vr content/vr)
 (def hr content/hr)
 (def label label/label)
+(def notification notification/notification)
+(def notifications notification/notifications)
 
 
 ;; Form Elements
