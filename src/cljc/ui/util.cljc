@@ -235,7 +235,7 @@
         (when-not (empty? s)
           (str/includes? (str/lower-case s) (str/lower-case substr))))))
 
-(defn ratom? [x]
+(defn deref? [x]
   #?(:cljs (or (= (type x) reagent.ratom/RAtom)
                (= (type x) reagent.ratom/RCursor))
      :clj  true))

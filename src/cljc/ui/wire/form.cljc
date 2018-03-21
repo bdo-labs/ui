@@ -1,9 +1,9 @@
-(ns ui.element.form
+(ns ui.wire.form
   (:require [clojure.spec.alpha :as spec]
             #?(:cljs [reagent.core :refer [atom] :as reagent])
             [re-frame.core :as re-frame]
             [ui.elements :as element]
-            [ui.element.form.table :as form.table]
+            [ui.wire.form.table :as form.table]
             [ui.util :as util]))
 
 

@@ -30,7 +30,7 @@
 (spec/def ::auto-focus boolean?)
 (spec/def ::read-only boolean?)
 (spec/def ::focus boolean?)
-(spec/def ::model util/ratom?)
+(spec/def ::model util/deref?)
 (spec/def ::--params
   (spec/keys :opt-un [::id
                       ::placeholder

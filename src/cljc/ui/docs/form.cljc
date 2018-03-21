@@ -1,8 +1,8 @@
 (ns ui.docs.form
   (:require [clojure.spec.alpha :as spec]
             [ui.elements :as element]
-            [ui.element.form :as form :refer [defform]]
-            [ui.layout :as layout]))
+            [ui.layout :as layout]
+            [ui.wire.form :as form :refer [defform]]))
 
 
 (spec/def ::number1-valid #(> % 30))

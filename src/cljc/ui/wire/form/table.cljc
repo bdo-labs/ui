@@ -1,6 +1,6 @@
-(ns ui.element.form.table
+(ns ui.wire.form.table
   (:require [clojure.spec.alpha :as spec]
-            [ui.element.form.common :as common]
+            [ui.wire.form.common :as common]
             [ui.util :as util]))
 
 

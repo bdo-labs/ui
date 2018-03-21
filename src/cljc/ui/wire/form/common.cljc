@@ -1,4 +1,4 @@
-(ns ui.element.form.common
+(ns ui.wire.form.common
   #?(:cljs (:require [reagent.core :refer [atom] :as reagent])))
 
 
