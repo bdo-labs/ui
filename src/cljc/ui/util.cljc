@@ -236,6 +236,11 @@
           (str/includes? (str/lower-case s) (str/lower-case substr))))))
 
 (defn deref? [x]
-  #?(:cljs (or (= (type x) reagent.ratom/RAtom)
-               (= (type x) reagent.ratom/RCursor))
-     :clj  true))
+  #?(:cljs (condp = (type x)
+             reagent.ratom/RAtom true
+             reagent.ratom/RCursor true
+             reagent.ratom/Reaction true
+             false)
+     :clj (condp = (type x)
+            clojure.lang.Atom true
+            false)))

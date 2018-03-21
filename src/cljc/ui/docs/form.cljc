@@ -1,11 +1,13 @@
 (ns ui.docs.form
   (:require [clojure.spec.alpha :as spec]
+            [re-frame.core :as re-frame]
             [ui.elements :as element]
             [ui.layout :as layout]
             [ui.wire.form :as form :refer [defform]]))
 
 
-(spec/def ::number1-valid #(> % 30))
+(spec/def ::number1-valid (spec/and number? #(> % 30)))
+(spec/def ::number2-valid (spec/and number? #(< % 30)))
 
 (defform testform
   {:on-valid (fn [data _] #?(:cljs (js/alert (pr-str data))))}
@@ -13,15 +15,24 @@
     :name :number1
     :spec ::number1-valid}
    {:type element/numberfield
-    :name :number2}])
+    :name :number2
+    :spec ::number2-valid
+    :error-element :dispatch
+    }])
+
+;;(testform {} {})
 
 (defn documentation[]
-  (let [f (testform {} {})]
+  (let [f (testform {} {})
+        number2-error-sub (re-frame/subscribe [::form/error (:id f) :number2])]
     (fn []
      [element/article
       "# Hi there"
       [layout/vertically
-       [form/as-table {:on-valid :test} f]]])))
+       [form/as-table {:on-valid :test} f]]
+      "## Second error output, using re-frame subscription"
+
+      [element/notifications {:model number2-error-sub}]])))
 
 ;; (comment
 

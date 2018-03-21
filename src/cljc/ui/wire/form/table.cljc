@@ -15,10 +15,13 @@
 
 (defn- table-row [field {{label? :label?} :options :as form-map}]
   (if (false? label?)
-    [:tr {:key (str "tr-" (:id field))} [:td (common/render-field field form-map)]]
+    [:tr {:key (str "tr-" (:id field))}
+     [:td (common/render-field field form-map)
+          (common/render-error-element field form-map)]]
     [:tr {:key (str "tr-" (:id field))}
      [:td [:label {:for (:id field)} (or (:label field) (:name field))]]
-     [:td (common/render-field (dissoc field :label) form-map)]]))
+     [:td (common/render-field (dissoc field :label) form-map)
+          (common/render-error-element field form-map)]]))
 
 (defn as-table
   [& args]
