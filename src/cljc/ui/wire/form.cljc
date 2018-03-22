@@ -5,6 +5,7 @@
             [re-frame.core :as re-frame]
             [ui.elements :as element]
             [ui.wire.form.list :as form.list]
+            [ui.wire.form.paragraph :as form.paragraph]
             [ui.wire.form.table :as form.table]
             [ui.util :as util]))
 
@@ -123,6 +124,7 @@
 
 (def as-table form.table/as-table)
 (def as-list form.list/as-list)
+(def as-paragraph form.paragraph/as-paragraph)
 
 (defmacro defform [-name options fields]
   (let [form-name (name -name)]
