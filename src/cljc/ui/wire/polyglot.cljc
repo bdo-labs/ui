@@ -42,7 +42,10 @@
    :ui/show-rows-containing "Show only rows containing:"
    :ui/time-period          "Time-period"
    :ui/date-period          "Date-period"
-   :ui/hello                "hello {1}!"})
+   :ui/hello                "hello {1}!"
+   :validation/min-number   "The number needs to be larger than {1}."
+   :validation/max-number   "The number needs to be smaller than {1}."
+   :validation/NaN          "The current value '{1}' is not a number."})
 
 
 

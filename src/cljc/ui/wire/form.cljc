@@ -1,6 +1,7 @@
 (ns ui.wire.form
   (:require [clojure.spec.alpha :as spec]
             #?(:cljs [reagent.core :refer [atom] :as reagent])
+            [phrase.alpha :refer [phrase]]
             [re-frame.core :as re-frame]
             [ui.elements :as element]
             [ui.wire.form.table :as form.table]
@@ -8,7 +9,7 @@
 
 
 (re-frame/reg-sub      ::error (fn [db [_ id field-name]]
-                                 (get-in db [::error id field-name])))
+                                 (get-in db [::error id field-name] [])))
 
 (re-frame/reg-event-db ::error (fn [db [_ id field-name errors]]
                                  (assoc-in db [::error id field-name] errors)))
@@ -42,6 +43,11 @@
 (defmethod get-field-fn :default [field]
   (:type field))
 
+(defn- get-error-messages [field value]
+  (let [explanation (spec/explain-data (:spec field) value)
+        messages (mapv #(or (phrase {} %) (str %)) (::spec/problems explanation))]
+    messages))
+
 (defn- get-validation-errors [form-map old-state]
   (fn [out [k v]]
     (let [field (get-in form-map [:fields k])]
@@ -56,7 +62,7 @@
            (conj out [k same-value? []])
            ;; if the spec is invalid we give an explanation to
            ;; what's wrong
-           (conj out [k same-value? [(spec/explain-str (:spec field) v)]])))
+           (conj out [k same-value? (get-error-messages field v)])))
         ;; no spec defined, give back the out value
         out))))
 
@@ -84,7 +90,7 @@
   ;; do the conform here as conform can change the structure of the data
   ;; that comes out in order to show how it came to that conclusion (spec/or for example)
   (util/conform! ::form-args (list fields form-options override-options data))
-  (let [options (merge form-options override-options)
+  (let [options (merge {:id (util/gen-id)} form-options override-options)
         map-fields (->> fields
                         (map (fn [{:keys [name id error-element] :as field}]
                                [name (assoc field
@@ -102,6 +108,7 @@
                            {} map-fields))
         form-map {:fields  map-fields
                   :options options
+                  :id (:id options)
                   :errors  errors
                   :data data}]
     (add-validation-watcher form-map)

@@ -74,4 +74,6 @@
                                :style style
                                :class class}
            (for [value values]
-             [notification (assoc notification-params :value value)])])))))
+             ^{:key (util/slug "notification" id "-sub-" (str value))}
+             [notification (assoc notification-params
+                                  :value value)])])))))

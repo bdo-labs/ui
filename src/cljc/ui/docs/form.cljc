@@ -1,13 +1,30 @@
 (ns ui.docs.form
   (:require [clojure.spec.alpha :as spec]
+            [phrase.alpha :as phrase]
             [re-frame.core :as re-frame]
             [ui.elements :as element]
             [ui.layout :as layout]
+            [ui.wire.polyglot :refer [translate]]
             [ui.wire.form :as form :refer [defform]]))
 
+(phrase/defphraser #(> % min-number)
+  [_ _ min-number]
+  (translate :validation/min-number min-number))
+(phrase/defphraser #(< % max-number)
+  [_ _ max-number]
+  (translate :validation/max-number max-number))
+(phrase/defphraser number?
+  [_ {:keys [val]}]
+  (let [val-str (if (nil? val)
+                  "nil"
+                  (str val))]
+    (translate :validation/NaN val-str)))
 
-(spec/def ::number1-valid (spec/and number? #(> % 30)))
+(spec/def ::number1-valid (spec/and number? #(> % 20) #(< % 50)))
 (spec/def ::number2-valid (spec/and number? #(< % 30)))
+(spec/def ::number-1+2 (spec/and ::number1-valid ::number2-valid))
+
+(spec/explain-data ::number-1+2 3)
 
 (defform testform
   {:on-valid (fn [data _] #?(:cljs (js/alert (pr-str data))))}
@@ -26,13 +43,13 @@
   (let [f (testform {} {})
         number2-error-sub (re-frame/subscribe [::form/error (:id f) :number2])]
     (fn []
-     [element/article
-      "# Hi there"
-      [layout/vertically
-       [form/as-table {:on-valid :test} f]]
-      "## Second error output, using re-frame subscription"
+      [element/article
+       "# Hi there"
+       [layout/vertically
+        [form/as-table {:on-valid :test} f]]
+       "## Second error output, using re-frame subscription"
 
-      [element/notifications {:model number2-error-sub}]])))
+       [element/notifications {:model number2-error-sub}]])))
 
 ;; (comment
 
