@@ -30,12 +30,20 @@
   {:on-valid (fn [data _] #?(:cljs (js/alert (pr-str data))))}
   [{:type ::element/numberfield
     :name :number1
+    :help "My help text"
+    :text [:span {:style {:font-weight "bold"}} "My info text"]
+    :wiring [:tr :$key
+             [:td :$label]
+             [:tr :$field
+              :$errors
+              [:div "We put this extra struff in"]
+              :$help
+              "And we removed the info text"]]
     :spec ::number1-valid}
    {:type element/numberfield
     :name :number2
     :spec ::number2-valid
-    :error-element :dispatch
-    }])
+    :error-element :dispatch}])
 
 ;;(testform {} {})
 
@@ -46,7 +54,7 @@
       [element/article
        "# Hi there"
        [layout/vertically
-        [form/as-table {:on-valid :test} f]]
+        [form/as-table {} f]]
        "## Second error output, using re-frame subscription"
 
        [element/notifications {:model number2-error-sub}]])))

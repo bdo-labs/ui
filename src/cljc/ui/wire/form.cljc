@@ -19,7 +19,11 @@
 (spec/def ::on-valid (spec/or :fn? fn? :keyword? keyword?))
 
 (spec/def ::error-element (spec/or :fn? fn? :dispatcher #{:dispatch}))
-(spec/def ::field (spec/keys :opt-un [::error-element]))
+(spec/def ::text any?)
+(spec/def ::help any?)
+(spec/def ::field (spec/keys :opt-un [::error-element
+                                      ::text
+                                      ::help]))
 (spec/def ::fields (spec/coll-of ::field))
 
 (spec/def ::form-options (spec/keys :opt-un [::on-valid]))
