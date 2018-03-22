@@ -4,6 +4,7 @@
             [phrase.alpha :refer [phrase]]
             [re-frame.core :as re-frame]
             [ui.elements :as element]
+            [ui.wire.form.list :as form.list]
             [ui.wire.form.table :as form.table]
             [ui.util :as util]))
 
@@ -21,7 +22,9 @@
 (spec/def ::error-element (spec/or :fn? fn? :dispatcher #{:dispatch}))
 (spec/def ::text any?)
 (spec/def ::help any?)
+(spec/def ::wiring any?)
 (spec/def ::field (spec/keys :opt-un [::error-element
+                                      ::wiring
                                       ::text
                                       ::help]))
 (spec/def ::fields (spec/coll-of ::field))
@@ -119,6 +122,7 @@
     form-map))
 
 (def as-table form.table/as-table)
+(def as-list form.list/as-list)
 
 (defmacro defform [-name options fields]
   (let [form-name (name -name)]

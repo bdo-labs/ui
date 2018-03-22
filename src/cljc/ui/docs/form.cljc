@@ -48,16 +48,26 @@
 ;;(testform {} {})
 
 (defn documentation[]
-  (let [f (testform {} {})
-        number2-error-sub (re-frame/subscribe [::form/error (:id f) :number2])]
+  (let [form-table (testform {} {})
+        form-list (testform {} {})
+        table-error-sub (re-frame/subscribe [::form/error (:id form-table) :number2])
+        list-error-sub  (re-frame/subscribe [::form/error (:id form-list) :number2])]
     (fn []
       [element/article
-       "# Hi there"
-       [layout/vertically
-        [form/as-table {} f]]
-       "## Second error output, using re-frame subscription"
+       "# We generate one form per type of rendering using the same form (testform)
 
-       [element/notifications {:model number2-error-sub}]])))
+## as-table"
+       [form/as-table {} form-table]
+       "#### Second error output, using re-frame subscription"
+
+       [element/notifications {:model table-error-sub}]
+
+
+       "## as-list"
+       [form/as-list {:wiring {:number1 nil}} form-list]
+       "#### Second error output"
+
+       [element/notifications {:model list-error-sub}]])))
 
 ;; (comment
 
