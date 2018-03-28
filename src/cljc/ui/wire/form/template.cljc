@@ -1,7 +1,6 @@
 (ns ui.wire.form.template
   (:require [clojure.spec.alpha :as spec]
             [ui.wire.form.common :as common]
-            [ui.wire.wiring :as wiring]
             [ui.util :as util]))
 
 
@@ -31,7 +30,6 @@
         {:keys [id template]
          :or   {id (util/gen-id)}} params
         body (common/get-body row (adapt-wiring params form-map) form-map)]
-    (println (adapt-wiring params form-map))
     (fn [& args]
       (let [{:keys [params]} (util/conform! ::template-args args)
             {:keys [style
@@ -41,6 +39,4 @@
         [:div {:key (util/slug "form-template" id)
                :style style
                :class class}
-          body
-         ;;"foobar"
-         ]))))
+         body]))))

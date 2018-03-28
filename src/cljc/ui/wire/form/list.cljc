@@ -1,7 +1,6 @@
 (ns ui.wire.form.list
   (:require [clojure.spec.alpha :as spec]
             [ui.wire.form.common :as common]
-            [ui.wire.wiring :as wiring]
             [ui.util :as util]))
 
 

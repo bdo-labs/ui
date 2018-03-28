@@ -8,6 +8,7 @@
             [ui.wire.form.paragraph :as form.paragraph]
             [ui.wire.form.table :as form.table]
             [ui.wire.form.template :as form.template]
+            [ui.wire.form.wire :as form.wire]
             [ui.util :as util]))
 
 
@@ -123,10 +124,11 @@
     (add-validation-watcher form-map)
     form-map))
 
-(def as-table form.table/as-table)
-(def as-list form.list/as-list)
+(def as-table     form.table/as-table)
+(def as-list      form.list/as-list)
 (def as-paragraph form.paragraph/as-paragraph)
-(def as-template form.template/as-template)
+(def as-template  form.template/as-template)
+(def as-wire      form.wire/as-wire)
 
 (defmacro defform [-name options fields]
   (let [form-name (name -name)]

@@ -257,6 +257,8 @@
                       ;; [scale-ripple]
 ]))
 
+(defn- notification [{:keys [negative]}]
+  [[:.Error {:background negative :color "white"}]])
 (defn- forms [{:keys [primary secondary]}]
   [[:.Chooser {:position      :relative
                :width         (unit/percent 100)
@@ -616,6 +618,7 @@
                       (color-picker theme)
                       (calendar theme)
                       (typography theme)
+                      (notification theme)
                       (ripple/style theme)
                       (badge/style theme)
                       (button/style theme)

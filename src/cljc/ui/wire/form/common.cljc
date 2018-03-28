@@ -12,13 +12,15 @@
 
 (defn render-error-element [{:keys [error-element name] :as field} form-map]
   (when-not (#{:dispatch} error-element)
-    [error-element {:model (get-in form-map [:errors name])}]))
+    [error-element {:model (get-in form-map [:errors name])
+                    :class ["Error"]
+                    :notification {:class ["Error"]}}]))
 
 (defn render-field [{:keys [field-fn name] :as field} form-map]
   [field-fn (-> field
                 (assoc :model #?(:cljs (reagent/cursor (:data form-map) [name])
                                  :clj  (get-in form-map [:data name])))
-                (dissoc :wiring :template))])
+                (dissoc :wiring :template :label))])
 
 
 (defn render-text [{:keys [field-fn text] :as field} form-map]
@@ -53,7 +55,7 @@
                  (wiring/wiring row {:$wrapper wiring/unwrapper
                                      :$key     {:key (str "ui-wire-form-common-" (:id field))}
                                      :$label   (render-label field form-map)
-                                     :$field   (render-field (dissoc field :label) form-map)
+                                     :$field   (render-field field form-map)
                                      :$errors  (render-error-element field form-map)
                                      :$text    (render-text field form-map)
                                      :$help    (render-help field form-map)

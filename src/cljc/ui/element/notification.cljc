@@ -9,7 +9,7 @@
 (spec/def ::id (spec/and string? #(re-find #"(?i)(\w+)" %)))
 (spec/def ::value string?)
 (spec/def ::model util/deref?)
-(spec/def ::class (spec/or :string string? :coll-of-strings (spec/coll-of string?)))
+(spec/def ::class (spec/coll-of string?))
 (spec/def ::params
   (spec/keys :opt-un [::id
                       ::value
