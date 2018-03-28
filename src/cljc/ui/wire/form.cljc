@@ -7,6 +7,7 @@
             [ui.wire.form.list :as form.list]
             [ui.wire.form.paragraph :as form.paragraph]
             [ui.wire.form.table :as form.table]
+            [ui.wire.form.template :as form.template]
             [ui.util :as util]))
 
 
@@ -125,6 +126,7 @@
 (def as-table form.table/as-table)
 (def as-list form.list/as-list)
 (def as-paragraph form.paragraph/as-paragraph)
+(def as-template form.template/as-template)
 
 (defmacro defform [-name options fields]
   (let [form-name (name -name)]
