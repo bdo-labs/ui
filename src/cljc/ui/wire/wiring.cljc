@@ -4,33 +4,31 @@
             [ui.zipper :refer [zipper]]))
 
 
-(defn material [node]
+(defn marker [node]
   (if (and (keyword? node)
            (str/starts-with? (str node) ":$"))
     node))
 
-(defn unwrapper [loc materials]
-  (let [rest-of-material (zip/rights loc)]
+(defn unwrapper [loc markers]
+  (let [rest-of-location (zip/rights loc)]
     (-> loc
         (zip/up)
-        (zip/replace rest-of-material))))
+        (zip/replace rest-of-location))))
 
-(defn wire [materials loc]
+(defn wire [markers loc]
   (let [node (zip/node loc)
-        mat (material node)]
-    (println {:node node
-              :mat mat})
-    (if (contains? materials mat)
-      (let [value (get materials mat)]
+        mk(marker node)]
+    (if (contains? markers mk)
+      (let [value (get markers mk)]
         (if (fn? value)
-         (value loc materials)
+         (value loc markers)
          (zip/replace loc value)))
       loc)))
 
 
-(defn wiring [frame materials]
+(defn wiring [frame markers]
   (loop [loc (zipper frame)]
     (let [next-loc (zip/next loc)]
       (if (zip/end? next-loc)
         (zip/root loc)
-        (recur (wire materials next-loc))))))
+        (recur (wire markers next-loc))))))
