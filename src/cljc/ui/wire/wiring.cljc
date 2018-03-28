@@ -9,10 +9,6 @@
            (str/starts-with? (str node) ":$"))
     node))
 
-
-;; (defmulti wire (fn [_ loc] (material (zip/node loc))))
-;; (defmethod wire :default [_ loc] loc)
-
 (defn unwrapper [loc materials]
   (let [rest-of-material (zip/rights loc)]
     (-> loc
@@ -20,11 +16,15 @@
         (zip/replace rest-of-material))))
 
 (defn wire [materials loc]
-  (let [node (zip/node loc)]
-    (if-let [value (get materials (material node))]
-      (if (fn? value)
-        (value loc materials)
-        (zip/replace loc value))
+  (let [node (zip/node loc)
+        mat (material node)]
+    (println {:node node
+              :mat mat})
+    (if (contains? materials mat)
+      (let [value (get materials mat)]
+        (if (fn? value)
+         (value loc materials)
+         (zip/replace loc value)))
       loc)))
 
 
@@ -34,9 +34,3 @@
       (if (zip/end? next-loc)
         (zip/root loc)
         (recur (wire materials next-loc))))))
-
-
-(wiring
- [:div [:$wrapper :$foo "My stuff"]]
- {:$foo {:key "asdf"}
-  :$wrapper unwrapper})
