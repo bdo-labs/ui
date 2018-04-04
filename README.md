@@ -49,3 +49,4 @@ JavaScript-dependencies from `npm`, so be very patient.  Ones you hear
 a *pling*, it should all be installed and running, you'll be asked
 whether you'd like to open up a browser with the URL
 (http://localhost:3000/). Answer [y]es, and that's it.. Good luck!
+FOO-TEST
