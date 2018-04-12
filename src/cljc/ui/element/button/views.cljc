@@ -1,13 +1,11 @@
 (ns ui.element.button.views
-  (:require ;; [ui.element.ripple.views :refer [ripple]]
-   [ui.element.button.spec :as spec]
-   [ui.util :as util]))
+  (:require [ui.element.button.spec :as spec]
+            [ui.util :as util]))
 
 (defn button
   "### button
   
   Pretty actionable items of different flavors.
-
   "
   [& args]
   (let [{:keys [params content]} (util/conform! ::spec/args args)
@@ -15,4 +13,4 @@
         ui-params                (conj (util/keys-from-spec ::spec/params) :class)
         params                   (->> (apply dissoc params ui-params)
                                       (merge {:class class}))]
-    [:button.Button params (doall (map last content))]))
+    (into [:button.Button params] content)))

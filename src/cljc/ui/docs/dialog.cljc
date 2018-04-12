@@ -4,15 +4,12 @@
             [ui.util :as util]
             [re-frame.core :as re-frame]))
 
-
 (re-frame/reg-event-db
  ::set-show
  (fn [db [_ dialog]]
    (assoc db ::show dialog)))
 
-
 (re-frame/reg-sub ::show util/extract)
-
 
 (defn documentation []
   (let [show         @(re-frame/subscribe [::show])
@@ -21,8 +18,7 @@
         show-dialog  (fn [n] #(re-frame/dispatch [::set-show n]))]
     [element/article
      "### Dialog
-      Think quick feedback!
-     "
+Think quick feedback!"
      [layout/horizontally
       [element/button {:class    "primary"
                        :on-click #(re-frame/dispatch [::set-show 1])}

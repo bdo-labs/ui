@@ -1,9 +1,9 @@
 (ns ui.element.containers.spec
-  (:require [clojure.spec.alpha :as spec]))
+  (:require [clojure.spec.alpha :as spec]
+            [ui.specs :as common]))
 
-;; Parameter specifications
-(spec/def ::background (spec/or :str string?
-                                :key keyword?))
+;; Parameters
+(spec/def ::background (spec/nonconforming (spec/or :str string? :key keyword?)))
 (spec/def ::compact? boolean?)
 (spec/def ::fill? boolean?)
 (spec/def ::gap? boolean?)
@@ -16,21 +16,31 @@
 (spec/def ::alignment #{:start :end :center})
 (spec/def ::layout #{:horizontally :vertically})
 (spec/def ::space #{:between :around :none})
-(spec/def ::content-type (spec/or :nil nil? :seq seq? :fn fn? :str string? :vec vector?))
-(spec/def ::variable-content (spec/* ::content-type))
-(spec/def ::width
-  (spec/or :flex int?
-           :width string?))
-
-;; Consolidated parameters
+(spec/def ::width (spec/or :flex int? :width string?))
 (spec/def ::container-params
-  (spec/keys :opt-un [::compact? ::fill? ::gap? ::inline? ::raised? ::rounded? ::wrap? ::scrollable?
-                      ::layout ::background ::align ::space ::width]))
+  (spec/keys :opt-un [::compact?
+                      ::fill?
+                      ::gap?
+                      ::inline?
+                      ::raised?
+                      ::rounded?
+                      ::wrap?
+                      ::scrollable?
+                      ::layout
+                      ::background
+                      ::align
+                      ::space
+                      ::width]))
 
-;; Full arguments specifications
+;; Content
+(spec/def ::hiccup (spec/nonconforming (spec/or :nil nil? :seq seq? :fn fn? :str string? :vec vector?)))
+(spec/def ::content (spec/* ::hiccup))
+;; (spec/def ::content ::common/hiccup)
+
+;; Arguments
 (spec/def ::container-args
   (spec/cat :params (spec/? ::container-params)
-            :content ::variable-content))
+            :content ::content))
 
 (spec/def ::open boolean?)
 (spec/def ::ontop boolean?)

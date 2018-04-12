@@ -1,42 +1,46 @@
 (ns ui.element.textfield.spec
-  (:require [clojure.spec.alpha :as spec]
-            [clojure.test.check.generators :as gen]))
-
-(spec/def ::maybe-fn
-  (spec/with-gen fn?
-    (gen/return (constantly nil))))
+  (:require [#?(:clj clojure.core :cljs reagent.core) :refer [atom]]
+            [clojure.spec.alpha :as spec]
+            [clojure.test.check.generators :as gen]
+            [ui.util :refer [ratom?]]
+            [ui.specs :as common]))
 
 ;; Events
-(spec/def ::on-change ::maybe-fn)
-(spec/def ::on-focus ::maybe-fn)
-(spec/def ::on-blur ::maybe-fn)
-(spec/def ::on-key-up ::maybe-fn)
-(spec/def ::on-key-down ::maybe-fn)
+(spec/def ::on-change ::common/maybe-fn)
+(spec/def ::on-focus ::common/maybe-fn)
+(spec/def ::on-blur ::common/maybe-fn)
+(spec/def ::on-key-up ::common/maybe-fn)
+(spec/def ::on-key-down ::common/maybe-fn)
 
 ;; Parameters
-(spec/def ::id (spec/and string? #(re-find #"(?i)(\w+)" %)))
-(spec/def ::placeholder #(or (string? %) (nil? %)))
+(spec/def ::placeholder string?)
 (spec/def ::label string?)
-(spec/def ::value string?)
+(spec/def ::value
+  (spec/nonconforming
+   (spec/or :string string? :nil nil?)))
+(spec/def ::model
+  (spec/with-gen (spec/and ::common/ratom #(string? (deref %)))
+    #(gen/fmap atom gen/string-alphanumeric)))
 (spec/def ::disabled boolean?)
 (spec/def ::auto-focus boolean?)
 (spec/def ::read-only boolean?)
-(spec/def ::focus boolean?)
-(spec/def ::--params
-  (spec/keys :opt-un [::id
+(spec/def ::params
+  (spec/keys :opt-un [::common/id
                       ::placeholder
-                      ::auto-focus
                       ::label
+                      ::model
+                      ::value
                       ::disabled
                       ::read-only
-                      ::focus
+                      ::auto-focus
                       ::on-change
                       ::on-focus
                       ::on-blur
                       ::on-key-up
                       ::on-key-down]))
-(spec/def ::params
-  (spec/merge ::--params
-              (spec/keys :req-un [::value])))
+
+#_(spec/def ::--params
+    (spec/merge ::params
+                (spec/keys :req-un [::model])))
 
 (spec/def ::args (spec/cat :params ::params))

@@ -1,7 +1,6 @@
 (ns ui.subs
   (:require [re-frame.core :as re-frame]
-            [ui.util :as util]
-            #_[ui.element.numbers.subs]))
+            [ui.util :as util]))
 
 
 (re-frame/reg-sub :fragments util/extract)

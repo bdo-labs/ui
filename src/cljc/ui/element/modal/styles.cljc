@@ -25,8 +25,7 @@
                 :top       (unit/percent 50)
                 :transform [[(translateY (unit/percent -50)) (translateX (unit/percent -50))]]
                 :z-index 101}
-     [:.Container {:animation [[:fade-up :200ms :ease]]
-                   :position  :relative}
+     [:.Container
       ;; TODO This hack should be corrected!
       [:&.raised {:overflow :visible}]]]]
    [:.Close {:position :absolute

@@ -9,7 +9,6 @@
             [ui.element.button.views :refer [button]]
             [ui.element.icon.views :refer [icon]]
             [ui.element.containers.views :refer [container]]
-            [ui.util :as u]
             [ui.wire.polyglot :refer [translate]]
             [ui.util :as util]))
 
@@ -102,7 +101,7 @@
 
 
 (defn- calendar-nav
-  [{:keys [id jump on-click format !model]
+  [{:keys [id jump on-click format model]
     :or   {jump   1
            format :ui/year-month}
     :as   params}]
@@ -110,11 +109,11 @@
     (let [minimum?    #(after? % (:min params))
           maximum?    #(before? % (:max params))
           month       (time/months jump)
-          less        (time/minus @!model month)
-          more        (time/plus @!model month)
-          on-previous #(do (reset! !model less)
+          less        (time/minus @model month)
+          more        (time/plus @model month)
+          on-previous #(do (reset! model less)
                            (when (fn? on-click) (on-click less)))
-          on-next     #(do (reset! !model more)
+          on-next     #(do (reset! model more)
                            (when (fn? on-click) (on-click more)))]
       [container {:layout :horizontally
                   :gap?   true
@@ -123,7 +122,7 @@
                   :space  :between
                   :class  "calendar-nav"}
        ^{:key "previous-month"} [icon {:font "ion" :on-click on-previous} "chevron-left"]
-       ^{:key "current-month"} [:h3 (translate format (coerce/to-date @!model))]
+       ^{:key "current-month"} [:h3 (translate format (coerce/to-date @model))]
        ^{:key "next-month"} [icon {:font "ion" :on-click on-next} "chevron-right"]])))
 
 (defn years [& args]
@@ -154,23 +153,23 @@
                 on-click
                 selected]
          :or   {selected (time/now)}} params
-        !model                        (atom selected)
+        model                        (atom selected)
         dt->str #(fmt/unparse (fmt/formatter "yyyyMMdd") %)]
     (fn [& args]
       (let [{:keys [params]}  (util/conform! ::spec/months-args args)
             {:keys [every
                     selected]
              :or   {every 1
-                    selected @!model}} params
+                    selected @model}} params
             group-every       (if (= every 1) 3 every)
-            year              (int (fmt/unparse (fmt/formatter "yyyy") @!model))
+            year              (int (fmt/unparse (fmt/formatter "yyyy") @model))
             rows              (->> (range 1 13)
                                    (map #(time/date-time year % 1))
                                    (partition group-every))]
         [container {:layout :vertically
                     :align  [:center :center]
                     :fill?  true}
-         [calendar-nav {:jump 12 :format :ui/year :!model !model}]
+         [calendar-nav {:jump 12 :format :ui/year :model model}]
          (for [months rows]
            [container {:key (str/join months) :layout :horizontally :fill? true :gap? false}
             (if (= every 1)
@@ -189,7 +188,7 @@
 ;; FIXME Overriding start of the week fails
 (defn days
   [& args]
-  (let [{:keys [params]} (util/conform! ::spec/days-args args)
+  (let [{:keys [params]}          (util/conform! ::spec/days-args args)
         {:keys [start-of-week selected show-weekend?
                 jump on-click nav? selectable? multiple?
                 on-navigation class short-form?]
@@ -199,17 +198,17 @@
                 short-form?   false
                 nav?          true
                 show-weekend? true
-                selectable?   true}}               params
-        num-days         (if (true? show-weekend?) 7 5)
-        weekdays-num     (range start-of-week (+ start-of-week num-days))
-        caret            (atom selected)]
+                selectable?   true}} params
+        num-days                  (if (true? show-weekend?) 7 5)
+        weekdays-num              (range start-of-week (+ start-of-week num-days))
+        caret                     (atom selected)]
     (fn []
       [:div.Calendar
        (when nav?
          [calendar-nav {:jump     jump
                         :min      (:min params)
                         :max      (:min params)
-                        :!model   caret
+                        :model    caret
                         :on-click on-navigation}])
        [:table {:class class}
         [:thead.Weekdays

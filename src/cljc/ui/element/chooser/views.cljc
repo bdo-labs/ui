@@ -25,7 +25,7 @@
 (defn chooser
   [& args]
   (let [{:keys [params]}       (util/conform! ::spec/args args)
-        {:keys [id selected deletable
+        {:keys [id selected deletable items
                 on-key-up on-change on-focus on-blur on-select]
          :or   {id       (util/gen-id)
                 selected #{}}} params
@@ -36,17 +36,19 @@
 
     (fn [& args]
       (let [{:keys [params]}          (util/conform! ::spec/args args)
-            {:keys [items
-                    close-on-select
-                    multiple
+            {:keys [multiple
                     labels
                     label
                     searchable
+                    selectable
                     deselectable
                     keyboard
                     predicate?
                     style]
              :or   {predicate?   str/includes?
+                    selectable   true
+                    searchable   true
+                    keyboard     true
                     labels       false
                     deselectable true
                     label        ""
@@ -55,23 +57,25 @@
             filtered-items            (set/select (labels-by-predicate predicate? current-query) items)
             textfield-params          (merge params
                                              {:id        (util/slug id "textfield")
-                                              :value     @query*
+                                              :model     query*
                                               ;; Remove incomplete items
-                                              :on-key-up #(do (let [candidates (->> (str/split (.-value (.-target %)) ",") (mapv str/trim) (set))
-                                                                    valid-ones (remove (fn [x] (not (contains? candidates (str (:value x))))) @selected*)]
-                                                                (when (not= @selected* valid-ones)
-                                                                  (reset! selected* valid-ones)))
-                                                              (when (fn? on-key-up) (on-key-up %)))
-                                              :on-focus  #(do (reset! show* true)
-                                                              (when (fn? on-focus) (on-focus %)))
-                                              :on-blur   #(do (.persist %)
-                                                              (go (<! (timeout 160))
-                                                                  (when @show* (reset! show* false))
-                                                                  (when (fn? on-blur) (on-blur %))))}
+                                              :on-key-up (fn [key value event]
+                                                           (let [candidates (->> (str/split value ",") (mapv str/trim) (set))
+                                                                 valid-ones (remove (fn [x] (not (contains? candidates (str (:value x))))) @selected*)]
+                                                             (when (not= @selected* valid-ones)
+                                                               (reset! selected* (set valid-ones))))
+                                                           (when (fn? on-key-up) (on-key-up key value event)))
+                                              :on-focus  (fn [value event]
+                                                           (do (reset! show* true)
+                                                               (when (fn? on-focus) (on-focus value event))))
+                                              :on-blur   (fn [value event]
+                                                           (do (.persist event)
+                                                               (go (<! (timeout 160))
+                                                                   (when @show* (reset! show* false))
+                                                                   (when (ifn? on-blur) (on-blur value event)))))}
                                              (if searchable
                                                {:label     label
-                                                :on-change #(do (reset! query* (.-value (.-target %)))
-                                                                (when (fn? on-change) (on-change %)))}
+                                                :on-change #(when (ifn? on-change) (on-change %))}
                                                {:label       ""
                                                 :placeholder label
                                                 :class       "read-only"
@@ -89,9 +93,11 @@
                                              {:id           (util/slug id "collection")
                                               :emphasize    current-query
                                               :model        selected*
+                                              :keyboard     keyboard
+                                              :selectable   selectable
+                                              :searchable   searchable
                                               :deselectable deselectable
                                               :on-select    (fn [items]
-                                                              (when (true? close-on-select) (reset! show* false))
                                                               (if deletable
                                                                 (reset! query* (str (str/join ", " (map :value items)) (when multiple ", ")))
                                                                 (reset! query* ""))
@@ -102,13 +108,13 @@
                        :key   (util/slug id "key")
                        :style style}
          [textfield textfield-params]
-         [dropdown {:open? @show*}
-          [collection collection-params
-           filtered-items]]
+         [dropdown {:open? @show*
+                    :origin [:top :left]}
+          [collection collection-params filtered-items]]
 
          (when (and multiple
                     (false? labels))
-           [badge {:show-count true} (count @selected*)])
+           [badge {:show-content? true} (count @selected*)])
 
          (when (and multiple labels)
            [:div.Labels

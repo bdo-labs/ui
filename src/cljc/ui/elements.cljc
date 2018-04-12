@@ -3,6 +3,7 @@
             [ui.element.link.views :as link]
             [ui.element.icon.views :as icon]
             [ui.element.containers.views :as containers]
+            [ui.element.sidebar.views :as sidebar]
             [ui.element.content.views :as content]
             [ui.element.chooser.views :as chooser]
             [ui.element.progress-bar.views :as progress-bar]
@@ -32,11 +33,10 @@
 
 ;; Layout Elements
 (def container containers/container)
-(def sidebar containers/sidebar)
+(def sidebar sidebar/sidebar)
 (def header containers/header)
 (def code containers/code)
-;; TODO card
-
+(def card containers/card)
 
 ;; Content Elements
 (def markdown content/markdown)
@@ -63,8 +63,6 @@
 (def dialog modal/dialog)
 (def confirm-dialog modal/confirm-dialog)
 (def badge badge/badge)
-;; TODO notifications
-
 
 ;; Load-Indication Elements
 (def progress-bar progress-bar/progress-bar)

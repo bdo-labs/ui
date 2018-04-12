@@ -15,6 +15,10 @@ in 2.0, but at-least our upgrade-path is way easier now.
 
 /* Dialog */
 /* .Dialog:not(.open) { display: none; } */
+.Dialog .Content .Container:not(.Dropdown) {
+    animation: fade-up 200ms ease;
+    position: absolute;
+}
 
 
 /* Drop-down */
@@ -22,23 +26,23 @@ in 2.0, but at-least our upgrade-path is way easier now.
 
 
 /* Color-picker */
-.Swatch::-webkit-color-swatch-wrapper { padding: 0; }
-.Swatch::-webkit-color-swatch { border: 0; }
+.Swatch input::-webkit-color-swatch-wrapper { padding: 0; }
+.Swatch input::-webkit-color-swatch { border: 0; }
 
 
 /* Sidebar */
 .Sidebar:not(.locked) {}
 .Sidebar:not(.locked) .Slider, .Sidebar:not(.locked).ontop sidebar { transition: 500ms ease; }
-.Sidebar:not(.locked).align-left sidebar { left: -360px; }
-.Sidebar:not(.locked).align-right sidebar { right: -360px; }
+.Sidebar:not(.locked).to-the-left sidebar { left: -360px; }
+.Sidebar:not(.locked).to-the-right sidebar { right: -360px; }
 .Sidebar:not(.locked).open .Backdrop { opacity: 1; z-index: 8; }
-.Sidebar:not(.locked).open:not(.ontop).align-left .Slider { transform: translateX(360px); }
-.Sidebar:not(.locked).open:not(.ontop).align-right .Slider { transform: translateX(-360px); }
+.Sidebar:not(.locked).open:not(.ontop).to-the-left .Slider { transform: translateX(360px); }
+.Sidebar:not(.locked).open:not(.ontop).to-the-right .Slider { transform: translateX(-360px); }
 .Sidebar:not(.locked).open.ontop sidebar { box-shadow: 0 0 6rem rgba(0,0,0,0.5); }
 .Sidebar:not(.locked).open.ontop.align-left sidebar { transform: translateX(360px); }
-.Sidebar:not(.locked).open.ontop.align-right sidebar { transform: translateX(-360px); }
-.Sidebar.locked main { width: calc(100% - 360px); }
-.Sidebar.locked.align-left > .Slider > main { margin-left: 360px; }
+.Sidebar:not(.locked).open.ontop.to-the-right sidebar { transform: translateX(-360px); }
+/* .Sidebar.locked main { width: calc(100% - 360px); } */
+.Sidebar.locked.to-the-left > .Slider > main { margin-left: 360px; }
 
 
 /* Worksheet */

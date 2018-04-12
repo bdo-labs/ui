@@ -1,7 +1,7 @@
 (ns ui.element.color-picker.views
   (:require #?(:cljs [reagent.core :refer [atom]])
             [garden.color :as color]
-            [ui.util :as u]
+            [ui.util :as util]
             [ui.element.color-swatch.views :refer [color-swatch]]))
 
 (defn color-value
@@ -22,15 +22,15 @@
            (case @!output
              :rgb (str "rgb(" r "," g "," b ")")
              :hsl (let [{:keys [h s l]} (color/rgb->hsl r g b)]
-                    (str "hsl(" (u/parse-int h) "," (u/parse-int s) "," (u/parse-int l) ")"))
+                    (str "hsl(" (util/parse-int h) "," (util/parse-int s) "," (util/parse-int l) ")"))
              :hex (str hex))))])))
 
 (defn color-picker
   [{:keys [hex disabled readonly on-change class]
     :or {class ""} :as params}]
-  (let [classes (u/names->str [(when (true? disabled) "disabled")
-                               (when (true? readonly) "readonly")
-                               class])]
+  (let [classes (util/names->str [(when (true? disabled) "disabled")
+                                  (when (true? readonly) "readonly")
+                                  class])]
     [:div.Color-picker (merge (dissoc params :disabled :readonly :hex)
                               {:class classes})
      [color-swatch hex on-change true]

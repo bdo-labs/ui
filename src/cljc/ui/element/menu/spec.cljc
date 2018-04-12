@@ -1,21 +1,21 @@
 (ns ui.element.menu.spec
-  (:require [clojure.spec.alpha :as spec]))
-
-;; FIXME Close drop-down upon clicking outside
-;; it should also close when holding the mouse outside for a longer period of time
+  (:require [clojure.spec.alpha :as spec]
+            [ui.specs :as common]))
 
 (spec/def ::open? boolean?)
-(spec/def ::content-type (spec/or :nil nil? :seq seq? :str string? :vec vector?))
-(spec/def ::variable-content (spec/* ::content-type))
 (spec/def ::origins #{:top :bottom :left :right :center})
 (spec/def ::origin
   (spec/coll-of ::origins :count 2))
+(spec/def ::on-click-outside ::common/maybe-fn)
 
-(spec/def ::dropdown-params
+(spec/def ::params
   (spec/keys :req-un [::open?]
-             :opt-un [::origin]))
+             :opt-un [::origin
+                      ::on-click-outside]))
 
-(spec/def ::dropdown-args
-  (spec/cat :params ::dropdown-params
-            :content ::variable-content))
+(spec/def ::content (spec/* ::common/hiccup))
+
+(spec/def ::args
+  (spec/cat :params ::params
+            :content ::content))
 

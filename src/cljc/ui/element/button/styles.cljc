@@ -3,8 +3,6 @@
   (:require #?(:clj [garden.def :refer [defcssfn]])
             [garden.units :as unit]
             [garden.color :as color]
-            [garden.selectors :as s]
-            [garden.normalize :as normalize]
             [clojure.string :as str]
             [ui.util :as util]))
 
@@ -26,6 +24,7 @@
     [[:.Button {:appearance  :none
                 :background  (util/gray 245)
                 :border      [[:solid (unit/em 0.1) (util/gray 245)]]
+                :color       :inherit
                 :cursor      :pointer
                 :outline     :none
                 :user-select :none
@@ -77,6 +76,4 @@
                    :transform-origin [[:left :center]]
                    :transition       [[:200ms :ease]]}]
        [:&.active:before {:width (unit/rem 2)}]]]]))
-
-
 

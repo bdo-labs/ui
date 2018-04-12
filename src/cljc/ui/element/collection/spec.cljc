@@ -1,65 +1,39 @@
 (ns ui.element.collection.spec
-  (:require [clojure.spec.alpha :as spec]
+  (:require [#?(:clj clojure.core :cljs reagent.core) :refer [atom]]
+            [clojure.spec.alpha :as spec]
             [clojure.test.check.generators :as gen]
-            [ui.util :refer [ratom?]]))
+            [ui.specs :as common]))
 
-(spec/def ::maybe-fn
-  (spec/with-gen fn?
-    (gen/return (constantly nil))))
+;; Events
+(spec/def ::on-toggle-expand ::common/maybe-fn)
+(spec/def ::on-click ::common/maybe-fn)
+(spec/def ::on-select ::common/maybe-fn)
+(spec/def ::on-mouse-enter ::common/maybe-fn)
 
-(spec/def ::on-click ::maybe-fn)
-(spec/def ::on-select ::maybe-fn)
-(spec/def ::qualified-string? (spec/and string? not-empty))
-
-;; These are attributes of an item
-;; Label will equal value if it's not explicitly set
-(spec/def ::id (spec/or :str ::qualified-string? :num nat-int?))
-(spec/def ::value ::qualified-string?)
-(spec/def ::label ::qualified-string?)
-(spec/def ::item
-  (spec/nonconforming
-   (spec/or
-    :without-label (spec/cat :id ::id :value ::value)
-    :with-label (spec/cat :id ::id :value ::value :label ::label)
-    :qualified (spec/keys :req-un [::id ::value] :opt-un [::label]))))
-(spec/def ::predicate? ::maybe-fn)
-(spec/def ::model ratom?)
-
-;; Wether you can select multiple items
-(spec/def ::multiple boolean?)
-
-;; Substring to emphasize in the item-labels
-(spec/def ::emphasize string?)
-
-;; Makes it possible to not have a selection
-(spec/def ::deselectable boolean?)
-
-(spec/def ::hide-selected boolean?)
-
-;; Add free-text item to collection
-(spec/def ::add-message ::qualified-string?)
-
-;; Text to display when there's no matches
-(spec/def ::empty-message ::qualified-string?)
-
-(spec/def ::max-items nat-int?)
-
-;; Enable keyboard-support
-;; ATM, only one collection can have keyboard-support
-;; enabled at a time
-(spec/def ::keyboard boolean?)
-
-;; The list of items should always be distinct, so you would probably
-;; pass it a `set`
-(spec/def ::items (spec/coll-of ::item
-                                :kind set?))
-
+;; Parameters
+(spec/def ::model
+  (spec/with-gen (spec/and ::common/ratom #(let [value (deref %)]
+                                             (or (empty? value) (set? value))))
+    #(gen/fmap atom (spec/gen ::items))))
+(spec/def ::multiple boolean?) ;; Wether you can select multiple items
+(spec/def ::emphasize string?) ;; Substring to emphasize in the item-labels
+(spec/def ::predicate? ::common/maybe-fn) ;; Predicate to use when emphasizing a substring of each item
+(spec/def ::collapsable boolean?) ;; Expand/collapse for lists with multiple items (defaults to false)
+(spec/def ::expanded boolean?) ;; Wether the collection should be expanded by default
+(spec/def ::selectable boolean?) ;; Makes it possible to selection items
+(spec/def ::deselectable boolean?) ;; Makes it possible to de-select items
+(spec/def ::hide-selected boolean?) ;; Hides already selected elements from collection
+(spec/def ::add-message ::common/qualified-string?) ;; Add free-text item to collection
+(spec/def ::empty-message ::common/qualified-string?) ;; Text to display when there's no matches
+(spec/def ::max-selected nat-int?) ;; Maximum number of items selected. Only used in correspondance with multiple
+(spec/def ::keyboard boolean?) ;; Enable keyboard-support
 (spec/def ::params
-  (spec/keys :opt-un [::id
-                      ::on-click
-                      ::on-select
-                      ::max-items
+  (spec/keys :opt-un [::common/id
+                      ::model
+                      ::max-selected
                       ::emphasize
+                      ::collapsable
+                      ::selectable
                       ::deselectable
                       ::multiple
                       ::keyboard
@@ -67,8 +41,21 @@
                       ::add-message
                       ::empty-message
                       ::hide-selected
-                      ::model]))
+                      ::on-toggle-expand
+                      ::on-click
+                      ::on-select
+                      ::on-mouse-enter]))
+
+(spec/def ::id (spec/nonconforming (spec/or :str :ui.specs/qualified-string? :num nat-int?)))
+(spec/def ::value :ui.specs/qualified-string?)
+(spec/def ::label ::common/hiccup)
+(spec/def ::item (spec/keys :req-un [::id ::value] :opt-un [::label]))
+(spec/def ::items
+  (spec/with-gen
+    (spec/coll-of ::item :kind? set)
+    #(gen/fmap set (spec/gen (spec/coll-of ::item)))))
 
 (spec/def ::args
-  (spec/cat :params ::params :items ::items))
+  (spec/cat :params ::params
+            :items ::items))
 

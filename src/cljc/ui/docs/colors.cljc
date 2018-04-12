@@ -44,11 +44,12 @@
       (let [primary   (str @primary)
             secondary (str @secondary)]
         #?(:cljs
-           (let [background (css [:body {:background primary}])]
+           (let [background (css [:.Container.Header {:background [[primary :!important]]}])]
              (styles/inject js/document "--colors" background)))
         [article
          "### Color-picker
-          Pick and choose colors that can easily be persisted as a theme "
+
+Pick and choose colors that can easily be persisted as a theme"
          [layout/horizontally
           [layout/centered {:class "demo"}
            [color-picker {:hex       primary

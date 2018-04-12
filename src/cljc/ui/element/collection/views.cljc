@@ -3,8 +3,11 @@
             #?(:cljs [reagent.core :as reagent])
             [clojure.string :as str]
             [clojure.set :as set]
+            [ui.element.button.views :refer [button]]
+            [ui.element.icon.views :refer [icon]]
             [ui.element.collection.spec :as spec]
-            [ui.util :as util]))
+            [ui.util :as util]
+            [re-frame.core :as re-frame]))
 
 ;; Helper functions -------------------------------------------------------
 
@@ -51,110 +54,108 @@
 ;; TODO Scroll list upon navigating using keyboard
 ;; TODO Multiple selection using ctrl/shift
 ;; TODO Allow custom markup in each item?
-#?(:clj (defn collection [] [:span "Not implemented"])
-   :cljs
-   (defn collection
-     [& args]
-     (let [intended*                  ^{:doc "Items that are intermediately marked for selection"} (atom nil)
-           {:keys [params items]}     (util/conform! ::spec/args args)
-           {:keys [id
-                   deselectable
-                   multiple
-                   model
-                   keyboard
-                   on-select
-                   max-items
-                   predicate?
-                   add-message
-                   empty-message
-                   hide-selected]
-            :or   {id            (util/gen-id)
-                   deselectable  true
-                   keyboard      true
-                   predicate?    str/includes?
-                   add-message   false
-                   empty-message false
-                   hide-selected false}} params
-           id                         (util/slug id)
-           items                      (apply sorted-set-by (fn [a b] (< (:value a) (:value b))) items)
-           ui-params                  (select-keys params (util/keys-from-spec ::spec/params))]
 
-       ;; State management
-       (letfn [(set-intended! [item]
-                 (reset! intended* item))
-               (remove-item! [item]
-                             (swap! model disj item))
-               (add-item! [item]
-                          (when-not (empty? item)
-                            (if (contains? @model item)
-                              (when deselectable
-                                (if (= 1 (count @model))
-                                  (remove-item! item)
-                                  (reset! model (set/difference @model #{item}))))
-                              (when (or (nil? max-items)
-                                        (> max-items (count @model)))
-                                (if (or (not multiple)
-                                        (empty? @model))
-                                  (reset! model #{item})
-                                  (swap! model conj item))))
-                            (when (fn? on-select)
-                              (on-select @model))))
-               (on-key-down [event]
-                            (let [key (util/code->key (.-which event))]
-                              (case key
-                                "up"    (set-intended! (prev-item items @intended*))
-                                "down"  (set-intended! (next-item items @intended*))
-                                "enter" (add-item! @intended*)
-                                true)))]
-
+(defn collection [& args]
+  (let [{:keys [params]}        (util/conform! ::spec/args args)
+        {:keys [id
+                class
+                items
+                emphasize
+                model
+                keyboard
+                max-selected
+                expanded
+                collapsable
+                selectable
+                deselectable
+                multiple
+                on-toggle-expand
+                on-click
+                on-select
+                on-mouse-enter]
+         :or   {id          (util/gen-id)
+                expanded    false
+                collapsable false
+                keyboard    true
+                selectable  false}} params
+        id                      (util/slug id)
+        expanded*               (atom expanded)
+        intended*               (atom nil)
+        ui-params               (select-keys params (util/keys-from-spec ::spec/params))
+        items                   (apply sorted-set-by (fn [a b] (< (:value a) (:value b))) items)]
+    (letfn [(set-intended! [item]
+              (reset! intended* item))
+            (remove-item! [item]
+                          (swap! model disj item))
+            (add-item! [item]
+                       (when (seq item)
+                         (if (contains? @model item)
+                           (when deselectable
+                             (if (= 1 (count @model))
+                               (remove-item! item)
+                               (reset! model (set/difference @model #{item}))))
+                           (when (or (nil? max-selected)
+                                     (> max-selected (count @model)))
+                             (if (or (not multiple)
+                                     (empty? @model))
+                               (reset! model #{item})
+                               (swap! model conj item)))))
+                       (when (fn? on-select)
+                         (on-select @model)))
+            (--on-key-down [event]
+                           (when (and selectable
+                                      (seq @intended*))
+                             (let [key (util/code->key (.-which event))]
+                               (case key
+                                 "up"    (set-intended! (prev-item items @intended*))
+                                 "down"  (set-intended! (next-item items @intended*))
+                                 "enter" (add-item! @intended*)
+                                 "esc"   (reset! intended* nil)
+                                 true))))
+            (--on-mouse-enter [item event]
+                              (when selectable (set-intended! item)
+                                    (when (ifn? on-mouse-enter) (on-mouse-enter item event))))
+            (--on-click [item event]
+                        (when selectable (add-item! item)
+                              (when (ifn? on-click) (on-click item event))))
+            (toggle-expanded []
+                             (do (swap! expanded* not)
+                                 (when (ifn? on-toggle-expand) (on-toggle-expand @expanded*))))
+            (render-fn [& args]
+                       (let [{:keys [params items]} (util/conform! ::spec/args args)
+                             intended               @intended*
+                             expanded?              @expanded*
+                             items                  (apply sorted-set-by (fn [a b] (< (:value a) (:value b))) items)
+                             items                  (if (or (not collapsable) expanded?) items (take 1 items))]
+                         [:ul.Collection {:key   (util/slug "collection" id)
+                                          :class (str (util/params->classes ui-params) " " class)}
+                          (when (seq items)
+                            (for [{:keys [id value label class] :as item} items]
+                              (let [label (or label value)]
+                                (into
+                                 [:li {:key            (util/slug "collection" "item" id)
+                                       :class          (str/join " " [(when (= (:id item) (:id intended)) "intended")
+                                                                      (when (and (util/ratom? model)
+                                                                                 (contains? @model item)) "selected")
+                                                                      (str class)])
+                                       :on-mouse-enter (partial --on-mouse-enter item)
+                                       :on-click       (partial --on-click item)}]
+                                 (if (and collapsable
+                                          (= (:id (first items)) id))
+                                   [[:div.item-area
+                                     (if (string? label)
+                                       (emphasize-match label emphasize)
+                                       label)]
+                                    [:div.collapse-area
+                                     [button {:on-click toggle-expanded}
+                                      [icon {:size 2} (str "chevron-" (if expanded? "up" "down"))]]]]
+                                   [(if (string? label)
+                                      (emphasize-match label emphasize)
+                                      label)])))))]))]
+      #?(:clj render-fn
+         :cljs
          (reagent/create-class
           {:display-name           "collection"
-           ;; We ensure that the collection is initialized with whatever
-           ;; selection was passed in
-           :component-did-mount    #(when keyboard (.addEventListener js/document "keydown" on-key-down))
-           :component-will-unmount #(.removeEventListener js/document "keydown" on-key-down)
-           :reagent-render
-           (fn [& args]
-             (let [{:keys [params]}    (util/conform! ::spec/args args)
-                   {:keys [emphasize]} params]
-               [:ul.Collection {:key   (util/slug id "collection")
-                                :id    id
-                                :class (util/params->classes ui-params)}
-                ;; Add new item
-                (when (and (not (empty? emphasize))
-                           (predicate? emphasize emphasize)
-                           (not (false? add-message))
-                           (not= emphasize (:value (first items))))
-                  (let [item {:id nil :value emphasize}]
-                    [:li {:key            (util/slug id "adder")
-                          :class          (str/join " " [(when (= item @intended*) "intended")
-                                                         (when (contains? @model item) "selected")])
-                          :on-mouse-enter #(set-intended! item)
-                          :on-click       #(add-item! item)}
-                     (emphasize-match (str/replace-first add-message "%" emphasize) emphasize)]))
-                ;; No results
-                (when (and (empty? items)
-                           (predicate? emphasize emphasize)
-                           (not (false? empty-message)))
-                  [:li {:key (util/slug id "empty")}
-                   (emphasize-match (str/replace-first empty-message "%" emphasize) emphasize)])
-                ;; List items
-                (when-not (empty? items)
-                  (doall
-                   (for [{:keys [value label]
-                          :or   {label value}
-                          :as   item} items]
-                     (when (or (false? hide-selected)
-                               (not (contains? @model item)))
-                       [:li {:key            (util/gen-id)
-                             ;; (util/slug id (:id item) "listitem")
-                             :class          (str/join " " [(when (and (= item @intended*)
-                                                                       (or (nil? max-items)
-                                                                           (< (count @model) max-items))) "intended")
-                                                            (when (contains? @model item) "selected")
-                                                            (when (and (not (contains? @model item))
-                                                                       (and (not (nil? max-items))
-                                                                            (>= (count @model) max-items))) "readonly")])
-                             :on-mouse-enter #(set-intended! item)
-                             :on-click       #(add-item! item)}
-                        (emphasize-match label emphasize)]))))]))})))))
+           :component-did-mount    #(when keyboard (.addEventListener js/document "keydown" --on-key-down))
+           :component-will-unmount #(when keyboard (.removeEventListener js/document "keydown" --on-key-down))
+           :reagent-render         render-fn})))))

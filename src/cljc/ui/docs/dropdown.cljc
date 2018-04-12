@@ -10,18 +10,20 @@
       [element/article
        "### Dropdown
 
-       Drop-downs are great for hiding auxiliary actions.
-       "
+Drop-downs are great for hiding auxiliary actions.
+"
        [layout/vertically
         [element/button {:class "primary"
                          :circular true
                          :title "Notifications"
-                         :on-click #(reset! !open? (not @!open?))}
+                         :on-click #(swap! !open? not)}
          [element/icon "ios-bell-outline"]]
         [element/dropdown {:open? @!open?
-                           :origin [:top :right]
-                           :style {:width "360px"}}
-         [layout/horizontally [:h5 "Notifications"]]
+                           :on-click-outside #(reset! !open? false)
+                           :origin [:top :left]
+                           :style {:width "360px"
+                                   :margin-top "2.5em"}}
+         [layout/horizontally [:h4 "Notifications"]]
          [layout/horizontally {:style {:border-top "1px solid rgb(230,230,230)"
                                        :background "rgb(250,250,250)"}
                                :space :around
@@ -31,7 +33,7 @@
           [:small (str "Some information for you")]
           [:small (str "1 min ago")]]]]
        "
-       You can use any arbitrary element you'd like inside of a
-       drop-down. The drop-down only supplies a way of toggling
-       content in and out of the view from a certain position.
-       "])))
+You can use any arbitrary element you'd like inside of a
+drop-down. The drop-down only supplies a way of toggling
+content in and out of the view from a certain position.
+"])))
