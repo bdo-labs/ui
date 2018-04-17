@@ -4,13 +4,10 @@
             [accountant.core :as accountant]
             [ui.util :as util]))
 
-(defroute "/" []
-  (re-frame/dispatch [:set-active-panel :marketing-panel]))
-
-(defroute #"/docs/?" []
+(defroute #"/" []
   (re-frame/dispatch [:set-active-panel :doc-panel]))
 
-(defroute #"/docs/([^\/]+)/?" [item]
+(defroute #"/([^\/]+)/?" [item]
   (re-frame/dispatch [:set-active-doc-item (keyword item)]))
 
 (defroute "*" []

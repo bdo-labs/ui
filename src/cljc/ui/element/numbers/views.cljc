@@ -2,13 +2,13 @@
   #?(:cljs (:require-macros [cljs.core.async.macros :refer [go]]))
   (:require [re-frame.core :as re-frame]
             [#?(:clj clojure.core :cljs reagent.core) :refer [atom]]
-            [ui.element.progress-bar :refer [progress-bar]]
+            [ui.element.progress-bar.views :refer [progress-bar]]
             [ui.element.numbers.filter-views :refer [column-menu]]
             [ui.element.numbers.subs]
             [ui.element.numbers.events]
-            [ui.element.loaders :refer [spinner]]
-            [ui.element.chooser :refer [chooser]]
-            [ui.element.textfield :refer [textfield]]
+            [ui.element.loaders.views :refer [spinner]]
+            [ui.element.chooser.views :refer [chooser]]
+            [ui.element.textfield.views :refer [textfield]]
             [ui.util :as util]
             [clojure.core.async :as async :refer [<! #?(:clj go) timeout]]
             [clojure.string :as str]))
@@ -73,12 +73,11 @@
         select-cell  (fn [cell-ref event] (re-frame/dispatch [:set-first-selection id cell-ref]))
         edit-cell    (fn [cell-ref event] (re-frame/dispatch [:set-editing id cell-ref]))
         --on-blur    (fn [cell-ref f] (fn [event]
-                                       (do
-                                         (.persist event)
-                                         (re-frame/dispatch [:set-editing id nil])
-                                         (when (fn? f) (f event)))))
+                                        (do
+                                          (re-frame/dispatch [:set-editing id nil])
+                                          (when (ifn? f) (f event)))))
         --on-change  (fn [cell-ref f] #(do (re-frame/dispatch [:set-cell-val id cell-ref (:value (first %))])
-                                          (when (fn? f) (f %))))]
+                                           (when (ifn? f) (f %))))]
     [:tr.Body-row {:key   (util/slug id "body" "row" n)
                    :class (util/slug "row" n)
                    :style {:height (str row-height "px")}}
@@ -100,14 +99,13 @@
                           [chooser {:id         (util/slug "chooser" cell-ref)
                                     :labels     false
                                     :multiple   false
-                                    :searchable true
-                                    :deletable  true
+                                    :close-on-select true
                                     :predicate? util/case-insensitive-includes?
-                                    :selected   (filter #(= (:value %) display-value) items)
+                                    :selected   (set (filter #(= (:value %) display-value) items))
                                     :items      items
-                                    :on-blur    (--on-blur cell-ref (partial on-blur row cell-ref))
-                                    :on-select  (--on-change cell-ref (partial on-select row cell-ref))
-                                    :on-change  #(when (fn? on-change) (on-change %))
+                                    :on-blur    (--on-blur cell-ref (if (ifn? on-blur) (partial on-blur row cell-ref) nil))
+                                    :on-select  (--on-change cell-ref (if (ifn? on-select) (partial on-select row cell-ref) nil))
+                                    :on-change  #(when (ifn? on-change) (on-change %))
                                     :auto-focus true}]
                           (let [{:keys [on-change]} value]
                             [textfield {:placeholder display-value

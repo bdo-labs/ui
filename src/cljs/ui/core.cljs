@@ -8,8 +8,10 @@
             [ui.events]
             [ui.effects]
             [ui.subs]
-            [ui.wire.polyglot]))
-
+            [ui.wire.polyglot]
+            [ui.virtuals]
+            [cljsjs.highlight]
+            [cljsjs.highlight.langs.clojure]))
 
 (defn- dev-setup []
   (when config/debug?
@@ -25,7 +27,6 @@
 (defn- mount-root []
   (reagent/render [views/main-panel]
                   (.getElementById js/document "app")))
-
 
 (defn ^:export init! []
   (dev-setup)

@@ -4,25 +4,21 @@
             [clojure.string :as str]
             [ui.util :as util]))
 
-
 (def inst-strings-en
-  { :weekdays-narrow ["S" "M" "T" "W" "T" "F" "S"]
-    :weekdays-short  ["Sun" "Mon" "Tue" "Wed" "Thu" "Fri" "Sat"]
-    :weekdays-long   ["Sunday" "Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday"]
-    :months-narrow   ["J" "F" "M" "A" "M" "J" "J" "A" "S" "O" "N" "D"]
-    :months-short    ["Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"]
-    :months-long     ["January" "February" "March" "April" "May" "June" "July" "August" "September" "October" "November" "December"]
-    :dayperiods      ["AM" "PM"]})
-
+  {:weekdays-narrow ["S" "M" "T" "W" "T" "F" "S"]
+   :weekdays-short  ["Sun" "Mon" "Tue" "Wed" "Thu" "Fri" "Sat"]
+   :weekdays-long   ["Sunday" "Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday"]
+   :months-narrow   ["J" "F" "M" "A" "M" "J" "J" "A" "S" "O" "N" "D"]
+   :months-short    ["Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"]
+   :months-long     ["January" "February" "March" "April" "May" "June" "July" "August" "September" "October" "November" "December"]
+   :dayperiods      ["AM" "PM"]})
 
 (def format-inst
   (tongue/inst-formatter "{month-short} {day}, {year} {hour24-padded}.{minutes-padded}" inst-strings-en))
 
-
 (def format-number-en
-  (tongue/number-formatter { :group ","
-                             :decimal "." }))
-
+  (tongue/number-formatter {:group ","
+                            :decimal "."}))
 
 (def en
   {:tongue/format-inst      format-inst
@@ -42,13 +38,12 @@
    :ui/show-rows-containing "Show only rows containing:"
    :ui/time-period          "Time-period"
    :ui/date-period          "Date-period"
+   :ui/change-log-version   "{1} ({2})"
+   :ui/report-issue         "Report and issue"
    :ui/hello                "hello {1}!"
    :validation/min-number   "The number needs to be larger than {1}."
    :validation/max-number   "The number needs to be smaller than {1}."
    :validation/NaN          "The current value '{1}' is not a number."})
-
-
-
 ;; Events -----------------------------------------------------------------
 
 
@@ -57,19 +52,16 @@
  (fn [db [k lang]]
    (assoc db (util/->ref-name k) lang)))
 
-
 (re-frame/reg-event-db
  :ui/add-dictionary
  (fn [db [_ lang dictionary]]
    (assoc-in db [:ui/dictionaries lang] dictionary)))
-
 
 (re-frame/reg-event-fx
  :init-polyglot
  (fn [{:keys [db]} _]
    {:dispatch [:ui/add-dictionary :en en]
     :db db}))
-
 
 ;; Subscriptions ----------------------------------------------------------
 
@@ -79,9 +71,7 @@
  (fn [db [k]]
    (get db k :en)))
 
-
 (re-frame/reg-sub :ui/dictionaries util/extract)
-
 
 (re-frame/reg-sub
  :ui/translate
@@ -93,7 +83,6 @@
      (when (str/starts-with? translated (str "{Missing key :"))
        (re-frame/dispatch [:missing-translation phrase]))
      translated)))
-
 
 (defn translate [& args]
   (let [phrase (into [:ui/translate] args)]

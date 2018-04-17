@@ -5,6 +5,7 @@
             [ui.elements :as element]
             [ui.layout :as layout]
             [ui.util :as util]
+            [ui.wire.polyglot :as polyglot]
             [clojure.spec.alpha :as spec]))
 
 (def characters
@@ -179,17 +180,12 @@
       [element/checkbox {:checked   disabled
                          :on-change #(re-frame/dispatch [::toggle-disabled])} "Disabled"]
       [element/chooser {:style           {:width "420px"}
-                        :deletable true
                         :label           "Name a Character from Game of Thrones"
-                        :searchable      true
                         :add-message     "Add % to members"
                         :empty-message   "No results matching %"
-                        :selected        #{{:id 14, :value "Alliser Thorne"} {:id 18, :value "Arya Stark"}}
                         :on-select       #(reset! selected* %)
                         :items           (set sep-filtered-items)
-                        :auto-focus      true
                         :predicate?      smart-case-includes?
-                        :close-on-select false
                         :multiple        multiple
                         :disabled        disabled
                         :labels          false}]]]))

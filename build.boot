@@ -14,6 +14,7 @@
                  [org.clojure/core.async "0.4.474" :exclusions [org.clojure/clojure]]
                  [venantius/accountant "0.2.3"]
                  [com.cemerick/url "0.1.1"]
+                 [cljsjs/highlight "9.12.0-1"]
                  [clj-time "0.14.2"]
                  [garden "2.0.0-alpha1"]
                  [markdown-clj "1.0.2"]
@@ -25,7 +26,7 @@
                  [com.taoensso/timbre "4.10.0"]
 
                  [org.clojars.stumitchell/clairvoyant "0.2.1" :scope "test"]
-                 [day8.re-frame/re-frame-10x "0.2.0-react16" :scope "test"]
+                 [day8.re-frame/re-frame-10x "0.3.1" :scope "test"]
                  [adzerk/boot-cljs "2.1.4" :scope "test"]
                  [adzerk/boot-cljs-repl "0.3.3" :scope "test"]
                  [adzerk/boot-reload "0.5.2" :scope "test"]
@@ -108,8 +109,7 @@
               :optimizations :none
               :source-map true
               :compiler-options {:asset-path      "/ui.out"
-                                 :preloads        '[devtools.preload
-                                                    day8.re-frame-10x.preload]
+                                 :preloads        '[devtools.preload day8.re-frame-10x.preload]
                                  :closure-defines {"re_frame.trace.trace_enabled_QMARK_" true}})
         (target)))
 

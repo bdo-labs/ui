@@ -2,26 +2,22 @@
   (:require [clojure.string :as str]
             [ui.elements :as element]
             [ui.layout :as layout]
-            [ui.util :as u]
+            [ui.util :as util]
             [re-frame.core :as re-frame]))
 
-
-(re-frame/reg-event-db ::toggle-backdrop u/toggle)
-(re-frame/reg-event-db ::toggle-ontop u/toggle)
-(re-frame/reg-event-db ::toggle-open u/toggle)
-
+(re-frame/reg-event-db ::toggle-backdrop util/toggle)
+(re-frame/reg-event-db ::toggle-ontop util/toggle)
+(re-frame/reg-event-db ::toggle-open util/toggle)
 
 (re-frame/reg-event-db
  ::set-to-the
  (fn [db [_ alignment]]
    (assoc db ::to-the alignment)))
 
-
-(re-frame/reg-sub ::backdrop u/extract-or-false)
-(re-frame/reg-sub ::open u/extract-or-false)
-(re-frame/reg-sub ::ontop u/extract-or-false)
-(re-frame/reg-sub ::to-the u/extract)
-
+(re-frame/reg-sub ::backdrop util/extract-or-false)
+(re-frame/reg-sub ::open util/extract-or-false)
+(re-frame/reg-sub ::ontop util/extract-or-false)
+(re-frame/reg-sub ::to-the util/extract)
 
 (defn documentation
   []

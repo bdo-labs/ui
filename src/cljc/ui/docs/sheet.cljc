@@ -4,7 +4,7 @@
             [clojure.spec.alpha :as spec]
             [clojure.string :as str]
             [ui.elements :as element]
-            [ui.element.chooser :refer [chooser]]
+            [ui.element.chooser.views :refer [chooser]]
             [ui.layout :as layout]
             [tongue.core :as tongue]
             [re-frame.core :as re-frame]
@@ -46,8 +46,6 @@
                                                  :value         value
                                                  :items         items
                                                  :editable?     true
-                                                 :on-blur (fn [event]
-                                                            (util/log (.-value (.-target event))))
                                                  :on-select     (fn [row cell-ref event]
                                                                   (let [{:keys [id value]} (first event)]
                                                                     (util/log row cell-ref id value)))}))))]
@@ -59,11 +57,10 @@
   (let [content  @(re-frame/subscribe [::content])
         segments (mapv (fn [segment] [{:value      segment
                                        :title-row? false}]) (spec/describe ::segment))]
-    [layout/vertically {:rounded? true
-                        :raised? true
-                        :background :white
-                        :style {:margin "2em"}
-                        :fill? true}
+    [layout/vertically {:background :white
+                        :fill? true
+                        :style {:padding "4em"
+                                :margin-bottom "4em"}}
      [:h1 "sheet"]
      [element/sheet {:name           "Segments"
                      :hidden         true}

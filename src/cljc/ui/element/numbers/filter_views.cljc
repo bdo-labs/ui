@@ -1,10 +1,10 @@
 (ns ui.element.numbers.filter-views
   (:require [re-frame.core :as re-frame]
-            [ui.element.menu :as menu]
-            [ui.element.checkbox :refer [checkbox]]
+            [ui.element.menu.views :as menu]
+            [ui.element.checkbox.views :refer [checkbox]]
+            [ui.element.button.views :refer [button]]
+            [ui.element.containers.views :refer [container]]
             [ui.wire.polyglot :refer [translate]]
-            [ui.element.button :refer [button]]
-            [ui.element.containers :refer [container]]
             [ui.util :as util]))
 
 (defn- string-filter
@@ -38,7 +38,9 @@
         show-column-menu? @(re-frame/subscribe [:show-column-menu? id col-ref])
         sort-ascending    #(re-frame/dispatch [:sort-column id col-ref true])
         sort-descending   #(re-frame/dispatch [:sort-column id col-ref false])]
-    [menu/dropdown {:open? show-column-menu?}
+    [menu/dropdown {:open? show-column-menu?
+                    :origin [:top :right]
+                    :on-click-outside #(re-frame/dispatch [:show-column-menu id col-ref])}
      [container {:layout :vertically :gap? false :fill? true :compact? true}
       [button {:key (str col-ref "-sort-asc") :flat true :fill true :class "secondary" :on-click sort-ascending}
        (translate :ui/sort-ascending)]

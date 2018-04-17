@@ -1,6 +1,7 @@
 (ns ui.util
-  #?(:cljs (:require-macros [cljs.core.async.macros :as a]))
   (:require #?(:cljs [cljs.core :refer [random-uuid]])
+            #?(:cljs [ui.config :refer [debug?]])
+            #?(:cljs [reagent.ratom])
             [clojure.core.async :as async]
             [clojure.string :as str]
             [clojure.spec.alpha :as spec]
@@ -28,14 +29,14 @@
     (keyword (str (namespace event) "/" datom))))
 
 (defn extract
-  "Extracts [key] from [db]"
-  [db [key]]
-  (-> db key))
+  "Extracts [path] from [db]"
+  [db path]
+  (get-in db path))
 
 (defn extract-or-false
-  "Extracts [key] from [db] or return false if it doesn't exist"
-  [db [key]]
-  (or (-> db key) false))
+  "Extracts [path] from [db] or return false if it doesn't exist"
+  [db path]
+  (get-in db path false))
 
 (defn toggle
   "Toggle a boolean value found using the [k]ey from the [db]. Note

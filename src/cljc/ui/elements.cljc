@@ -1,28 +1,29 @@
 (ns ui.elements
-  (:require [ui.element.badge :as badge]
-            [ui.element.button :as button]
-            [ui.element.calendar :as calendar]
-            [ui.element.checkbox :as checkbox]
-            [ui.element.chooser :as chooser]
-            [ui.element.collection :as collection]
-            [ui.element.color-picker :as color-picker]
-            [ui.element.color-swatch :as color-swatch]
-            [ui.element.containers :as containers]
-            [ui.element.content :as content]
-            [ui.element.date-picker :as date-picker]
-            [ui.element.icon :as icon]
-            [ui.element.label :as label]
-            [ui.element.link :as link]
-            [ui.element.loaders :as loaders]
-            [ui.element.menu :as menu]
-            [ui.element.modal :as modal]
-            [ui.element.notification :as notification]
-            [ui.element.numberfield :as numberfield]
+  (:require [ui.element.badge.views :as badge]
+            [ui.element.button.views :as button]
+            [ui.element.calendar.views :as calendar]
+            [ui.element.checkbox.views :as checkbox]
+            [ui.element.chooser.views :as chooser]
+            [ui.element.collection.views :as collection]
+            [ui.element.color-picker.views :as color-picker]
+            [ui.element.color-swatch.views :as color-swatch]
+            [ui.element.containers.views :as containers]
+            [ui.element.content.views :as content]
+            [ui.element.date-picker.views :as date-picker]
+            [ui.element.icon.views :as icon]
+            [ui.element.label.views :as label]
+            [ui.element.link.views :as link]
+            [ui.element.loaders.views :as loaders]
+            [ui.element.menu.views :as menu]
+            [ui.element.modal.views :as modal]
+            [ui.element.numberfield.views :as numberfield]
             [ui.element.numbers.views :as numbers]
-            [ui.element.period-picker :as period-picker]
-            [ui.element.progress-bar :as progress-bar]
-            [ui.element.textfield :as textfield]
-            [ui.element.toggle :as toggle]))
+            [ui.element.notification.views :as notification]
+            [ui.element.period-picker.views :as period-picker]
+            [ui.element.progress-bar.views :as progress-bar]
+            [ui.element.sidebar.views :as sidebar]
+            [ui.element.textfield.views :as textfield]
+            [ui.element.toggle.views :as toggle]))
 
 ;; Action Elements
 (def dropdown menu/dropdown)
@@ -32,14 +33,12 @@
 (def color-swatch color-swatch/color-swatch)
 (def color-picker color-picker/color-picker)
 
-
 ;; Layout Elements
 (def container containers/container)
-(def sidebar containers/sidebar)
+(def sidebar sidebar/sidebar)
 (def header containers/header)
 (def code containers/code)
-;; TODO card
-
+(def card containers/card)
 
 ;; Content Elements
 (def markdown content/markdown)
@@ -50,7 +49,6 @@
 (def label label/label)
 (def notification notification/notification)
 (def notifications notification/notifications)
-
 
 ;; Form Elements
 (def sheet numbers/sheet)
@@ -66,13 +64,10 @@
 (def date-picker date-picker/date-picker)
 (def period-picker period-picker/period-picker)
 
-
 ;; In your face Elements
 (def dialog modal/dialog)
 (def confirm-dialog modal/confirm-dialog)
 (def badge badge/badge)
-;; TODO notifications
-
 
 ;; Load-Indication Elements
 (def progress-bar progress-bar/progress-bar)

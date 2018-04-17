@@ -18,15 +18,15 @@
      
         
    Ex.  
-   ```clojure
-   (ns your.namespace
-     (:require [ui.main :as ui]))
+```clojure
+(ns your.namespace
+  (:require [ui.main :as ui]))
 
-   (ui/dispatch [:icon-font \"ion\"])
-   [element/icon {:size 15} \"happy-outline\"]
-   [element/icon {:font \"material-icons\"  
-                  :size 16} \"face\"]
-   ```
+(ui/dispatch [:icon-font \"ion\"])
+[element/icon {:size 15} \"happy-outline\"]
+[element/icon {:font \"material-icons\"  
+               :size 16} \"face\"]
+```
    "
    [layout/centered
     [element/icon {:size 15} "happy-outline"]

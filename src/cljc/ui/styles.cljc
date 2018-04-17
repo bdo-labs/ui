@@ -1,22 +1,25 @@
 (ns ui.styles
   #?(:cljs (:require-macros [garden.def :refer [defcssfn defkeyframes]]))
   (:require #?(:clj [garden.def :refer [defcssfn defkeyframes]])
-            [garden.stylesheet :as stylesheet :refer [calc]]
+            [garden.stylesheet :refer [calc at-media]]
             [garden.units :as unit]
+            [garden.media :as media]
             [garden.color :as color]
-            [garden.selectors :as selector :refer [defpseudoelement]]
-            [ui.util :as u]
-            [ui.element.badge :as badge]
-            [ui.element.checkbox :as checkbox]
-            [ui.element.containers :as containers]
-            [ui.element.menu :as menu]
-            [ui.element.ripple :as ripple]
-            [ui.element.button :as button]
-            [ui.element.clamp :as clamp]
-            [ui.element.progress-bar :as progress-bar]
-            [ui.element.modal :as modal]))
+            [garden.selectors :as selector]
+            [ui.util :as util]
+            [ui.element.badge.styles :as badge]
+            [ui.element.chooser.styles :as chooser]
+            [ui.element.textfield.styles :as textfield]
+            [ui.element.collection.styles :as collection]
+            [ui.element.checkbox.styles :as checkbox]
+            [ui.element.containers.styles :as containers]
+            [ui.element.sidebar.styles :as sidebar]
+            [ui.element.menu.styles :as menu]
+            [ui.element.button.styles :as button]
+            [ui.element.icon.styles :as icon]
+            [ui.element.progress-bar.styles :as progress-bar]
+            [ui.element.modal.styles :as modal]))
 
-;;
 ;; Realizations that should be materialized
 ;;
 ;; - Many layout-problems arise from the fact that we're mixing
@@ -37,8 +40,6 @@
 ;;   how they push and pull each other and so forth. This also means
 ;;   that most elements will need to be created from the same cloth
 ;;   "container".
-;;
-
 
 (defcssfn linear-gradient)
 (defcssfn rotateZ)
@@ -57,6 +58,13 @@
              :font-weight 100
              :font-base (unit/rem 1.6)
              :font-scale :augmented-fourth}})
+
+(def breakpoint
+  {:phone {:max-width (unit/px 599)}
+   :pad-portrait {:min-width (unit/px 600)}
+   :pad-landscape {:min-width (unit/px 900)}
+   :desktop {:min-width (unit/px 1200)}
+   :big-screen {:min-width (unit/px 1800)}})
 
 (def scales
   {:minor-second     (/ 16 15)
@@ -80,12 +88,11 @@
 (defn- structure [theme]
   [[:body {:overflow :hidden}]
    [:.hide {:display :none}]
-   ;; TODO #app:first-child, really!?
    [#{:html :body :#app :#app:first-child} {:height (unit/percent 100)
                                             :width  (unit/percent 100)}]
    [#{:html :body :menu :ul :input :.Chooser} {:margin  0
                                                :padding 0}]
-   [:main {:height (stylesheet/calc (- (unit/vh 100) (unit/px 64)))}]
+   [:main {:height (calc (- (unit/vh 100) (unit/px 64)))}]
    [#{:.Vertical-rule :.Horizontal-rule} {:background-color :silver}]
    [:.Vertical-rule {:width        (unit/px 1)
                      :min-height   (unit/rem 2.5)
@@ -99,9 +106,12 @@
                        :top           (unit/rem 3)
                        :margin-bottom (unit/rem 6)}]
    [:article {:padding    (unit/rem 4)
+              :margin-bottom (unit/rem 4)
+              :max-width (unit/rem 100)
               :text-align :left}
-    [:section {:max-width    (unit/rem 70)
-               :margin-right (unit/rem 3)}]]])
+    [:p {:width (unit/rem 60)}]
+    [:pre {:width (unit/rem 70)
+           :overflow :auto}]]])
 
 (defn- layouts
   [{:keys [background]}]
@@ -113,60 +123,15 @@
                 :top        0
                 :transition [[:opacity :500ms :ease]]
                 :opacity    0
-                :z-index    -1}]
-   ;; Should use immediate descender-selector
-   ;; [[:.Sidebar.Locked.Align-left :.Slider :main] {:margin-left (unit/px 360)}]
-   [:.Sidebar {:overflow :hidden
-               :width    (unit/percent 100)
-               :height   (unit/percent 100)}
-    [:.Slider {:width          (unit/percent 100)
-               :height         (unit/percent 100)
-               :position       :relative}]
-    [:sidebar {:width       (calc (- (unit/px 360) (unit/rem 6)))
-               :overflow :auto
-               :background  background
-               :box-shadow  [[(unit/em 0.1) (unit/em 0.1) (unit/em 0.5) (color/rgba [0 0 0 0.2])]]
-               :height      (unit/percent 100)
-               :padding [[0 (unit/rem 3)]]
-               :position    :absolute
-               :top 0
-               :z-index     9
-               :line-height 2}]
-    [:main {:width              (unit/percent 100)
-            :overflow           :auto
-            :overflow-scrolling :touch
-            :display            :flex
-            :position           :relative
-            :height             (unit/percent 100)}]
-    #_[:&.Locked
-       [:main {:width (stylesheet/calc (- (unit/percent 100) (unit/px 360)))}]]
-    #_[(selector/& (selector/not :.Locked))
-       [:.Slider {:transition [[:500ms :ease]]}]
-       [:&.Align-left
-        [:sidebar {:left (unit/px -360)}]]
-       [:&.Align-right
-        [:sidebar {:right (unit/px -360)}]]
-       [:&.Ontop
-        [:sidebar {:transition [[:500ms :ease]]}]]
-       [:&.Open
-        [:.Backdrop {:opacity 1
-                     :z-index 8}]
-        [(selector/& (selector/not :.Ontop))
-         [:&.Align-left [:.Slider {:transform (translateX (unit/px 360))}]]
-         [:&.Align-right [:.Slider {:transform (translateX (unit/px -360))}]]]
-        [:&.Ontop
-         [:sidebar {:box-shadow [[0 0 (unit/rem 6) (color/rgba [0 0 0 0.5])]]}]
-         [:&.Align-left [:sidebar {:transform (translateX (unit/px 360))}]]
-         [:&.Align-right [:sidebar {:transform (translateX (unit/px -360))}]]]]]]])
+                :z-index    -1}]])
 
-(defn- header [theme]
-  [[#{:.Header :.Card} {:background-color :white}]
-   [:.Header {:justify-content :space-between
-              :align-items     :center
-              :z-index         1
+(defn- header [{:keys [background]}]
+  [[#{:.Header :.Card} {:background-color background}]
+   [:.Header {:z-index         10
+              :box-shadow [[(unit/rem 0) (unit/rem 0.1) (unit/rem 0.8) (color/rgba [0 0 0 0.2])]]
               :width           (unit/vw 100)
               :box-sizing      :border-box
-              :padding         [[0 (unit/rem 1)]]
+              :padding         [[0 (unit/rem 2)]]
               :position        :relative}
     [:&.small {:flex   [[0 0 (unit/px 64)]]
                :height (unit/px 64)}]
@@ -174,12 +139,12 @@
                :height (unit/px 128)}]]])
 
 (defn- card [{:keys [font-scale]
-              :as theme}]
+              :as   theme}]
   [[:.Card
-    {:min-width  (unit/rem 26)
-     :min-height (unit/rem (* (get scales font-scale) 26))}
-    {:border-radius (unit/rem 0.3)
-     :overflow      :hidden}]])
+    {:min-width (unit/rem 26)
+     :max-width (unit/rem 70)
+     :width     (unit/percent 100)
+     :position :relative}]])
 
 (defn- containers [theme]
   (map #(into '() %)
@@ -199,17 +164,18 @@
                                 :line-height 1.2}]
    (for [n (range 1 6)]
      (let [size  (* (Math/abs (- n 6)) 0.3)
-           scale (get scales font-scale)]
-       [(keyword (str "h" n)) {:font-size (unit/em (* size scale))}]))
+           scale (get scales font-scale)
+           font-declaration {:font-size (unit/em (* size scale))}]
+       [(set [(keyword (str "h" n)) (keyword (str ".h" n))]) font-declaration]))
    [:p {:margin-bottom (unit/em 1.3)}]
    [:.Copy {:max-width (unit/rem 65)}]
    [:.Newspaper {:text-align :justify}]
-   [:.Legal {:font-size (unit/em 0.7)}
-    (selector/> :*) {:margin-right (unit/rem 1)}]])
+   #_[:.Legal {:font-size (unit/em 0.7)}
+      (selector/> :*) {:margin-right (unit/rem 1)}]])
 
 (defkeyframes pulse-color
-  [:from {:background (u/gray 240)}]
-  [:to {:background (u/gray 220)}])
+  [:from {:background (util/gray 240)}]
+  [:to {:background (util/gray 220)}])
 
 (defkeyframes fade-up
   [:from {:opacity 0
@@ -229,48 +195,24 @@
   [:from {:transform (scale 0)}]
   [:to {:transform (scale 1)}])
 
-(defkeyframes move-background
-  [0 {:background-position [[(unit/percent 0) (unit/percent 50)]]}]
-  [50 {:background-position [[(unit/percent 100) (unit/percent 50)]]}]
-  [100 {:background-position [[(unit/percent 0) (unit/percent 50)]]}])
-
 (defkeyframes can-edit
-  [0 {:background (u/gray 200)}]
-  [100 {:background (u/gray 240)}])
-
-;; (defkeyframes scale-ripple
-;;   [:from {:opacity          0
-;;           :transform-origin [[:center :center]]
-;;           :transform        (scale 0)}]
-;;   [:to {:opacity          1
-;;         :transform-origin [[:center :center]]
-;;         :transform        (scale 10)}])
-
+  [0 {:background (util/gray 200)}]
+  [100 {:background (util/gray 240)}])
 
 (defn- animations [theme]
   (map #(into '() %) [[pulse-color]
                       [fade]
                       [up]
                       [fade-up]
-                      ;; [move-background]
-                      [scaled]
-                      ;; [scale-ripple]
-]))
+                      [scaled]]))
 
 (defn- notification [{:keys [negative]}]
   [[:.Error {:background negative :color "white"}]])
 (defn- forms [{:keys [primary secondary]}]
-  [[:.Chooser {:position      :relative
-               :width         (unit/percent 100)
-               :margin-bottom (unit/rem 1)}
-    [:.Badge {:top   (unit/rem 1)
-              :right 0}]
-    [:&.read-only [:* {:cursor :default}]]
-    [:.Textfield {:margin-bottom 0}]
-    [:.Dropdown {:border-top-left-radius  0
-                 :border-top-right-radius 0
-                 :max-height              (unit/rem 25)
-                 :width                   (unit/percent 100)}]]
+  [[:.disabled {:cursor :not-allowed
+                :pointer-events :none
+                :opacity 0.3}]
+   [:.read-only {:cursor :default}]
    [:.Labels
     [:.Label:first-child {:margin-left 0}]
     [:.Label:last-child {:margin-right 0}]]
@@ -278,7 +220,6 @@
     [:input {:position :absolute
              :left     (unit/percent -100)
              :z-index  -10}]
-    #_[(selector/+ (selector/input (selector/focus)) :label) {:opacity 1}]
     [:label {:background    (color/lighten secondary 15)
              :color         (color/darken secondary 40)
              :display       :inline-block
@@ -292,73 +233,7 @@
              :z-index       1
              :user-select   :none
              :cursor        :pointer
-             :margin-right  (unit/rem 0.5)}]]
-   [:.Textfield {:position :relative}
-    [:&.label {:margin [[(unit/rem 3) 0 (unit/rem 1) 0]]}]
-    [:&.dirty
-     [:label {:left             0
-              :transform        [[(translateY (unit/percent -100)) (scale 0.75)]]
-              :transform-origin [[:top :left]]}]]
-    [:&.read-only [:* {:cursor :pointer}]]
-    [:&.disabled [:* {:cursor :not-allowed
-                      :pointer-events :none}]
-     [:label {:color :silver}]]
-    [:label {:position      :absolute
-             :color         :silver
-             :transition    [[:all :200ms :ease]]
-             :transform     (translateZ 0)
-             :left          0
-             :cursor        :text
-             :overflow      :hidden
-             :text-overflow :ellipsis
-             :white-space   :nowrap
-             :width         (unit/percent 100)
-             :top           (unit/rem 0.5)
-             :z-index       1}]
-    [:input {:background    :transparent
-             :border        :none
-             :border-bottom [[(unit/px 1) :solid :silver]]
-             :box-sizing    :border-box
-             :display       :inline-block
-             :font-weight   :600
-             :outline       :none
-             :overflow      :hidden
-             :padding       [[(unit/rem 0.5) 0]]
-             :position      :relative
-             :text-overflow :ellipsis
-             :transition    [[:all :200ms :ease]]
-             :white-space   :nowrap
-             :width         (unit/percent 100)
-             :z-index       2}
-     [:&:hover {:border-color primary}]
-     [:&:focus {:border-color primary}
-      [:+ [:label {:color            :black
-                   :left             0
-                   :transform        [[(translateY (unit/percent -100)) (scale 0.75)]]
-                   :transform-origin [[:top :left]]}]]]
-     [:&:disabled {:cursor :not-allowed
-                   :pointer-events :none}]
-     [:&:required
-      [:&.invalid {:border-color :red}]]]
-    [:.Ghost {:color    (color/rgba [0 0 0 0.3])
-              :position :absolute
-              :top      (unit/rem 0.5)}]]
-   [:.Collection {:background         :white
-                  :width              (unit/percent 100)
-                  :overflow-scrolling :touch
-                  :overflow           :auto
-                  :list-style         :none
-                  :padding            0
-                  :z-index            2}
-    ;; TODO Make it an immediate child selector
-    [:li {:border-bottom [[:solid (unit/rem 0.1) (color/rgba [150 150 150 0.1])]]
-          :padding       [[(unit/rem 1) (unit/rem 2)]]}
-     [:&.readonly {:cursor :not-allowed}]
-     [:&.selected {:background (color/rgba [0 0 0 0.04])
-                   :cursor     :pointer}]
-     [:&.intended {:background-color (color/rgba [0 0 0 0.06])
-                   :cursor           :pointer}]
-     [:&:last-child {:border-bottom :none}]]]])
+             :margin-right  (unit/rem 0.5)}]]])
 
 (defn- calendar [{:keys [primary secondary tertiary]}]
   [[:.Date-picker {:position :relative
@@ -395,26 +270,27 @@
                         :text-overflow :ellipsis
                         :white-space   :nowrap
                         :overflow      :hidden}]]
-    [:.Table {:border-bottom [[:solid (unit/px 1) (u/gray 230)]]
+    [:.Table {:border-bottom [[:solid (unit/px 1) (util/gray 230)]]
               :width         (unit/percent 100)}]
-    [:.Arrow {:color         (u/gray 150)
+    [:.Arrow {:color         (util/gray 150)
               :font-size     (unit/em 0.7)
               :padding-left  (unit/rem 1)
               :padding-right (unit/rem 1)}]
     [:.Column-headings {:background :white}
-     [#{:th :td} {:border-top [[:solid (unit/px 1) (u/gray 230)]]}]]
+     [#{:th :td} {:border-top [[:solid (unit/px 1) (util/gray 230)]]}]]
     [#{:th} {:position :relative}
      [:.Dropdown {:background :white
                   :position   [[:absolute :!important]]
-                  :right      0}]
+                  :right      0}
+      [:.Button {:border :transparent}]]
      [:.Dropdown-origin {:opacity    0
                          :transform  [[(translateY (unit/percent -50)) (rotateZ (unit/deg 90))]]
-                         ;; :transition [[:200ms :ease]]
+                         :transition [[:200ms :ease]]
                          :cursor     :pointer
                          :outline    :none
                          :border     :none
                          :background :transparent
-                         :color      (u/gray 130)
+                         :color      (util/gray 130)
                          :font-size  (unit/rem 1.5)
                          :position   :absolute
                          :right      (unit/rem 1)
@@ -422,7 +298,7 @@
      [:&:hover
       [:.Dropdown-origin {:opacity 1}]]]
     [:tr
-     [#{:td:first-child :th:first-child} {:border-left [[:solid (unit/px 1) (u/gray 230)]]}]]
+     [#{:td:first-child :th:first-child} {:border-left [[:solid (unit/px 1) (util/gray 230)]]}]]
     [:.duplicate {:position   :relative
                   :background :yellow}
      [:&:before {:content      "' '"
@@ -455,15 +331,15 @@
                               :font-weight 100}]
      [:&.smaller {:font-size (unit/em 0.45)}]
      [#{:&.numeric :&.select :&.alpha} {:text-align :center}]]
-    [:.not-editable {:background (u/gray 245)}]
-    [:.can-edit {:background (u/gray 250)}]
+    [:.not-editable {:background (util/gray 250)}]
+    [:.can-edit {:background (util/gray 250)}]
     [:.editable
      [:&.cell {:cursor :cell}]
      [:&:hover {:position :relative}
       [:&:before {:content        "' '"
                   :box-sizing     :content-box
                   :display        :block
-                  :border         [[:solid (unit/px 1) (u/gray 185)]]
+                  :border         [[:solid (unit/px 1) (util/gray 185)]]
                   :width          (unit/percent 100)
                   :height         (unit/percent 100)
                   :top            (unit/px -1)
@@ -472,7 +348,7 @@
                   :position       :absolute}]
       #_[:&:after {:content       "' '"
                    :border-radius (unit/percent 50)
-                   :border        [[:solid (unit/px 1) (u/gray 150)]]
+                   :border        [[:solid (unit/px 1) (util/gray 150)]]
                    :display       :block
                    :position      :absolute
                    :bottom        0
@@ -505,17 +381,17 @@
     [:&.selectable
      [:tr
       [:&:hover
-       [:td {:background-color (u/gray 245)}]]
+       [:td {:background-color (util/gray 245)}]]
       [:&.selected
-       [#{:td :th} {:background-color (u/gray 245)}]]]]
-    [#{:th :td} {:border-bottom [[:solid (unit/px 1) (u/gray 230)]]
-                 :border-right  [[:solid (unit/px 1) (u/gray 230)]]
+       [#{:td :th} {:background-color (util/gray 245)}]]]]
+    [#{:th :td} {:border-bottom [[:solid (unit/px 1) (util/gray 230)]]
+                 :border-right  [[:solid (unit/px 1) (util/gray 230)]]
                  :padding       (unit/rem 1)}]
     [:.Chooser
      [:span {:display :inline}]
      [:.Textfield {:margin  0
                    :padding 0}
-      [:&.dirty
+      [#{:&.placeholder :&.not-empty}
        [:label {:display :none}]]
       [:input {:border     :none
                :margin-top (unit/rem -1) ;; TODO Why is this necessary for mid-alignment
@@ -528,58 +404,71 @@
                      :width  (unit/em 10)}]
     [[:.Swatch {:width         (unit/em 4)
                 :height        (unit/em 4)
-                :border-radius (unit/percent 50)}
-      ;; [(selector/& -webkit-color-swatch-wrapper) {:padding 0}]
-      ;; [(selector/& -webkit-color-swatch) {:border 0}]
-]
+                :border-radius (unit/percent 50)}]
+     [:.Color-wheel {:background (linear-gradient (unit/deg 180) :red :yellow :lime :aqua :blue :magenta)
+                     :height     (unit/em 1)
+                     :width      (-> swatch-size :width)
+                     :position :absolute
+                     :z-index 300}
+      [:&:after {:background (linear-gradient (unit/deg 90) (color/rgba [255 255 255 1]) (color/rgba [0 0 0 0]) (color/rgba [0 0 0 1]))
+                 :content "' '"
+                 :display :block
+                 :position :absolute
+                 :left 0
+                 :right 0
+                 :top 0
+                 :bottom 0}]]
      [:.Color-picker {:background    :white
                       :display       :inline-block
                       :border-radius (unit/rem 0.25)
                       :overflow      :hidden
                       :text-align    :center}
       [:&.raised {:box-shadow [[(unit/rem 0) (unit/rem 0.1) (unit/rem 0.8) (color/rgba [0 0 0 0.2])]]}]
-      [:.Swatch (merge {:cursor             :pointer
-                        :margin             [[0 :auto]]
-                        :padding            0
-                        :position           :relative
-                        :-webkit-appearance :none
-                        :border             0
-                        :border-radius      0
-                        :outline            :none
-                        :overflow           :hidden} swatch-size)]
+      [:.Swatch swatch-size
+       [#{:span :input} swatch-size]
+       [:input {:cursor             :pointer
+                :overflow           :hidden
+                :position           :relative
+                :outline            :none
+                :margin             [[0 :auto]]
+                :border             0
+                :border-radius      0
+                :-webkit-appearance :none
+                :padding            0}]]
       [:.Value {:font-size (unit/em 0.7)
                 :cursor    :pointer
                 :padding   (unit/em 0.5)}]]]))
 
 (defn- in-doc [{:keys [primary secondary]}]
-  (let [contrast (u/gray 240)
+  (let [contrast (util/gray 240)
         triangle [(linear-gradient (unit/deg 45)
                                    [contrast (unit/percent 25)]
                                    [:transparent (unit/percent 25)]
                                    [:transparent (unit/percent 75)]
                                    [contrast (unit/percent 75)]
                                    contrast)]]
-    [[:.Marketing {:color (color/rgb [240 240 240])}
-      [:.raised {:color (color/rgb [50 50 50])}]
-      [:section {:margin-top    (unit/rem 5)
-                 :margin-bottom (unit/rem 5)}]]
+    [[:.Sidebar
+      [:sidebar {:box-shadow :none
+                 :border-right [[(unit/px 1) :solid (util/gray 230)]]}]]
      [:.Container
       [:&.demo {:background          (vec (repeat 2 triangle))
                 :background-position [[0 0] [(unit/px 10) (unit/px 10)]]
                 :background-size     [[(unit/px 20) (unit/px 20)]]
                 :box-shadow          [[:inset 0 (unit/px 2) (unit/px 8) (color/rgba [0 0 0 0.3])]]
-                :min-width           (unit/px 300)}]
+                :width (unit/percent 100)
+                :min-width           (unit/em 21)
+                :min-height          (unit/em 10)}]
       [:&.fill-demo
-       [:.fill {:background (-> theme :default :primary)
-                :border     [[:dashed (unit/px 1) (color/rgba [0 0 0 0.2])]]}]]]
-     [#{:.Code :pre} {:background    (color/rgb [34 38 68])
-                      :border-radius (unit/rem 0.3)
-                      :font-family   [[:inconsolata :monospace]]
-                      :font-size     (unit/em 1)
-                      :color         (color/rgb [60 70 100])
-                      :white-space   :pre
-                      :padding       (unit/rem 2)}
-      [:span {:font-family :monospace}]]
+       [:.fill {:background (-> theme :default :secondary)
+                :border     [[:dashed (unit/em 0.2) (color/rgba [0 0 0 0.2])]]}]]]
+     [:pre {:padding (unit/rem 2)}]
+     [#{:.Code :pre :.hljs} {:background    (color/rgb [34 38 68])
+                             :border-radius (unit/rem 0.3)
+                             :font-family   "roboto mono"
+                             :font-size     (unit/em 0.9)
+                             :color         (color/rgb [60 70 100])
+                             :white-space   :pre}
+      [:span {:font-family "roboto mono"}]]
      [#{:.Code :code} {:line-height 1.8}
       [:label {:background    (color/rgb [38 189 230])
                :color         :white
@@ -592,14 +481,7 @@
      [:.Demo-box {:border           [[:solid (unit/px 1) :silver]]
                   :background-color :white
                   :padding          (unit/rem 2)}]
-     [:body {;; :background (linear-gradient (unit/deg 145) (color/rgb [201 220 241]) (color/rgb [171 190 211]))
-             ;; :background                (linear-gradient (unit/deg 45) (color/rgb [65 88 208]) (color/rgb [200 80 192]) (color/rgb [255 204 112]))
-             ;; :background                (linear-gradient (unit/deg 45) (color/rgb [90 154 238]) (color/rgb [119 177 255]) (color/rgb [95 230 250]))
-             ;; :background                (linear-gradient (unit/deg 45) primary secondary)
-             ;; :background-size           [[(unit/percent 400) (unit/percent 400)]]
-             ;; :animation                 [[:move-background :30s :ease]]
-             ;; :animation-iteration-count :infinite
-             :background (color/rgb [65 88 208])}]
+     [:body {:background (color/rgb [65 88 208])}]
      [:.Functional-hide {:position :absolute
                          :left     (unit/vw -200)}]]))
 
@@ -619,13 +501,16 @@
                       (calendar theme)
                       (typography theme)
                       (notification theme)
-                      (ripple/style theme)
+                      (chooser/style theme)
+                      (collection/style theme)
+                      (sidebar/style theme)
                       (badge/style theme)
+                      (textfield/style theme)
                       (button/style theme)
                       (menu/style theme)
                       (checkbox/style theme)
                       (modal/style theme)
-                      (clamp/style theme)
+                      (icon/style theme)
                       (progress-bar/style theme)]))
 
 (def screen

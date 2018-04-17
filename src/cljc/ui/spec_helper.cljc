@@ -1,8 +1,5 @@
-
-;; Brian Noguchi
-;; https://github.com/lab-79/clojure-spec-helpers
-
 (ns ui.spec-helper
+  "Brian Noguchi - https://github.com/lab-79/clojure-spec-helpers "
   (:require [clojure.spec.alpha :as s]
             [clojure.test.check.generators :as gen :refer [generator?]]))
 
@@ -112,23 +109,23 @@
            ((fn [x]
               (if (empty? x)
                 (throw (ex-info "The spec should generate a map or collection of maps."
-                       {:spec spec-form}))
+                                {:spec spec-form}))
                 x)))
            (reduce
-             (fn [spec-keys {[type spec-name-or-form] :spec}]
-               (let [{:keys [req opt]}
-                     (condp = type
-                       :spec-name (extract-spec-keys spec-name-or-form)
-                       (let [matching-spec (condp = type
-                                             :keys-form ::keys-form
-                                             :coll-form ::coll-form
-                                             :and-form ::and-form
-                                             :merge-desc ::merge-desc)]
-                         (spec->spec-keys (s/unform matching-spec spec-name-or-form))))]
-                 (-> spec-keys
-                     (update :req into req)
-                     (update :opt into opt))))
-              {:req [] :opt []})))
+            (fn [spec-keys {[type spec-name-or-form] :spec}]
+              (let [{:keys [req opt]}
+                    (condp = type
+                      :spec-name (extract-spec-keys spec-name-or-form)
+                      (let [matching-spec (condp = type
+                                            :keys-form ::keys-form
+                                            :coll-form ::coll-form
+                                            :and-form ::and-form
+                                            :merge-desc ::merge-desc)]
+                        (spec->spec-keys (s/unform matching-spec spec-name-or-form))))]
+                (-> spec-keys
+                    (update :req into req)
+                    (update :opt into opt))))
+            {:req [] :opt []})))
 
     ::merge-desc
     (let [out (s/conform ::merge-desc spec-form)
@@ -143,7 +140,7 @@
            ((fn [x]
               (if (empty? x)
                 (throw (ex-info "The spec should generate a map or collection of maps."
-                       {:spec spec-form}))
+                                {:spec spec-form}))
                 x)))
            (apply merge-with into)))
 
@@ -170,17 +167,17 @@
   [spec-name]
   (let [spec (s/describe spec-name)]
     (and (coll? spec)
-      (condp = (first spec)
-        'keys true
-        'coll-of (and (s/valid? ::spec-name (second spec))
-                      (is-keys-spec? (second spec)))
-        'every   (and (s/valid? ::spec-name (second spec))
-                      (is-keys-spec? (second spec)))
-        'and     (and (s/valid? ::spec-name (second spec))
-                      (is-keys-spec? (second spec)))
-        'merge   (and (s/valid? ::spec-name (second spec))
-                      (is-keys-spec? (second spec)))
-        false))))
+         (condp = (first spec)
+           'keys true
+           'coll-of (and (s/valid? ::spec-name (second spec))
+                         (is-keys-spec? (second spec)))
+           'every   (and (s/valid? ::spec-name (second spec))
+                         (is-keys-spec? (second spec)))
+           'and     (and (s/valid? ::spec-name (second spec))
+                         (is-keys-spec? (second spec)))
+           'merge   (and (s/valid? ::spec-name (second spec))
+                         (is-keys-spec? (second spec)))
+           false))))
 
 (s/fdef generates-map-or-coll-of-maps?
         :args (s/cat :spec-name ::spec-name
