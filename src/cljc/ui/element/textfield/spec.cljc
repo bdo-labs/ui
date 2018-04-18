@@ -15,12 +15,12 @@
 ;; Parameters
 (spec/def ::placeholder string?)
 (spec/def ::label string?)
-(spec/def ::value
-  (spec/nonconforming
-   (spec/or :string string? :nil nil?)))
 (spec/def ::model
-  (spec/with-gen (spec/and ::common/ratom #(string? (deref %)))
-    #(gen/fmap atom gen/string-alphanumeric)))
+  (spec/nonconforming
+   (spec/with-gen (spec/or :deref (spec/and ::common/ratom #(string? (deref %)))
+                           :string string?
+                           :nil nil?)
+     #(gen/fmap atom gen/string-alphanumeric))))
 (spec/def ::disabled boolean?)
 (spec/def ::auto-focus boolean?)
 (spec/def ::read-only boolean?)
@@ -28,8 +28,6 @@
   (spec/keys :opt-un [::common/id
                       ::placeholder
                       ::label
-                      ::model
-                      ::value
                       ::disabled
                       ::read-only
                       ::auto-focus
@@ -39,8 +37,8 @@
                       ::on-key-up
                       ::on-key-down]))
 
-#_(spec/def ::--params
+(spec/def ::--params
     (spec/merge ::params
-                (spec/keys :req-un [::model])))
+                (spec/keys :opt-un [::model])))
 
-(spec/def ::args (spec/cat :params ::params))
+(spec/def ::args (spec/cat :params ::--params))

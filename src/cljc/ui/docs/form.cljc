@@ -28,6 +28,7 @@
   {:on-valid (fn [data _] #?(:cljs (js/alert (pr-str data))))}
   [{:type ::element/numberfield
     :name :number1
+    :label "Number (1)"
     :help "My help text"
     :text [:span {:style {:font-weight "bold"}} "My info text"]
     :wiring [:tr :$key
@@ -40,8 +41,20 @@
     :spec ::number1-valid}
    {:type element/numberfield
     :name :number2
+    :label "Number (2)"
     :spec ::number2-valid
-    :error-element :dispatch}])
+    :error-element :dispatch}
+   {:type ::element/textfield
+    :name :text1
+    :label "Text"}
+   {:type ::element/chooser
+    :name :chooser1
+    :label "Chooser"
+    :items [{:id 1 :value "Test 1"}
+            {:id 2 :value "Test 2"}]}
+   {:type ::element/checkbox
+    :name :checkbox1
+    :label "Checkbox"}])
 
 (defn- notification-args [model]
   {:model model

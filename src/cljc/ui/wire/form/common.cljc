@@ -45,24 +45,25 @@
                  (:wiring field)))))
 
 (defn get-body [row-fn params form-map]
-  (map (fn [field]
-         (let [field (assoc-wiring field params)
-               ;; fetch the row
-               row (row-fn field form-map)]
-           ;; if we have wiring or label-wiring for the field we replace it using wiring
+  (doall
+   (map (fn [field]
+          (let [field (assoc-wiring field params)
+                ;; fetch the row
+                row (row-fn field form-map)]
+            ;; if we have wiring or label-wiring for the field we replace it using wiring
 
-           (cond (:wiring field)
-                 (wiring/wiring row {:$wrapper wiring/unwrapper
-                                     :$key     {:key (str "ui-wire-form-common-" (:id field))}
-                                     :$label   (render-label field form-map)
-                                     :$field   (render-field field form-map)
-                                     :$errors  (render-error-element field form-map)
-                                     :$text    (render-text field form-map)
-                                     :$help    (render-help field form-map)
-                                     })
+            (cond (:wiring field)
+                  (wiring/wiring row {:$wrapper wiring/unwrapper
+                                      :$key     {:key (str "ui-wire-form-common-" (:id field))}
+                                      :$label   (render-label field form-map)
+                                      :$field   (render-field field form-map)
+                                      :$errors  (render-error-element field form-map)
+                                      :$text    (render-text field form-map)
+                                      :$help    (render-help field form-map)
+                                      })
 
 
-                 ;; otherwise we're good to go with use the default row
-                 :else
-                 row)))
-       (map second (:fields form-map))))
+                  ;; otherwise we're good to go with use the default row
+                  :else
+                  row)))
+        (map second (:fields form-map)))))

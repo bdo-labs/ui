@@ -29,7 +29,6 @@
 (spec/def ::keyboard boolean?) ;; Enable keyboard-support
 (spec/def ::params
   (spec/keys :opt-un [::common/id
-                      ::model
                       ::max-selected
                       ::emphasize
                       ::collapsable
@@ -45,6 +44,9 @@
                       ::on-click
                       ::on-select
                       ::on-mouse-enter]))
+(spec/def ::--params
+  (spec/merge ::params
+              (spec/keys :opt-un [::model])))
 
 (spec/def ::id (spec/nonconforming (spec/or :str :ui.specs/qualified-string? :num nat-int?)))
 (spec/def ::value :ui.specs/qualified-string?)
@@ -56,6 +58,5 @@
     #(gen/fmap set (spec/gen (spec/coll-of ::item)))))
 
 (spec/def ::args
-  (spec/cat :params ::params
+  (spec/cat :params ::--params
             :items ::items))
-

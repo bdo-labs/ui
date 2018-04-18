@@ -4,7 +4,6 @@
             [ui.specs :as common]
             [ui.util :as util]))
 
-(spec/def ::id (spec/and string? #(re-find #"(?i)(\w+)" %)))
 (spec/def ::value string?)
 (spec/def ::model util/deref?)
 (spec/def ::class (spec/coll-of string?))

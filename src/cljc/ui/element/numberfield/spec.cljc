@@ -3,24 +3,19 @@
             [clojure.spec.alpha :as spec]
             [clojure.string :as str]
             [clojure.test.check.generators :as gen]
+            [ui.specs :as common]
             [ui.util :as util]))
 
 
-(spec/def ::maybe-fn
-  (spec/with-gen fn?
-    (gen/return (constantly nil))))
-
-
 ;; Events
-(spec/def ::on-change ::maybe-fn)
-(spec/def ::on-focus ::maybe-fn)
-(spec/def ::on-blur ::maybe-fn)
-(spec/def ::on-key-up ::maybe-fn)
-(spec/def ::on-key-down ::maybe-fn)
+(spec/def ::on-change   ::common/maybe-fn)
+(spec/def ::on-focus    ::common/maybe-fn)
+(spec/def ::on-blur     ::common/maybe-fn)
+(spec/def ::on-key-up   ::common/maybe-fn)
+(spec/def ::on-key-down ::common/maybe-fn)
 
 
 ;; Parameters
-(spec/def ::id (spec/and string? #(re-find #"(?i)(\w+)" %)))
 (spec/def ::placeholder #(or (string? %) (nil? %)))
 (spec/def ::max (spec/or :number number? :nil nil?))
 (spec/def ::min (spec/or :number number? :nil nil?))
@@ -32,7 +27,7 @@
 (spec/def ::focus boolean?)
 (spec/def ::model util/deref?)
 (spec/def ::--params
-  (spec/keys :opt-un [::id
+  (spec/keys :opt-un [::common/id
                       ::placeholder
                       ::auto-focus
                       ::label

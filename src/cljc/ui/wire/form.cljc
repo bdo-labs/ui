@@ -47,8 +47,17 @@
                                          :else                    nil)))
 (defmethod get-field-fn :keyword [field]
   (case (:type field)
-    ::element/textfield element/textfield
-    ::element/numberfield element/numberfield
+    ::element/textfield     element/textfield
+    ::element/numberfield   element/numberfield
+    ::element/dropdown      element/dropdown
+    ::element/button        element/button
+    ::element/checkbox      element/checkbox
+    ::element/chooser       element/chooser
+    ::element/collection    element/collection
+    ::element/days          element/days
+    ::element/months        element/months
+    ::element/date-picker   element/date-picker
+    ::element/period-picker element/period-picker
     nil))
 (defmethod get-field-fn :default [field]
   (:type field))
@@ -96,6 +105,14 @@
                        (on-valid new-state form-map)
                        (re-frame/dispatch [on-valid new-state form-map]))))))))
 
+(defn- get-default-value [field]
+  (let [value (or (:value field) (util/deref-or-value (:model field)))]
+    (condp isa? (:field-fn field)
+      element/textfield (or value "")
+      element/chooser   (or value #{})
+      element/checkbox  (or value :not-checked)
+      value)))
+
 (defn form [fields form-options override-options data]
   ;; do the conform here as conform can change the structure of the data
   ;; that comes out in order to show how it came to that conclusion (spec/or for example)
@@ -109,18 +126,18 @@
                                             ;; always generate id in the form so we
                                             ;; can reference it later
                                             :id (or id (util/gen-id)))]))
-                        (into (sorted-map)))
+                        (into (array-map)))
         errors (reduce (fn [out [name _]]
                          (assoc out name (atom [])))
                        {} map-fields)
         data (atom (reduce (fn [out [name field]]
-                             (assoc out name (:value field)))
+                             (assoc out name (get-default-value field)))
                            {} map-fields))
         form-map {:fields  map-fields
                   :options options
-                  :id (:id options)
+                  :id      (:id options)
                   :errors  errors
-                  :data data}]
+                  :data    data}]
     (add-validation-watcher form-map)
     form-map))
 

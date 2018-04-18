@@ -196,10 +196,14 @@
        (flatten)
        (mapv (comp keyword name))))
 
+(declare deref?)
+(defn- get-class-name [v]
+  (if (deref? v) @v v))
+
 (defn param->class
   [[k v]]
   (-> (cond
-        (vector? v)  (str (name k) "-" (str/join "-" (map name v)))
+        (vector? v)  (str (name k) "-" (str/join "-" (map get-class-name v)))
         (keyword? v) (str (name k) "-" (name v))
         (string? v)  (name k)
         (true? v)    (name k)
@@ -245,3 +249,6 @@
      :clj (condp = (type x)
             clojure.lang.Atom true
             false)))
+
+(defn deref-or-value [model]
+  (if (deref? model) @model model))

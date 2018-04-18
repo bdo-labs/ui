@@ -88,7 +88,7 @@
             (remove-item! [item]
                           (swap! model disj item))
             (add-item! [item]
-                       (when (seq item)
+              (when (seq item)
                          (if (contains? @model item)
                            (when deselectable
                              (if (= 1 (count @model))
@@ -130,28 +130,30 @@
                          [:ul.Collection {:key   (util/slug "collection" id)
                                           :class (str (util/params->classes ui-params) " " class)}
                           (when (seq items)
-                            (for [{:keys [id value label class] :as item} items]
-                              (let [label (or label value)]
-                                (into
-                                 [:li {:key            (util/slug "collection" "item" id)
-                                       :class          (str/join " " [(when (= (:id item) (:id intended)) "intended")
-                                                                      (when (and (util/deref? model)
-                                                                                 (contains? @model item)) "selected")
-                                                                      (str class)])
-                                       :on-mouse-enter (partial --on-mouse-enter item)
-                                       :on-click       (partial --on-click item)}]
-                                 (if (and collapsable
-                                          (= (:id (first items)) id))
-                                   [[:div.item-area
-                                     (if (string? label)
+                            ;; force evaluation. React doesn't like a LazySeq here
+                            (doall
+                             (for [{:keys [id value label class] :as item} items]
+                               (let [label (or label value)]
+                                 (into
+                                  [:li {:key            (util/slug "collection" "item" id)
+                                        :class          (str/join " " [(when (= (:id item) (:id intended)) "intended")
+                                                                       (when (and (util/deref? model)
+                                                                                  (contains? @model item)) "selected")
+                                                                       (str class)])
+                                        :on-mouse-enter (partial --on-mouse-enter item)
+                                        :on-click       (partial --on-click item)}]
+                                  (if (and collapsable
+                                           (= (:id (first items)) id))
+                                    [[:div.item-area
+                                      (if (string? label)
+                                        (emphasize-match label emphasize)
+                                        label)]
+                                     [:div.collapse-area
+                                      [button {:on-click toggle-expanded}
+                                       [icon {:size 2} (str "chevron-" (if expanded? "up" "down"))]]]]
+                                    [(if (string? label)
                                        (emphasize-match label emphasize)
-                                       label)]
-                                    [:div.collapse-area
-                                     [button {:on-click toggle-expanded}
-                                      [icon {:size 2} (str "chevron-" (if expanded? "up" "down"))]]]]
-                                   [(if (string? label)
-                                      (emphasize-match label emphasize)
-                                      label)])))))]))]
+                                       label)]))))))]))]
       #?(:clj render-fn
          :cljs
          (reagent/create-class
