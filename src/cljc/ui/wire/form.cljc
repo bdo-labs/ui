@@ -12,15 +12,23 @@
             [ui.util :as util]))
 
 
+(defn valid?
+  "Helper function for checking validity of the sub ::on-valid"
+  [v] (not= v ::invalid))
+
 (re-frame/reg-sub      ::error (fn [db [_ id field-name]]
                                  (get-in db [::error id field-name] [])))
+(re-frame/reg-sub      ::on-valid (fn [db [_ id]]
+                                    (get-in db [::on-valid id] ::invalid)))
 
 (re-frame/reg-event-db ::error (fn [db [_ id field-name errors]]
                                  (assoc-in db [::error id field-name] errors)))
+(re-frame/reg-event-db ::on-valid (fn [db [_ id new-state]]
+                                    (assoc-in db [::on-valid id] new-state)))
 
 
 (spec/def ::id (spec/and string? #(re-find #"(?i)(\w+)" %)))
-(spec/def ::on-valid (spec/or :fn? fn? :keyword? keyword?))
+(spec/def ::on-valid (spec/or :fn? fn? :dispatcher #{:dispatch}))
 
 (spec/def ::error-element (spec/or :fn? fn? :dispatcher #{:dispatch}))
 (spec/def ::text any?)
@@ -96,14 +104,14 @@
                    ;; update the RAtoms for the error map
                    (doseq [[k same-value? errors] field-errors]
                      (when-not same-value?
-                       (if (#{:dispatch} (get-in form-map [:fields k :error-element]))
+                       (if (= :dispatch (get-in form-map [:fields k :error-element]))
                          (re-frame/dispatch [::error (:id form-map) k errors])
                          (reset! (get-in form-map [:errors k]) errors))))
                    ;; if there are no errors then the form is valid and we can fire off the function
-                   (when (every? empty? (map last field-errors))
-                     (if (fn? on-valid)
-                       (on-valid new-state form-map)
-                       (re-frame/dispatch [on-valid new-state form-map]))))))))
+                   (let [valid? (every? empty? (map last field-errors))
+                         to-send (if valid? new-state ::invalid)]
+                     (if (fn? on-valid) (on-valid to-send)
+                         (re-frame/dispatch [::on-valid (:id form-map) to-send]))))))))
 
 (defn- get-default-value [field]
   (let [value (or (:value field) (util/deref-or-value (:model field)))]
@@ -151,6 +159,6 @@
   (let [form-name (name -name)]
     `(defn ~-name
        ([~'data]
-        (~-name ~'data nil))
-       ([~'data ~'opts]
+        (~-name nil ~'data))
+       ([~'opts ~'data]
         (form ~fields (assoc ~options :form-name ~form-name) ~'opts ~'data)))))

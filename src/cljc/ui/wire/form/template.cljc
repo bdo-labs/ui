@@ -1,19 +1,17 @@
 (ns ui.wire.form.template
   (:require [clojure.spec.alpha :as spec]
+            [ui.specs :as specs.common]
             [ui.wire.form.common :as common]
             [ui.util :as util]))
 
 
-(spec/def ::form map?)
-(spec/def ::id (spec/and string? #(re-find #"(?i)(\w+)" %)))
-
-(spec/def ::template-params
-  (spec/keys :opt-un [::id
-                       ::common/wiring]
+(spec/def ::params
+  (spec/keys :opt-un [::specs.common/id
+                      ::common/wiring]
              :req-un [::common/template]))
 
 
-(spec/def ::template-args (spec/cat :params ::template-params :form-map ::form))
+(spec/def ::args (spec/cat :params ::params :form-map ::common/form :content (spec/? ::common/content)))
 
 
 (defn row [{:keys [wiring]} _]
@@ -26,12 +24,12 @@
                  {} (:fields form-map))))
 
 (defn as-template [& args]
-  (let [{:keys [params form-map]} (util/conform! ::template-args args)
+  (let [{:keys [params form-map content]} (util/conform! ::args args)
         {:keys [id template]
          :or   {id (util/gen-id)}} params
         body (common/get-body row (adapt-wiring params form-map) form-map)]
     (fn [& args]
-      (let [{:keys [params]} (util/conform! ::template-args args)
+      (let [{:keys [params]} (util/conform! ::args args)
             {:keys [style
                     class]
              :or {style {}
@@ -39,4 +37,6 @@
         [:div {:key (util/slug "form-template" id)
                :style style
                :class class}
-         body]))))
+         body
+         (if content
+           [content])]))))

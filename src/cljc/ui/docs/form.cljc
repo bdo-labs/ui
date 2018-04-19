@@ -25,7 +25,7 @@
 (spec/def ::number-1+2 (spec/and ::number1-valid ::number2-valid))
 
 (defform testform
-  {:on-valid (fn [data _] #?(:cljs (js/alert (pr-str data))))}
+  {:on-valid :dispatch}
   [{:type ::element/numberfield
     :name :number1
     :label "Number (1)"
@@ -62,18 +62,25 @@
    :class ["Error"]
    :notification {:class ["Error"]}})
 
+(defn alert-result [data]
+  #?(:cljs (if (form/valid? data) (js/alert (pr-str data)))))
+
 
 (defn documentation[]
   (let [form-table          (testform {} {})
-        form-list           (testform {} {})
-        form-paragraph      (testform {} {})
+        form-list           (testform {:on-valid alert-result} {})
+        form-paragraph      (testform {:on-valid alert-result} {})
         form-template       (testform {} {})
-        form-wire           (testform {} {})
+        form-wire           (testform {:on-valid alert-result} {})
         table-error-sub     (re-frame/subscribe [::form/error (:id form-table) :number2])
         list-error-sub      (re-frame/subscribe [::form/error (:id form-list) :number2])
         paragraph-error-sub (re-frame/subscribe [::form/error (:id form-paragraph) :number2])
         template-error-sub  (re-frame/subscribe [::form/error (:id form-template) :number2])
-        wire-error-sub      (re-frame/subscribe [::form/error (:id form-wire) :number2])]
+        wire-error-sub      (re-frame/subscribe [::form/error (:id form-wire) :number2])
+        form-on-valid       (re-frame/subscribe [::form/on-valid (:id form-table)])
+        form-button-send    (fn []
+                              [:tr [:td] [:td [element/button {:class "primary"
+                                                               :disabled (not (form/valid? @form-on-valid))} "Send"]]])]
     (fn []
       [layout/horizontally
        [layout/vertically
@@ -81,7 +88,7 @@
          "# We generate one form per type of rendering using the same form (testform)
 
 ## as-table"
-         [form/as-table {} form-table]
+         [form/as-table {} form-table form-button-send]
          "#### Second error output, using re-frame subscription (the rest will show up on the right column)"
          [element/notifications (notification-args table-error-sub)]
 
@@ -99,8 +106,7 @@
                                        :$field
                                        :$errors
                                        :$text
-                                       :$help
-                                       ]} form-template]
+                                       :$help]} form-template]
 
          "## as-wire"
          [form/as-wire {:wiring

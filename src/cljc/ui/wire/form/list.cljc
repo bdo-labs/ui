@@ -1,20 +1,19 @@
 (ns ui.wire.form.list
   (:require [clojure.spec.alpha :as spec]
+            [ui.specs :as specs.common]
             [ui.wire.form.common :as common]
             [ui.util :as util]))
 
 
-(spec/def ::form map?)
-(spec/def ::id (spec/and string? #(re-find #"(?i)(\w+)" %)))
 (spec/def ::type #{:ul :ol})
 
 
-(spec/def ::list-params
-  (spec/keys :opt-un [::id
+(spec/def ::params
+  (spec/keys :opt-un [::specs.common/id
                       ::common/wiring
                       ::type]))
 
-(spec/def ::list-args (spec/cat :params ::list-params :form-map ::form))
+(spec/def ::args (spec/cat :params ::params :form-map ::common/form :content (spec/? ::common/content)))
 
 
 (defn- li [{:keys [wiring] :as field} {{label? :label?} :options :as form-map}]
@@ -35,13 +34,13 @@
 
 (defn as-list
   [& args]
-  (let [{:keys [params form-map]} (util/conform! ::list-args args)
+  (let [{:keys [params form-map content]} (util/conform! ::args args)
         {:keys [id type]
          :or   {id   (util/gen-id)
                 type :ul}} params
         body (common/get-body li params form-map)]
     (fn [& args]
-      (let [{:keys [params]} (util/conform! ::list-args args)
+      (let [{:keys [params]} (util/conform! ::args args)
             {:keys [style
                     class]
              :or {style {}
@@ -49,4 +48,6 @@
         [type {:key (util/slug "form-list" id)
                :style style
                :class class}
-         body]))))
+         body
+         (if content
+           [content])]))))

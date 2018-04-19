@@ -17,7 +17,7 @@
 
 (defn wire [markers loc]
   (let [node (zip/node loc)
-        mk(marker node)]
+        mk (marker node)]
     (if (contains? markers mk)
       (let [value (get markers mk)]
         (if (fn? value)

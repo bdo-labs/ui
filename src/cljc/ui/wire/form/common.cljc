@@ -8,6 +8,8 @@
 (spec/def ::wiring (spec/map-of keyword? any?))
 ;; allow override of everything
 (spec/def ::template vector?)
+(spec/def ::form map?)
+(spec/def ::content fn?)
 
 
 (defn render-error-element [{:keys [error-element name] :as field} form-map]
