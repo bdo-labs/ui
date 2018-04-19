@@ -50,8 +50,9 @@
    {:type ::element/chooser
     :name :chooser1
     :label "Chooser"
-    :items [{:id 1 :value "Test 1"}
-            {:id 2 :value "Test 2"}]}
+    :deletable true
+    :items #{{:id 1 :value "Test 1"}
+             {:id 2 :value "Test 2"}}}
    {:type ::element/checkbox
     :name :checkbox1
     :label "Checkbox"}])

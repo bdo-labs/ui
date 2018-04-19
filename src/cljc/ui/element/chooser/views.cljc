@@ -28,13 +28,12 @@
         {:keys [id model deletable items
                 on-key-up on-change on-focus on-blur on-select]
          :or   {id       (util/gen-id)
-                model #{}}} params
-        id                     (util/slug "chooser" id)
-        query*                 ^{:doc "Query to use for filtering and emphasizing the resultset"} (atom (if deletable (str/join ", " (map :value model)) ""))
-        show*                  ^{:doc "Show or hide the collection-dropdown"} (atom false)
+                model    #{}}} params
         model                  ^{:doc "Keep track of all selected items"} (cond (util/deref? model) model
                                                                                 (set? model) (atom model)
-                                                                                :else (atom #{}))]
+                                                                                :else (atom #{}))
+        query*                 ^{:doc "Query to use for filtering and emphasizing the resultset"} (atom (if deletable (str/join ", " (map :value @model)) ""))
+        show*                  ^{:doc "Show or hide the collection-dropdown"} (atom false)]
     (fn [& args]
       (let [{:keys [params]}          (util/conform! ::spec/args args)
             {:keys [multiple
