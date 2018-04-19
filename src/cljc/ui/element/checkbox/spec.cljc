@@ -24,9 +24,7 @@
    ::params
    (spec/keys :opt-un [::model])))
 
-(spec/def ::args
-  (spec/or :arg2 (spec/cat :params ::--params :label ::label)
-           :arg1 (spec/cat :params ::--params)))
+(spec/def ::args (spec/cat :params ::--params :label (spec/? ::label)))
 
 (spec/fdef checkbox
            :args ::args

@@ -4,7 +4,7 @@
             [ui.element.checkbox.spec :as spec]))
 
 (defn checkbox [& args]
-  (let [{:keys [params]} (second (util/conform! ::spec/args args))
+  (let [{:keys [params]} (util/conform! ::spec/args args)
         {:keys [model on-change id]
          :or   {id (util/gen-id)}} params
         initial-value (util/deref-or-value model)
