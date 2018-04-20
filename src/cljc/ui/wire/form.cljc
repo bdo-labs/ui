@@ -4,27 +4,29 @@
             [phrase.alpha :refer [phrase]]
             [re-frame.core :as re-frame]
             [ui.elements :as element]
+            [ui.wire.form.helpers :as form.helpers]
             [ui.wire.form.list :as form.list]
             [ui.wire.form.paragraph :as form.paragraph]
             [ui.wire.form.table :as form.table]
             [ui.wire.form.template :as form.template]
+            [ui.wire.form.wizard :as form.wizard]
             [ui.wire.form.wire :as form.wire]
             [ui.util :as util]))
 
 
-(defn valid?
-  "Helper function for checking validity of the sub ::on-valid"
-  [v] (not= v ::invalid))
+(re-frame/reg-sub      ::error       (fn [db [_ id field-name]]
+                                       (get-in db [::error id field-name] [])))
+(re-frame/reg-sub      ::on-valid    (fn [db [_ id]]
+                                       (get-in db [::on-valid id] ::invalid)))
+(re-frame/reg-sub      ::wizard-current-step (fn [db [_ id]]
+                                               (get-in db [::wizard id :current-step])))
 
-(re-frame/reg-sub      ::error (fn [db [_ id field-name]]
-                                 (get-in db [::error id field-name] [])))
-(re-frame/reg-sub      ::on-valid (fn [db [_ id]]
-                                    (get-in db [::on-valid id] ::invalid)))
-
-(re-frame/reg-event-db ::error (fn [db [_ id field-name errors]]
-                                 (assoc-in db [::error id field-name] errors)))
-(re-frame/reg-event-db ::on-valid (fn [db [_ id new-state]]
-                                    (assoc-in db [::on-valid id] new-state)))
+(re-frame/reg-event-db ::error       (fn [db [_ id field-name errors]]
+                                       (assoc-in db [::error id field-name] errors)))
+(re-frame/reg-event-db ::on-valid    (fn [db [_ id new-state]]
+                                       (assoc-in db [::on-valid id] new-state)))
+(re-frame/reg-event-db ::wizard-current-step (fn [db [_ id step]]
+                                               (assoc-in db [::wizard id :current-step] step)))
 
 
 (spec/def ::id (spec/and string? #(re-find #"(?i)(\w+)" %)))
@@ -53,19 +55,19 @@
                                    (cond (fn? (:type field))      :fn
                                          (keyword? (:type field)) :keyword
                                          :else                    nil)))
+(defmethod get-field-fn :fn [field]
+  (:type field))
 (defmethod get-field-fn :keyword [field]
   (case (:type field)
     ::element/textfield     element/textfield
     ::element/numberfield   element/numberfield
     ::element/dropdown      element/dropdown
-    ::element/button        element/button
     ::element/checkbox      element/checkbox
     ::element/chooser       element/chooser
-    ::element/collection    element/collection
-    ::element/days          element/days
-    ::element/months        element/months
-    ::element/date-picker   element/date-picker
-    ::element/period-picker element/period-picker
+    ;; ::element/days          element/days
+    ;; ::element/months        element/months
+    ;; ::element/date-picker   element/date-picker
+    ;; ::element/period-picker element/period-picker
     nil))
 (defmethod get-field-fn :default [field]
   (:type field))
@@ -104,14 +106,15 @@
                    ;; update the RAtoms for the error map
                    (doseq [[k same-value? errors] field-errors]
                      (when-not same-value?
-                       (if (= :dispatch (get-in form-map [:fields k :error-element]))
-                         (re-frame/dispatch [::error (:id form-map) k errors])
-                         (reset! (get-in form-map [:errors k]) errors))))
+                       (when (= :dispatch (get-in form-map [:fields k :error-element]))
+                         (re-frame/dispatch [::error (:id form-map) k errors]))
+                       (reset! (get-in form-map [:errors k]) errors)))
                    ;; if there are no errors then the form is valid and we can fire off the function
                    (let [valid? (every? empty? (map last field-errors))
                          to-send (if valid? new-state ::invalid)]
-                     (if (fn? on-valid) (on-valid to-send)
-                         (re-frame/dispatch [::on-valid (:id form-map) to-send]))))))))
+                     (when (fn? on-valid)
+                       (on-valid to-send))
+                     (re-frame/dispatch [::on-valid (:id form-map) to-send])))))))
 
 (defn- get-default-value [field]
   (let [value (or (:value field) (util/deref-or-value (:model field)))]
@@ -121,6 +124,7 @@
       element/checkbox  (or value :not-checked)
       value)))
 
+(defrecord Form [fields field-ks options id errors data meta])
 (defn form [fields form-options override-options data]
   ;; do the conform here as conform can change the structure of the data
   ;; that comes out in order to show how it came to that conclusion (spec/or for example)
@@ -141,19 +145,28 @@
         data (atom (reduce (fn [out [name field]]
                              (assoc out name (get-default-value field)))
                            {} map-fields))
-        form-map {:fields  map-fields
-                  :options options
-                  :id      (:id options)
-                  :errors  errors
-                  :data    data}]
+        form-map (map->Form {:fields  map-fields
+                             ;; field-ks control which fields are to be rendered for
+                             ;; everything form supports with the exception of wiring
+                             :field-ks (mapv :name fields)
+                             :options options
+                             :id      (:id options)
+                             :errors  errors
+                             :data    data})]
     (add-validation-watcher form-map)
     form-map))
 
-(def as-table     form.table/as-table)
-(def as-list      form.list/as-list)
-(def as-paragraph form.paragraph/as-paragraph)
-(def as-template  form.template/as-template)
-(def as-wire      form.wire/as-wire)
+(def as-table         (form.wizard/wizard form.table/as-table))
+(def as-list          (form.wizard/wizard form.list/as-list))
+(def as-paragraph     (form.wizard/wizard form.paragraph/as-paragraph))
+(def as-template      (form.wizard/wizard form.template/as-template))
+(def as-wire          form.wire/as-wire)
+(def valid?           form.helpers/valid?)
+(def button           form.helpers/button)
+(def table-button     form.helpers/table-button)
+(def list-button      form.helpers/list-button)
+(def paragraph-button form.helpers/paragraph-button)
+
 
 (defmacro defform [-name options fields]
   (let [form-name (name -name)]

@@ -2,6 +2,7 @@
   (:require [clojure.spec.alpha :as spec]
             [ui.specs :as specs.common]
             [ui.wire.form.common :as common]
+            [ui.wire.form.helpers :as helpers]
             [ui.util :as util]))
 
 
@@ -27,13 +28,15 @@
   (let [{:keys [params form-map content]} (util/conform! ::args args)
         {:keys [id template]
          :or   {id (util/gen-id)}} params
-        body (common/get-body row (adapt-wiring params form-map) form-map)]
+        body (common/get-body row (adapt-wiring params form-map) form-map)
+        re-render? (helpers/re-render? form-map)]
     (fn [& args]
-      (let [{:keys [params]} (util/conform! ::args args)
+      (let [{:keys [params form-map]} (util/conform! ::args args)
             {:keys [style
                     class]
              :or {style {}
-                  class ""}} params]
+                  class ""}} params
+            body (if re-render? (common/get-body row (adapt-wiring params form-map) form-map) body)]
         [:div {:key (util/slug "form-template" id)
                :style style
                :class class}

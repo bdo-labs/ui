@@ -72,12 +72,22 @@
         form-paragraph      (testform {:on-valid alert-result} {})
         form-template       (testform {} {})
         form-wire           (testform {:on-valid alert-result} {})
+        form-wizard         (testform {:render :wizard
+                                       :wizard {:valid-fn alert-result
+                                                :steps [{:fields [:number1 :number2]
+                                                         :legend [:h3 "Numbers"]}
+                                                        {:fields [:text1 :chooser1]
+                                                         :legend [:h3 "Text + Chooser"]}
+                                                        {:fields [:checkbox1]
+                                                         :legend [:h3 "Checkbox"]}]}}
+                                      {})
         table-error-sub     (re-frame/subscribe [::form/error (:id form-table) :number2])
         list-error-sub      (re-frame/subscribe [::form/error (:id form-list) :number2])
         paragraph-error-sub (re-frame/subscribe [::form/error (:id form-paragraph) :number2])
         template-error-sub  (re-frame/subscribe [::form/error (:id form-template) :number2])
         wire-error-sub      (re-frame/subscribe [::form/error (:id form-wire) :number2])
         form-on-valid       (re-frame/subscribe [::form/on-valid (:id form-table)])
+        wizard-current-step (re-frame/subscribe [::form/wizard-current-step (:id form-wizard)])
         form-button-send    (fn []
                               [:tr [:td] [:td [element/button {:class "primary"
                                                                :disabled (not (form/valid? @form-on-valid))} "Send"]]])]
@@ -85,10 +95,15 @@
       [layout/horizontally
        [layout/vertically
         [element/article
+
+         "## as-table with :render set to :wizard"
+         [:h4 "Current step (subscription) -> " @wizard-current-step]
+         [form/as-table {} form-wizard]
+
          "# We generate one form per type of rendering using the same form (testform)
 
 ## as-table"
-         [form/as-table {} form-table form-button-send]
+         [form/as-table {} form-table (form/table-button form-table alert-result)]
          "#### Second error output, using re-frame subscription (the rest will show up on the right column)"
          [element/notifications (notification-args table-error-sub)]
 

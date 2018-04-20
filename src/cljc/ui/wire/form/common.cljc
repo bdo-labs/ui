@@ -68,4 +68,4 @@
                   ;; otherwise we're good to go with use the default row
                   :else
                   row)))
-        (map second (:fields form-map)))))
+        (map #(get-in form-map [:fields %]) (:field-ks form-map)))))

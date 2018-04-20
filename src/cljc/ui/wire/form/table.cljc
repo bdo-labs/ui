@@ -2,6 +2,7 @@
   (:require [clojure.spec.alpha :as spec]
             [ui.specs :as specs.common]
             [ui.wire.form.common :as common]
+            [ui.wire.form.helpers :as helpers]
             [ui.util :as util]))
 
 
@@ -36,13 +37,15 @@
         {:keys [id]
          :or   {id (util/gen-id)}} params
         ;; generate the body of the table
-        body (common/get-body table-row params form-map)]
+        body (common/get-body table-row params form-map)
+        re-render? (helpers/re-render? form-map)]
     (fn [& args]
-      (let [{:keys [params]} (util/conform! ::args args)
+      (let [{:keys [params form-map]} (util/conform! ::args args)
             {:keys [style
                     class]
              :or {style {}
-                  class ""}} params]
+                  class ""}} params
+            body (if re-render? (common/get-body table-row params form-map) body)]
         [:table {:key (util/slug "form-table" id)
                  :style style
                  :class class}

@@ -41,6 +41,9 @@
    :ui/change-log-version   "{1} ({2})"
    :ui/report-issue         "Report and issue"
    :ui/hello                "hello {1}!"
+   :ui.wire.form.wizard/next "Next"
+   :ui.wire.form.wizard/prev "Previous"
+   :ui.wire.form/done       "Done"
    :validation/min-number   "The number needs to be larger than {1}."
    :validation/max-number   "The number needs to be smaller than {1}."
    :validation/NaN          "The current value '{1}' is not a number."})
