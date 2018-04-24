@@ -46,9 +46,9 @@
              :or {style {}
                   class ""}} params
             body (if re-render? (common/get-body table-row params form-map) body)]
-        [:table {:key (util/slug "form-table" id)
-                 :style style
-                 :class class}
-         [:tbody body
+        [:table.Table {:key (util/slug "form-table" id)
+                       :style style
+                       :class class}
+         [:tbody.Table-Body body
           (if content
             [content])]]))))

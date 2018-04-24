@@ -6,19 +6,21 @@
             [garden.media :as media]
             [garden.color :as color]
             [garden.selectors :as selector]
-            [ui.util :as util]
             [ui.element.badge.styles :as badge]
-            [ui.element.chooser.styles :as chooser]
-            [ui.element.textfield.styles :as textfield]
-            [ui.element.collection.styles :as collection]
-            [ui.element.checkbox.styles :as checkbox]
-            [ui.element.containers.styles :as containers]
-            [ui.element.sidebar.styles :as sidebar]
-            [ui.element.menu.styles :as menu]
             [ui.element.button.styles :as button]
+            [ui.element.checkbox.styles :as checkbox]
+            [ui.element.chooser.styles :as chooser]
+            [ui.element.collection.styles :as collection]
+            [ui.element.containers.styles :as containers]
             [ui.element.icon.styles :as icon]
+            [ui.element.menu.styles :as menu]
+            [ui.element.modal.styles :as modal]
+            [ui.element.numberfield.styles :as numberfield]
             [ui.element.progress-bar.styles :as progress-bar]
-            [ui.element.modal.styles :as modal]))
+            [ui.element.sidebar.styles :as sidebar]
+            [ui.element.textfield.styles :as textfield]
+            [ui.wire.form.styles :as form]
+            [ui.util :as util]))
 
 ;; Realizations that should be materialized
 ;;
@@ -450,6 +452,7 @@
     [[:.Sidebar
       [:sidebar {:box-shadow :none
                  :border-right [[(unit/px 1) :solid (util/gray 230)]]}]]
+     [:.List {:list-style "none"}]
      [:.Container
       [:&.demo {:background          (vec (repeat 2 triangle))
                 :background-position [[0 0] [(unit/px 10) (unit/px 10)]]
@@ -461,7 +464,8 @@
       [:&.fill-demo
        [:.fill {:background (-> theme :default :secondary)
                 :border     [[:dashed (unit/em 0.2) (color/rgba [0 0 0 0.2])]]}]]]
-     [:pre {:padding (unit/rem 2)}]
+     [:pre {:padding (unit/rem 2)}
+      [:.hljs {:color :white}]]
      [#{:.Code :pre :.hljs} {:background    (color/rgb [34 38 68])
                              :border-radius (unit/rem 0.3)
                              :font-family   "roboto mono"
@@ -506,12 +510,14 @@
                       (sidebar/style theme)
                       (badge/style theme)
                       (textfield/style theme)
+                      (numberfield/style theme)
                       (button/style theme)
                       (menu/style theme)
                       (checkbox/style theme)
                       (modal/style theme)
                       (icon/style theme)
-                      (progress-bar/style theme)]))
+                      (progress-bar/style theme)
+                      (form/style theme)]))
 
 (def screen
   (let [theme (:default theme)]

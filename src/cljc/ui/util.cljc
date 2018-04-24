@@ -252,3 +252,10 @@
 
 (defn deref-or-value [model]
   (if (deref? model) @model model))
+
+(defn deep-merge
+  "Merge all maps while retaining keys"
+  [& vals]
+  (if (every? map? vals)
+    (apply merge-with deep-merge vals)
+    (last vals)))

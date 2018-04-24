@@ -16,6 +16,7 @@
             [ui.docs.icons :as icons]
             [ui.docs.inputs :as inputs]
             [ui.docs.load :as load]
+            [ui.docs.notification :as notification]
             [ui.docs.numberfield :as numberfield]
             [ui.docs.period-picker :as period-picker]
             [ui.docs.polyglot :as polyglot]
@@ -87,6 +88,7 @@ batteries included, so have a look and get yourself familiarized.
     :numberfield [numberfield/documentation]
     :progress [progress/documentation]
     :sheet [sheet/documentation]
+    :notification [notification/documentation]
     ;; :sidebar [sidebar/documentation]
 
     ;; Labs
@@ -98,7 +100,7 @@ batteries included, so have a look and get yourself familiarized.
   (let [active-item @(re-frame/subscribe [:active-doc-item])
         wires       [:feature :form :load :polyglot]
         layouts     [:centered :horizontally :vertically :fill]
-        elements    [:buttons :colors #_:date-picker #_:period-picker :dialog :dropdown :icons :textfield :numberfield :collection #_:chooser :inputs :progress :sheet]
+        elements    [:buttons :colors #_:date-picker #_:period-picker :dialog :dropdown :icons :textfield :numberfield :notification :collection #_:chooser :inputs :progress :sheet]
         labs        [:card]]
     [:div {:style {:width "100vw"
                    :height "100vh"}}

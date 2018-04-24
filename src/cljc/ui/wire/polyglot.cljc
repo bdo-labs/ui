@@ -39,7 +39,7 @@
    :ui/time-period          "Time-period"
    :ui/date-period          "Date-period"
    :ui/change-log-version   "{1} ({2})"
-   :ui/report-issue         "Report and issue"
+   :ui/report-issue         "Report an issue"
    :ui/hello                "hello {1}!"
    :ui.wire.form.wizard/next "Next"
    :ui.wire.form.wizard/prev "Previous"

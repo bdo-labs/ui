@@ -106,8 +106,7 @@
                    ;; update the RAtoms for the error map
                    (doseq [[k same-value? errors] field-errors]
                      (when-not same-value?
-                       (when (= :dispatch (get-in form-map [:fields k :error-element]))
-                         (re-frame/dispatch [::error (:id form-map) k errors]))
+                       (re-frame/dispatch [::error (:id form-map) k errors])
                        (reset! (get-in form-map [:errors k]) errors)))
                    ;; if there are no errors then the form is valid and we can fire off the function
                    (let [valid? (every? empty? (map last field-errors))
