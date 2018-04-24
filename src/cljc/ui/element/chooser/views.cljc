@@ -25,15 +25,15 @@
 (defn chooser
   [& args]
   (let [{:keys [params]}       (util/conform! ::spec/args args)
-        {:keys [id selected deletable items
+        {:keys [id model deletable items
                 on-key-up on-change on-focus on-blur on-select]
          :or   {id       (util/gen-id)
-                selected #{}}} params
-        id                     (util/slug id)
-        query*                 ^{:doc "Query to use for filtering and emphasizing the resultset"} (atom (if deletable (str/join ", " (map :value selected)) ""))
-        show*                  ^{:doc "Show or hide the collection-dropdown"} (atom false)
-        selected*              ^{:doc "Keep track of all selected items"} (atom selected)]
-
+                model    #{}}} params
+        model                  ^{:doc "Keep track of all selected items"} (cond (util/deref? model) model
+                                                                                (set? model) (atom model)
+                                                                                :else (atom #{}))
+        query*                 ^{:doc "Query to use for filtering and emphasizing the resultset"} (atom (if deletable (str/join ", " (map :value @model)) ""))
+        show*                  ^{:doc "Show or hide the collection-dropdown"} (atom false)]
     (fn [& args]
       (let [{:keys [params]}          (util/conform! ::spec/args args)
             {:keys [multiple
@@ -61,9 +61,9 @@
                                               ;; Remove incomplete items
                                               :on-key-up (fn [key value event]
                                                            (let [candidates (->> (str/split value ",") (mapv str/trim) (set))
-                                                                 valid-ones (remove (fn [x] (not (contains? candidates (str (:value x))))) @selected*)]
-                                                             (when (not= @selected* valid-ones)
-                                                               (reset! selected* (set valid-ones))))
+                                                                 valid-ones (remove (fn [x] (not (contains? candidates (str (:value x))))) @model)]
+                                                             (when (not= @model valid-ones)
+                                                               (reset! model (set valid-ones))))
                                                            (when (fn? on-key-up) (on-key-up key value event)))
                                               :on-focus  (fn [value event]
                                                            (do (reset! show* true)
@@ -82,17 +82,17 @@
                                                 :read-only   true})
                                              (when (and (not deletable)
                                                         (false? multiple)
-                                                        (not-empty @selected*))
-                                               {:placeholder (-> (first @selected*) :value)})
+                                                        (not-empty @model))
+                                               {:placeholder (-> (first @model) :value)})
                                              (when (and (not deletable)
                                                         multiple
                                                         (false? labels)
-                                                        (not (empty? @selected*)))
-                                               {:placeholder (str (str/join ", " (map :value @selected*)))}))
+                                                        (not (empty? @model)))
+                                               {:placeholder (str (str/join ", " (map :value @model)))}))
             collection-params         (merge params
                                              {:id           (util/slug id "collection")
                                               :emphasize    current-query
-                                              :model        selected*
+                                              :model        model
                                               :keyboard     keyboard
                                               :selectable   selectable
                                               :searchable   searchable
@@ -101,7 +101,7 @@
                                                               (if deletable
                                                                 (reset! query* (str (str/join ", " (map :value items)) (when multiple ", ")))
                                                                 (reset! query* ""))
-                                                              (reset! selected* items)
+                                                              (reset! model items)
                                                               (when (fn? on-select) (on-select items)))})]
 
         [:div.Chooser {:id    id
@@ -114,12 +114,12 @@
 
          (when (and multiple
                     (false? labels))
-           [badge {:show-content? true} (count @selected*)])
+           [badge {:show-content? true} (count @model)])
 
          (when (and multiple labels)
            [:div.Labels
             (doall
-             (for [label-params @selected*]
+             (for [label-params model]
                (let [label-params (merge label-params
                                          {:key         (util/slug (:id label-params) "a-label")
                                           :on-key-down #(let [key (util/code->key (.-which %))]

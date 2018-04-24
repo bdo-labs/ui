@@ -4,13 +4,13 @@
   (:require [#?(:clj clojure.core :cljs reagent.core) :refer [atom]]
             [clojure.spec.alpha :as spec]
             [clojure.test.check.generators :as gen]
-            [ui.util :refer [ratom?]]))
+            [ui.util :refer [deref?]]))
 
 (spec/def ::id
   (spec/and string? #(re-find #"(?i)(\w+)" %)))
 
 (spec/def ::ratom
-  (spec/with-gen (spec/and ratom? #(satisfies? IDeref %))
+  (spec/with-gen (spec/and deref? #(satisfies? IDeref %))
     #(gen/return (atom %))))
 
 (spec/def ::qualified-string?

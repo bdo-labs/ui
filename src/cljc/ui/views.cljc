@@ -1,31 +1,32 @@
 (ns ui.views
-  (:require [clojure.string :as str]
-            [ui.wire.polyglot :refer [translate]]
-            [ui.element.showcase.views :refer [showcase]]
-            [re-frame.core :as re-frame]
-            [ui.elements :as element]
-            [ui.layout :as layout]
-            [ui.docs.polyglot :as polyglot]
-            [ui.docs.load :as load]
-            [ui.docs.feature :as feature]
-            [ui.docs.centered :as centered]
-            [ui.docs.fill :as fill]
-            [ui.docs.horizontally :as horizontally]
-            [ui.docs.vertically :as vertically]
-            [ui.docs.card :as card]
+  (:require [re-frame.core :as re-frame]
             [ui.docs.buttons :as buttons]
-            [ui.docs.icons :as icons]
-            [ui.docs.progress :as progress]
-            [ui.docs.colors :as colors]
-            [ui.docs.dialog :as dialog]
-            [ui.docs.dropdown :as dropdown]
-            [ui.docs.inputs :as inputs]
-            [ui.docs.date-picker :as date-picker]
-            [ui.docs.period-picker :as period-picker]
-            [ui.docs.sheet :as sheet]
+            [ui.docs.card :as card]
+            [ui.docs.centered :as centered]
             [ui.docs.chooser :as chooser]
             [ui.docs.collection :as collection]
-            [ui.docs.textfield :as textfield]))
+            [ui.docs.colors :as colors]
+            [ui.docs.date-picker :as date-picker]
+            [ui.docs.dialog :as dialog]
+            [ui.docs.dropdown :as dropdown]
+            [ui.docs.feature :as feature]
+            [ui.docs.fill :as fill]
+            [ui.docs.form :as form]
+            [ui.docs.horizontally :as horizontally]
+            [ui.docs.icons :as icons]
+            [ui.docs.inputs :as inputs]
+            [ui.docs.load :as load]
+            [ui.docs.notification :as notification]
+            [ui.docs.numberfield :as numberfield]
+            [ui.docs.period-picker :as period-picker]
+            [ui.docs.polyglot :as polyglot]
+            [ui.docs.progress :as progress]
+            [ui.docs.sheet :as sheet]
+            [ui.docs.textfield :as textfield]
+            [ui.docs.vertically :as vertically]
+            [ui.elements :as element]
+            [ui.layout :as layout]
+            [ui.wire.polyglot :refer [translate]]))
 
 (defn- menu-item
   ([item]
@@ -61,6 +62,7 @@ batteries included, so have a look and get yourself familiarized.
   [item-name]
   (case item-name
     ;; Wires
+    :form     [form/documentation]
     :feature  [feature/documentation]
     :load     [load/documentation]
     :polyglot [polyglot/documentation]
@@ -83,8 +85,10 @@ batteries included, so have a look and get yourself familiarized.
     :chooser [chooser/documentation]
     :collection [collection/documentation]
     :inputs [inputs/documentation]
+    :numberfield [numberfield/documentation]
     :progress [progress/documentation]
     :sheet [sheet/documentation]
+    :notification [notification/documentation]
     ;; :sidebar [sidebar/documentation]
 
     ;; Labs
@@ -94,9 +98,9 @@ batteries included, so have a look and get yourself familiarized.
 (defn- doc-panel
   []
   (let [active-item @(re-frame/subscribe [:active-doc-item])
-        wires       [:feature :load :polyglot]
+        wires       [:feature :form :load :polyglot]
         layouts     [:centered :horizontally :vertically :fill]
-        elements    [:buttons :colors #_:date-picker #_:period-picker :dialog :dropdown :icons :textfield :collection #_:chooser :inputs :progress :sheet]
+        elements    [:buttons :colors #_:date-picker #_:period-picker :dialog :dropdown :icons :textfield :numberfield :notification :collection #_:chooser :inputs :progress :sheet]
         labs        [:card]]
     [:div {:style {:width "100vw"
                    :height "100vh"}}

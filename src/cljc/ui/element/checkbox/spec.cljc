@@ -1,26 +1,31 @@
 (ns ui.element.checkbox.spec
   (:require [clojure.spec.alpha :as spec]
-            [clojure.test.check.generators :as gen]))
+            [clojure.test.check.generators :as gen]
+            [ui.specs :as common]))
 
-(spec/def ::maybe-fn
-  (spec/with-gen fn?
-    (gen/return (constantly nil))))
-
-(spec/def ::id (spec/or :numeric int? :textual (spec/and string? not-empty)))
-(spec/def ::checked? boolean?)
 (spec/def ::label string?)
-(spec/def ::value string?)
+(spec/def ::model
+  (spec/nonconforming
+   (spec/or :deref   (spec/and ::common/ratom #(let [v (deref %)]
+                                                 (#{:checked :indeterminate :not-checked} v)))
+            :boolean boolean?
+            :nil     nil?
+            :keywords #{:checked :indeterminate :not-checked})))
 
-(spec/def ::on-change ::maybe-fn)
+(spec/def ::on-change ::common/maybe-fn)
 
-(spec/def ::checkbox-params
+(spec/def ::params
   (spec/keys
-   :opt-un [::id ::checked? ::value ::on-change]))
+   :opt-un [::common/id
+            ::on-change]))
 
-(spec/def ::checkbox-args
-  (spec/cat :params ::checkbox-params :label ::label))
+(spec/def ::--params
+  (spec/merge
+   ::params
+   (spec/keys :opt-un [::model])))
+
+(spec/def ::args (spec/cat :params ::--params :label (spec/? ::label)))
 
 (spec/fdef checkbox
-           :args ::checkbox-args
+           :args ::args
            :ret vector?)
-

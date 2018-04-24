@@ -6,6 +6,8 @@
             [clojure.string :as str]
             [clojure.spec.alpha :as spec]
             [markdown.core :as markdown]
+            #?(:cljs [reagent.ratom])
+            #?(:cljs [ui.config :refer [debug?]])
             [garden.color :as color]
             [ui.spec-helper :as h]))
 
@@ -58,7 +60,7 @@
   "Create a unique-id"
   []
   #?(:clj (str (java.util.UUID/randomUUID))
-     :cljs (random-uuid)))
+     :cljs (str (random-uuid))))
 
 (defn exception
   "Throw exceptions independently of environment"
@@ -194,10 +196,14 @@
        (flatten)
        (mapv (comp keyword name))))
 
+(declare deref?)
+(defn- get-class-name [v]
+  (if (deref? v) @v v))
+
 (defn param->class
   [[k v]]
   (-> (cond
-        (vector? v)  (str (name k) "-" (str/join "-" (map name v)))
+        (vector? v)  (str (name k) "-" (str/join "-" (map get-class-name v)))
         (keyword? v) (str (name k) "-" (name v))
         (string? v)  (name k)
         (true? v)    (name k)
@@ -234,6 +240,22 @@
         (when-not (empty? s)
           (str/includes? (str/lower-case s) (str/lower-case substr))))))
 
-(defn ratom? [x]
-  #?(:clj (= (type x) clojure.lang.Atom)
-     :cljs (= (type x) reagent.ratom/RAtom)))
+(defn deref? [x]
+  #?(:cljs (condp = (type x)
+             reagent.ratom/RAtom true
+             reagent.ratom/RCursor true
+             reagent.ratom/Reaction true
+             false)
+     :clj (condp = (type x)
+            clojure.lang.Atom true
+            false)))
+
+(defn deref-or-value [model]
+  (if (deref? model) @model model))
+
+(defn deep-merge
+  "Merge all maps while retaining keys"
+  [& vals]
+  (if (every? map? vals)
+    (apply merge-with deep-merge vals)
+    (last vals)))

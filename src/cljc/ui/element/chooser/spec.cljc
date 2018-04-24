@@ -10,6 +10,11 @@
 (spec/def ::searchable boolean?)
 (spec/def ::deletable boolean?)
 (spec/def ::predicate? ::common/maybe-fn)
+(spec/def ::model
+  (spec/nonconforming
+   (spec/or :deref (spec/and ::common/ratom #(set? (deref %)))
+            :set set?
+            :nil nil?)))
 
 (spec/def ::params
   (spec/merge ::collection/params
@@ -18,10 +23,8 @@
                                   ::deletable
                                   ::searchable
                                   ::labels
-                                  ::predicate?])))
-
-(spec/exercise ::params)
+                                  ::predicate?
+                                  ::model])))
 
 (spec/def ::args
   (spec/cat :params ::params))
-

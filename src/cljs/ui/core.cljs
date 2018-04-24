@@ -1,5 +1,6 @@
 (ns ui.core
   (:require [reagent.core :as reagent]
+            [weasel.repl :as repl]
             [ui.config :as config]
             [ui.routes :as routes]
             [ui.views :as views]
@@ -14,7 +15,14 @@
 
 (defn- dev-setup []
   (when config/debug?
-    (enable-console-print!)))
+    (enable-console-print!)
+    (util/log "dev mode")
+    ;; try to set up a Weasel REPL
+    (try
+      (util/log "Setting up Weasel REPL")
+      (repl/connect "ws://localhost:9001")
+      (catch js/Error _
+        (util/log "Unable to connect to the Weasel REPL")))))
 
 (defn- mount-root []
   (reagent/render [views/main-panel]

@@ -22,6 +22,8 @@
                  [reagent "0.8.0-alpha2"]
                  [secretary "1.2.3"]
                  [tongue "0.2.3"]
+                 [phrase "0.3-alpha3"]
+                 [com.taoensso/timbre "4.10.0"]
 
                  [org.clojars.stumitchell/clairvoyant "0.2.1" :scope "test"]
                  [day8.re-frame/re-frame-10x "0.3.1" :scope "test"]

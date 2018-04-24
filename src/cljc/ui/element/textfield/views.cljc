@@ -9,9 +9,9 @@
 
 
   "
-  [{:keys [id model value change-on-blur on-change on-blur on-key-up on-focus] :or {id (util/gen-id)}}]
-  (let [initial-value (if (util/ratom? model) @model (str value))
-        model         (if (util/ratom? model) model (atom (str value)))
+  [{:keys [id model change-on-blur on-change on-blur on-key-up on-focus] :or {id (util/gen-id)}}]
+  (let [initial-value (if (util/deref? model) @model (str model))
+        model         (if (util/deref? model) model (atom (str initial-value)))
         --on-change   #(let [value (-> % .-target .-value)]
                          (when (not= value @model)
                            (reset! model value)

@@ -5,7 +5,7 @@
             [ui.spec-helper :as spec-helper]
             [clojure.tools.reader :refer [read-string]]
             [clojure.spec.alpha :as spec]
-            [ui.util :as util :refer [ratom?]]
+            [ui.util :as util :refer [deref?]]
             [clojure.string :as str]
             [re-frame.core :as re-frame]))
 
@@ -106,7 +106,7 @@
        [element/icon "code"]]]]))
 
 (defn value->model [s]
-  (if (ratom? s) s (atom (str s))))
+  (if (deref? s) s (atom (str s))))
 
 (defn- type->input
   [id prop type]

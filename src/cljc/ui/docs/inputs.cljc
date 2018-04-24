@@ -150,14 +150,14 @@
         toggle-email   #(re-frame/dispatch [::toggle-email])]
     [layout/horizontally
      [layout/vertically
-      [element/checkbox {:checked   bacon
+      [element/checkbox {:model bacon
                          :on-change toggle-bacon} "Bacon"]
-      [element/checkbox {:checked   cheese
+      [element/checkbox {:model cheese
                          :on-change toggle-cheese} "Cheese"]
-      [element/checkbox {:checked   ketchup
+      [element/checkbox {:model ketchup
                          :on-change toggle-ketchup} "Ketchup"]]
      [layout/vertically
-      [element/toggle {:checked   email
+      [element/toggle {:model email
                        :on-change toggle-email} "Eat here?"]]]))
 
 (defn smart-case-includes? [s substr]
@@ -175,9 +175,9 @@
         sep-filtered-items @(re-frame/subscribe [::sep-filtered-items])]
     [layout/horizontally
      [layout/vertically
-      [element/checkbox {:checked   multiple
+      [element/checkbox {:model multiple
                          :on-change #(re-frame/dispatch [::toggle-multiple])} "Multiple"]
-      [element/checkbox {:checked   disabled
+      [element/checkbox {:model disabled
                          :on-change #(re-frame/dispatch [::toggle-disabled])} "Disabled"]
       [element/chooser {:style           {:width "420px"}
                         :label           "Name a Character from Game of Thrones"
@@ -200,4 +200,3 @@
    "
    [check-toggle]
    [completion]])
-
