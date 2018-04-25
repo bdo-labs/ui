@@ -93,7 +93,7 @@
   [& s]
   (some-> (lower (str/join " " (flatten s)))
           (str/escape +slug-tr-map+)
-          (str/replace #"[^\w\s]+" "")
+          (str/replace #"[^\w\s\d]+" "")
           (str/replace #"\s+" "-")))
 
 (defn md->html

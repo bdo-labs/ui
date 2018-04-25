@@ -4,12 +4,10 @@
             [ui.specs :as common]
             [ui.util :as util]))
 
-(spec/def ::value string?)
-(spec/def ::model util/deref?)
+(spec/def ::model any?)
 (spec/def ::class (spec/coll-of string?))
 (spec/def ::params
   (spec/keys :opt-un [::common/id
-                      ::value
                       ::class
                       ::model]))
 

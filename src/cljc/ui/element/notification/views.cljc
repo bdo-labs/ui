@@ -12,15 +12,13 @@
     (fn [& args]
       (let [{:keys [params]}         (util/conform! ::spec/args args)
             {:keys [style
-                    class
-                    value]
+                    class]
              :or   {style    {}
-                    value    ""
                     class    []}}    params
             ui-params                (select-keys params (util/keys-from-spec ::spec/params))
             class                    (str/join " " (flatten [(util/params->classes ui-params)
                                                              [class]]))]
-        (let [-value (if model (or @model value) (or value ""))
+        (let [-value (if (util/deref? model) @model (or model ""))
               extra-style(if (= -value ::hide)
                            {:display "none;"}
                            {})]
@@ -47,11 +45,20 @@
             ui-params                (select-keys params (util/keys-from-spec ::spec/notifications-params))
             class                    (str/join " " (flatten [(util/params->classes ui-params)
                                                              [class]]))]
-        (let [values @model]
+        (let [values (if (util/deref? model) @model model)
+              index-values (map vector (range (count values)) values)]
           [:div.Notifications {:key (util/slug "notifications" id)
                                :style style
                                :class class}
-           (for [value values]
-             ^{:key (util/slug "notification" id "-sub-" (str value))}
-             [notification (assoc notification-params
-                                  :value value)])])))))
+           (doall
+            (for [[index value] index-values]
+              (let [value (if (util/deref? value) @value value)]
+                ;; BUG: react for some reason does not like to have the id + index as a
+                ;; unique key and treats all notification elements with that
+                ;; key format as the same. using id + value works, but bugs out when the
+                ;; values are the same and of course is meaningless as a key since it
+                ;; changes all the time. id + index + value is the current solution, but
+                ;; suffers the same problem of changing all the time
+                (let [notification-id (util/slug "notification" (str id index value) "-sub")]
+                  ^{:key notification-id}
+                  [notification (assoc notification-params :model value)]))))])))))
