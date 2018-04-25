@@ -1,4 +1,4 @@
 (ns ui.virtuals
-  (:require [ui.virtual.boundary :as boundary]))
+  (:require #_[ui.virtual.boundary :as boundary]))
 
-(def boundary boundary/boundary)
+#_(def boundary boundary/boundary)
