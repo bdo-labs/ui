@@ -179,16 +179,17 @@
                          :on-change #(re-frame/dispatch [::toggle-multiple])} "Multiple"]
       [element/checkbox {:checked   disabled
                          :on-change #(re-frame/dispatch [::toggle-disabled])} "Disabled"]
-      [element/chooser {:style           {:width "420px"}
-                        :label           "Name a Character from Game of Thrones"
-                        :add-message     "Add % to members"
-                        :empty-message   "No results matching %"
-                        :on-select       #(reset! selected* %)
-                        :items           (set sep-filtered-items)
-                        :predicate?      smart-case-includes?
-                        :multiple        multiple
-                        :disabled        disabled
-                        :labels          false}]]]))
+      [element/chooser {:style         {:width "420px"}
+                        :label         "Name a Character from Game of Thrones"
+                        :add-message   "Add % to members"
+                        :empty-message "No results matching %"
+                        :on-select     #(reset! selected* %)
+                        :items         (sort-by :value sep-filtered-items)
+                        :predicate?    smart-case-includes?
+                        :deletable     true
+                        :multiple      multiple
+                        :disabled      disabled
+                        :labels        false}]]]))
 
 (defn documentation
   []

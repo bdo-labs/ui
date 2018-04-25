@@ -99,6 +99,7 @@
                           [chooser {:id         (util/slug "chooser" cell-ref)
                                     :labels     false
                                     :multiple   false
+                                    :deletable  true
                                     :close-on-select true
                                     :predicate? util/case-insensitive-includes?
                                     :selected   (set (filter #(= (:value %) display-value) items))

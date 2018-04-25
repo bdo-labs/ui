@@ -12,12 +12,12 @@
 (defcssfn scale)
 
 (defn style [{:keys [primary secondary]}]
-  [[:.Textfield {:position      :relative
-                 :margin-bottom 0
-                 :display       :inline-block
-                 :width         (unit/percent 100)}
+  [[:.Textfield {:position :relative
+                 :margin   0
+                 :display  :inline-block
+                 :width    (unit/percent 100)}
     [:&.dirty [:input {:color :black}]]
-    [:&.label {:margin [[(unit/rem 3) 0 (unit/rem 1) 0]]}]
+    [:&.label {:margin-top (unit/rem 3)}]
     [#{:&.not-empty :&.placeholder}
      [:label {:left             0
               :transform        [[(translateY (unit/percent -100)) (scale 0.75)]]

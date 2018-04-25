@@ -1,5 +1,7 @@
 (ns ui.element.textfield.views
+  #?(:cljs (:require-macros [cljs.core.async.macros :refer [go]]))
   (:require [#?(:clj clojure.core :cljs reagent.core) :refer [atom]]
+            [clojure.core.async :refer [<! timeout #?(:clj go)]]
             [ui.util :as util]
             [ui.element.textfield.spec :as spec]
             [clojure.string :as str]))
@@ -9,7 +11,15 @@
 
 
   "
-  [{:keys [id model value change-on-blur on-change on-blur on-key-up on-focus] :or {id (util/gen-id)}}]
+  [{:keys [id
+           model
+           value
+           change-on-blur
+           on-change
+           on-blur
+           on-key-up
+           on-focus]
+    :or {id (util/gen-id)}}]
   (let [initial-value (if (util/ratom? model) @model (str value))
         model         (if (util/ratom? model) model (atom (str value)))
         --on-change   #(let [value (-> % .-target .-value)]
@@ -18,9 +28,11 @@
                            (when (ifn? on-change) (on-change @model %))))
         --on-focus    #(when-let [value (-> % .-target .-value)]
                          (when (ifn? on-focus) (on-focus value %)))
-        --on-blur     #(when-let [value (-> % .-target .-value)]
-                         (when change-on-blur (--on-change %))
-                         (when (ifn? on-blur) (on-blur value %)))
+        --on-blur     #(do (.persist %)
+                           (go (<! (timeout 150))
+                               (when-let [value (-> % .-target .-value)]
+                                 (when change-on-blur (--on-change %))
+                                 (when (ifn? on-blur) (on-blur value %)))))
         --on-key-up   #(let [k     (util/code->key (-> % .-which))
                              value (-> % .-target .-value)]
                          (if (ifn? on-key-up)
