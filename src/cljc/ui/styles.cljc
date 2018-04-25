@@ -19,6 +19,7 @@
             [ui.element.progress-bar.styles :as progress-bar]
             [ui.element.sidebar.styles :as sidebar]
             [ui.element.textfield.styles :as textfield]
+            [ui.element.tabs.styles :as tabs]
             [ui.wire.form.styles :as form]
             [ui.util :as util]))
 
@@ -52,6 +53,7 @@
 
 (def theme
   {:default {:background (color/rgb [245 245 245])
+             :element-background "#ddd"
              :primary (color/rgb [70 111 226])
              :secondary (color/rgb [247 90 109])
              :tertiary (color/rgb [101 124 145])
@@ -517,7 +519,8 @@
                       (modal/style theme)
                       (icon/style theme)
                       (progress-bar/style theme)
-                      (form/style theme)]))
+                      (form/style theme)
+                      (tabs/style theme)]))
 
 (def screen
   (let [theme (:default theme)]

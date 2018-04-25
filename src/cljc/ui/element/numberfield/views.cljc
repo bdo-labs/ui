@@ -1,8 +1,7 @@
 (ns ui.element.numberfield.views
   (:require [clojure.string :as str]
-            [clojure.test.check.generators :as gen]
             [ui.element.numberfield.spec :as spec]
-            [ui.util :as util]))
+            [ui.util :as util :refer [get-event-handler]]))
 
 (defn- handle-input [model e]
   #?(:cljs
@@ -23,19 +22,15 @@
               ;; Do nothing. This is important as we don't want to lose the previous value
               ))))
 
-(defn- get-event-handler [event-handler model]
-  (fn [e] (do (handle-input model e)
-              (when (ifn? event-handler) (event-handler @model e)))))
-
 (defn numberfield
   [& args]
   (let [{:keys [params]}            (util/conform! ::spec/args args)
         {:keys [id on-change on-blur on-key-up on-focus on-key-down model]
          :or   {id (util/gen-id)}}  params
-        --on-change (get-event-handler on-change model)
-        --on-blur   (get-event-handler on-blur model)
-        --on-focus  (get-event-handler on-focus model)
-        --on-key-up (get-event-handler on-key-up model)
+        --on-change (get-event-handler on-change handle-input model)
+        --on-blur   (get-event-handler on-blur handle-input model)
+        --on-focus  (get-event-handler on-focus handle-input model)
+        --on-key-up (get-event-handler on-key-up handle-input model)
         --on-key-down #(when (ifn? on-key-down) (on-key-down @model %))]
     (fn [& args]
       (let [{:keys [params]}            (util/conform! ::spec/args args)

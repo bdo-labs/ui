@@ -259,3 +259,8 @@
   (if (every? map? vals)
     (apply merge-with deep-merge vals)
     (last vals)))
+
+
+(defn get-event-handler [event-handler handle-input model]
+  (fn [e] (do (handle-input model e)
+              (when (ifn? event-handler) (event-handler @model e)))))

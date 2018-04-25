@@ -23,6 +23,7 @@
             [ui.docs.progress :as progress]
             [ui.docs.sheet :as sheet]
             [ui.docs.textfield :as textfield]
+            [ui.docs.tabs :as tabs]
             [ui.docs.vertically :as vertically]
             [ui.elements :as element]
             [ui.layout :as layout]
@@ -89,6 +90,7 @@ batteries included, so have a look and get yourself familiarized.
     :progress [progress/documentation]
     :sheet [sheet/documentation]
     :notification [notification/documentation]
+    :tabs [tabs/documentation]
     ;; :sidebar [sidebar/documentation]
 
     ;; Labs
@@ -100,7 +102,7 @@ batteries included, so have a look and get yourself familiarized.
   (let [active-item @(re-frame/subscribe [:active-doc-item])
         wires       [:feature :form :load :polyglot]
         layouts     [:centered :horizontally :vertically :fill]
-        elements    [:buttons :colors #_:date-picker #_:period-picker :dialog :dropdown :icons :textfield :numberfield :notification :collection #_:chooser :inputs :progress :sheet]
+        elements    [:buttons :colors #_:date-picker #_:period-picker :dialog :tabs :dropdown :icons :textfield :numberfield :notification :collection #_:chooser :inputs :progress :sheet]
         labs        [:card]]
     [:div {:style {:width "100vw"
                    :height "100vh"}}

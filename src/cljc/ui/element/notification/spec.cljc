@@ -1,6 +1,5 @@
 (ns ui.element.notification.spec
   (:require [clojure.spec.alpha :as spec]
-            [clojure.test.check.generators :as gen]
             [ui.specs :as common]
             [ui.util :as util]))
 

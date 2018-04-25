@@ -22,6 +22,7 @@
             [ui.element.period-picker.views :as period-picker]
             [ui.element.progress-bar.views :as progress-bar]
             [ui.element.sidebar.views :as sidebar]
+            [ui.element.tabs.views :as tabs]
             [ui.element.textfield.views :as textfield]
             [ui.element.toggle.views :as toggle]))
 
@@ -49,6 +50,8 @@
 (def label label/label)
 (def notification notification/notification)
 (def notifications notification/notifications)
+(def tabs tabs/tabs-)
+
 
 ;; Form Elements
 (def sheet numbers/sheet)
