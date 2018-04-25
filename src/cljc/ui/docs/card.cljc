@@ -25,19 +25,18 @@
    [:h4 title]])
 
 (defn documentation []
-  (let [message {:id    0
-                 :label (label "Issues with retrieving customer-data" "We are currently experiencing problems with Safebase's data")
-                 :value (str (char (rand-int 100)))}
-        messages (->> message
-                      (repeat)
-                      (take 10)
-                      (map-indexed (fn [n m] (update-in m [:id] (partial + n))))
-                      (set))
+  (let [messages #{{:id    1
+                    :label (label "Do not take life too seriously" "You will never get out of it alive")
+                    :value "alive"}
+                   {:id    2
+                    :label (label "A day without sunshine is like," "you know, night")
+                    :value "night"}}
         on-click #(re-frame/dispatch [::toggle-show])]
-    [layout/vertically {:fill? true
+    [layout/vertically {:fill?      true
                         :background :white
-                        :style {:padding "4em"
-                                :margin-bottom "4em"}}
+                        :style      {:padding       "4em"
+                                     :margin-bottom "4em"}}
      [:div {:style {:margin "2em" :width "600px"}}
       [element/card {:rounded? true :gap? false :fill? true}
-       [element/collection {:collapsable true} messages]]]]))
+       [element/collection {:collapsable true
+                            :sorted false} messages]]]]))
