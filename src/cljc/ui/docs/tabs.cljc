@@ -2,11 +2,13 @@
   (:require #?(:cljs [reagent.core :refer [atom]])
             [ui.elements :as element]
             [ui.layout :as layout]
+            [ui.wire.polyglot :as polyglot]
             [ui.util :as util]))
 
 (defn show-sheet [sheets model]
   (if-let [sheet (get sheets @model)]
     [sheet]))
+
 (defn documentation []
   (let [model (atom :one)
         tabs [{:id :one :label "Tab1"}
@@ -16,9 +18,18 @@
                 :two (fn [] [:div "Two..."])
                 :three (fn [] [element/icon {:size 15} "happy-outline"])}]
     (fn []
-      [layout/horizontally
-       [element/article
-        "### Tabs
+      [layout/vertically {:style {:padding "0"}
+                          :background :white
+                          :gap? false}
+       [:a {:href "https://github.com/bdo-labs/ui/issues/new"
+            :target :_blank}
+        [element/icon {:title (polyglot/translate :ui/report-issue)
+                       :style {:position :absolute
+                               :top      "1em"
+                               :right    "1em"}} "bug"]]
+       [layout/horizontally
+        [element/article
+         "### Tabs
 
 ```clojure
 (ns your.namespace
@@ -44,13 +55,13 @@
 ```
 
 #### :horizontal"
-        [element/tabs {:model model :tabs tabs :sheets sheets :render :horizontal}]
-        "#### :vertical"
-        [element/tabs {:model model :tabs tabs :render :vertical}]
-        "#### :horizontal-bars"
-        [element/tabs {:model model :tabs tabs :render :horizontal-bars}]
-        "#### :vertical-bars"
-        [element/tabs {:model model :tabs tabs :render :vertical-bars}]]
-       [element/article
-        "### Sheet"
-        [show-sheet sheets model]]])))
+         [element/tabs {:model model :tabs tabs :sheets sheets :render :horizontal}]
+         "#### :vertical"
+         [element/tabs {:model model :tabs tabs :render :vertical}]
+         "#### :horizontal-bars"
+         [element/tabs {:model model :tabs tabs :render :horizontal-bars}]
+         "#### :vertical-bars"
+         [element/tabs {:model model :tabs tabs :render :vertical-bars}]]
+        [element/article
+         "### Sheet"
+         [show-sheet sheets model]]]])))

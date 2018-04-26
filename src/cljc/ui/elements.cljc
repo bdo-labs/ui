@@ -21,6 +21,7 @@
             [ui.element.notification.views :as notification]
             [ui.element.period-picker.views :as period-picker]
             [ui.element.progress-bar.views :as progress-bar]
+            [ui.element.radio.views :as radio]
             [ui.element.sidebar.views :as sidebar]
             [ui.element.tabs.views :as tabs]
             [ui.element.textfield.views :as textfield]
@@ -50,12 +51,13 @@
 (def label label/label)
 (def notification notification/notification)
 (def notifications notification/notifications)
-(def tabs tabs/tabs-)
+(def tabs tabs/tabs)
 
 
 ;; Form Elements
 (def sheet numbers/sheet)
 (def checkbox checkbox/checkbox)
+(def radio radio/radio)
 (def toggle toggle/toggle)
 (def textfield textfield/textfield)
 (def numberfield numberfield/numberfield)

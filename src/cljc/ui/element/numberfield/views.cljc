@@ -34,9 +34,8 @@
         --on-key-down #(when (ifn? on-key-down) (on-key-down @model %))]
     (fn [& args]
       (let [{:keys [params]}            (util/conform! ::spec/args args)
-            {:keys [style placeholder label]
-             :or   {style       {}
-                    placeholder ""}} params
+            {:keys [style label]
+             :or   {style       {}}} params
             ui-params                   (select-keys params (util/keys-from-spec ::spec/--params))
             class                       (str/join " " [(util/params->classes ui-params)
                                                        (when (or (nil? @model)
@@ -45,10 +44,9 @@
                            :style style
                            :class class}
          [:input (merge
-                  (dissoc ui-params :placeholder :label)
+                  (dissoc ui-params :label)
                   {:value         (or @model "")
                    :type          :number
-                   :placeholder   placeholder
                    :on-change     --on-change
                    :on-blur       --on-blur
                    :on-focus      --on-focus

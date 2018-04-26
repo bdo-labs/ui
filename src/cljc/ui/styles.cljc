@@ -17,6 +17,7 @@
             [ui.element.modal.styles :as modal]
             [ui.element.numberfield.styles :as numberfield]
             [ui.element.progress-bar.styles :as progress-bar]
+            [ui.element.radio.styles :as radio]
             [ui.element.sidebar.styles :as sidebar]
             [ui.element.textfield.styles :as textfield]
             [ui.element.tabs.styles :as tabs]
@@ -520,7 +521,8 @@
                       (icon/style theme)
                       (progress-bar/style theme)
                       (form/style theme)
-                      (tabs/style theme)]))
+                      (tabs/style theme)
+                      (radio/style theme)]))
 
 (def screen
   (let [theme (:default theme)]
