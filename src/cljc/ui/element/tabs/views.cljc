@@ -24,9 +24,10 @@
         [:div.Tabs {:key   (util/slug "tabs" id)
                     :style style
                     :class render}
-         [:ul (for [tab -tabs]
-                ^{:key (str id "-" (:id tab))}
-                [render-tab model tab])]
+         [:div.Tabs-wrapper
+          [:ul (for [tab -tabs]
+                 ^{:key (str id "-" (:id tab))}
+                 [render-tab model tab])]]
          (when-let [sheet (get sheets @model)]
            [:div.Sheet
             [sheet]])]))))

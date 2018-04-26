@@ -15,4 +15,4 @@
     (fn []
       [element/article
        "### Tabs"
-       [element/tabs {:model model :tabs tabs :sheets sheets :render :vertical-bars}]])))
+       [element/tabs {:model model :tabs tabs :sheets sheets :render :vertical}]])))

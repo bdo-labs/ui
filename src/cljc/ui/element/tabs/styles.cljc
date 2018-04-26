@@ -21,11 +21,13 @@
            :border-bottom {:color element-background
                            :style :solid
                            :width (unit/px 1)}}
-      [:li {:margin {:top 0 :left 0 :right (unit/px 2) :bottom (unit/px -1)}}]
+      [:li {:margin {:top 0 :left 0 :right (unit/px 2) :bottom (unit/px -1)}}
+       [:&:hover {:border {:top {:left-radius (unit/px 5)
+                                 :right-radius (unit/px 5)}}}]]
       [:li.active {:background-color :transparent
-                   :border-radius {:top-left (unit/px 3)
-                                   :top-right (unit/px 3)}
-                   :border {:style :solid
+                   :border {:top {:left-radius (unit/px 5)
+                                  :right-radius (unit/px 5)}
+                            :style :solid
                             :color element-background
                             :width (unit/px 1)}
                    :border-bottom-color :white}]]
@@ -53,11 +55,13 @@
            :border-right {:color element-background
                            :style :solid
                           :width (unit/px 1)}}
-      [:li {:margin {:top 0 :left 0 :right (unit/px -1) :bottom (unit/px 2)}}]
+      [:li {:margin {:top 0 :left 0 :right (unit/px -1) :bottom (unit/px 2)}}
+       [:&:hover {:border {:bottom {:left-radius (unit/px 5)}
+                           :top {:left-radius (unit/px 5)}}}]]
       [:li.active {:background-color :transparent
-                   :border-radius {:bottom-left (unit/px 3)
-                                   :top-left (unit/px 3)}
-                   :border {:style :solid
+                   :border {:bottom {:left-radius (unit/px 5)}
+                            :top {:left-radius (unit/px 5)}
+                            :style :solid
                             :color element-background
                             :width (unit/px 1)}
                    :border-right-color :white}]]
@@ -70,11 +74,14 @@
                     :style :solid
                     :width (unit/px 1)
                     :radius (unit/px 5)}}
-      [:li {:margin {:top 0 :left 0 :right (unit/px -1) :bottom (unit/px 2)}
-            :border-bottom {:color element-background
+      [:li {:border-bottom {:color element-background
                             :style :solid
                             :width (unit/px 1)}}
-       [:&:last-child {:border-bottom-width (unit/px 0)}]]
+       [:&:first-child {:border {:top {:left-radius (unit/px 3)
+                                       :right-radius (unit/px 3)}}}]
+       [:&:last-child {:border {:bottom-width (unit/px 0)
+                                :bottom {:left-radius (unit/px 3)
+                                         :right-radius (unit/px 3)}}}]]
       [:li.active {:background-color element-background
                    :box-shadow "inset 0 3px 5px rgba(0,0,0,0.125)"}]]
      [:.Sheet {:margin-left (unit/em 0.5)}]]
