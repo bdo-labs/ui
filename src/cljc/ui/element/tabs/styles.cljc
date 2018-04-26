@@ -23,7 +23,8 @@
                            :width (unit/px 1)}}
       [:li {:margin {:top 0 :left 0 :right (unit/px 2) :bottom (unit/px -1)}}
        [:&:hover {:border {:top {:left-radius (unit/px 5)
-                                 :right-radius (unit/px 5)}}}]]
+                                 :right-radius (unit/px 5)}}}]
+       [:&:first-child {:margin {:left (unit/px 2)}}]]
       [:li.active {:background-color :transparent
                    :border {:top {:left-radius (unit/px 5)
                                   :right-radius (unit/px 5)}
@@ -57,7 +58,8 @@
                           :width (unit/px 1)}}
       [:li {:margin {:top 0 :left 0 :right (unit/px -1) :bottom (unit/px 2)}}
        [:&:hover {:border {:bottom {:left-radius (unit/px 5)}
-                           :top {:left-radius (unit/px 5)}}}]]
+                           :top {:left-radius (unit/px 5)}}}]
+       [:&:first-child {:margin {:top (unit/px 2)}}]]
       [:li.active {:background-color :transparent
                    :border {:bottom {:left-radius (unit/px 5)}
                             :top {:left-radius (unit/px 5)}
