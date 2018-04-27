@@ -34,7 +34,7 @@
         --on-key-down #(when (ifn? on-key-down) (on-key-down @model %))]
     (fn [& args]
       (let [{:keys [params]}            (util/conform! ::spec/args args)
-            {:keys [style label]
+            {:keys [style label placeholder]
              :or   {style       {}}} params
             ui-params                   (select-keys params (util/keys-from-spec ::spec/--params))
             class                       (str/join " " [(util/params->classes ui-params)

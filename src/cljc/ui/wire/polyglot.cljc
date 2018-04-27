@@ -44,6 +44,8 @@
    :ui.wire.form.wizard/next "Next"
    :ui.wire.form.wizard/prev "Previous"
    :ui.wire.form/done       "Done"
+   :ui.element.paginator.views/prev "«"
+   :ui.element.paginator.views/next "»"
    :validation/min-number   "The number needs to be larger than {1}."
    :validation/max-number   "The number needs to be smaller than {1}."
    :validation/NaN          "The current value '{1}' is not a number."})

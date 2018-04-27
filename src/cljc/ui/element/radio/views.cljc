@@ -20,7 +20,7 @@
 (defn radio
   [& args]
   (let [{:keys [params]} (util/conform! ::spec/args args)
-        {:keys [id on-change buttons id render model]
+        {:keys [id on-change buttons render model]
          :or {id (util/gen-id)}} params
         render (or render :horizontal)]
     (fn [& args]

@@ -19,6 +19,7 @@
             [ui.element.numberfield.views :as numberfield]
             [ui.element.numbers.views :as numbers]
             [ui.element.notification.views :as notification]
+            [ui.element.paginator.views :as paginator]
             [ui.element.period-picker.views :as period-picker]
             [ui.element.progress-bar.views :as progress-bar]
             [ui.element.radio.views :as radio]
@@ -53,6 +54,8 @@
 (def notifications notification/notifications)
 (def tabs tabs/tabs)
 
+;; Navigation Elements
+(def paginator paginator/paginator-)
 
 ;; Form Elements
 (def sheet numbers/sheet)

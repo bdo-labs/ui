@@ -18,6 +18,7 @@
             [ui.docs.load :as load]
             [ui.docs.notification :as notification]
             [ui.docs.numberfield :as numberfield]
+            [ui.docs.paginator :as paginator]
             [ui.docs.period-picker :as period-picker]
             [ui.docs.polyglot :as polyglot]
             [ui.docs.progress :as progress]
@@ -87,6 +88,7 @@ batteries included, so have a look and get yourself familiarized.
     :chooser [chooser/documentation]
     :collection [collection/documentation]
     :radio [radio/documentation]
+    :paginator [paginator/documentation]
     :inputs [inputs/documentation]
     :numberfield [numberfield/documentation]
     :progress [progress/documentation]
@@ -104,7 +106,7 @@ batteries included, so have a look and get yourself familiarized.
   (let [active-item @(re-frame/subscribe [:active-doc-item])
         wires       [:feature :form :load :polyglot]
         layouts     [:centered :horizontally :vertically :fill]
-        elements    [:buttons :colors #_:date-picker #_:period-picker :dialog :tabs :radio :dropdown :icons :textfield :numberfield :notification :collection #_:chooser :inputs :progress :sheet]
+        elements    [:buttons :colors #_:date-picker #_:period-picker :dialog :tabs :paginator :dropdown :icons :textfield :numberfield :radio :notification :collection #_:chooser :inputs :progress :sheet]
         labs        [:card]]
     [:div {:style {:width "100vw"
                    :height "100vh"}}

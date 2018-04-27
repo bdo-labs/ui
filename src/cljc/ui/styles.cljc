@@ -16,6 +16,7 @@
             [ui.element.menu.styles :as menu]
             [ui.element.modal.styles :as modal]
             [ui.element.numberfield.styles :as numberfield]
+            [ui.element.paginator.styles :as paginator]
             [ui.element.progress-bar.styles :as progress-bar]
             [ui.element.radio.styles :as radio]
             [ui.element.sidebar.styles :as sidebar]
@@ -522,7 +523,8 @@
                       (progress-bar/style theme)
                       (form/style theme)
                       (tabs/style theme)
-                      (radio/style theme)]))
+                      (radio/style theme)
+                      (paginator/style theme)]))
 
 (def screen
   (let [theme (:default theme)]
