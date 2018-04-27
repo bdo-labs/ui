@@ -20,12 +20,12 @@
 (defn radio
   [& args]
   (let [{:keys [params]} (util/conform! ::spec/args args)
-        {:keys [id on-change buttons id render]
+        {:keys [id on-change buttons id render model]
          :or {id (util/gen-id)}} params
         render (or render :horizontal)]
     (fn [& args]
       (let [{:keys [params]} (util/conform! ::spec/args args)
-            {:keys [style model]
+            {:keys [style]
              :or   {style {}}} params]
         [:div.Radiobuttons {:key (util/slug "radiobutton" id)
                             :style style
