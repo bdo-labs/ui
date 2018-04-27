@@ -5,6 +5,8 @@
             [ui.util :as util]))
 
 
+(spec/def ::on-change ::common/maybe-fn)
+
 (spec/def ::model (spec/nonconforming (spec/or :number number? :deref util/deref?)))
 (spec/def ::count-per-page number?)
 (spec/def ::length (spec/nonconforming (spec/or :sequential sequential? :number number?)))
@@ -13,6 +15,7 @@
 (spec/def ::params
   (spec/keys :opt-un [::common/id
                       ::count-per-page
+                      ::on-change
                       ::edge]
              :req-un [::model
                       ::length]))

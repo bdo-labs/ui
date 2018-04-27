@@ -1,6 +1,7 @@
 (ns ui.elements
   (:require [ui.element.badge.views :as badge]
             [ui.element.button.views :as button]
+            [ui.element.breadcrumbs.views :as breadcrumbs]
             [ui.element.calendar.views :as calendar]
             [ui.element.checkbox.views :as checkbox]
             [ui.element.chooser.views :as chooser]
@@ -55,7 +56,8 @@
 (def tabs tabs/tabs)
 
 ;; Navigation Elements
-(def paginator paginator/paginator-)
+(def paginator paginator/paginator)
+(def breadcrumbs breadcrumbs/breadcrumbs)
 
 ;; Form Elements
 (def sheet numbers/sheet)

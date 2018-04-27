@@ -7,6 +7,7 @@
             [garden.color :as color]
             [garden.selectors :as selector]
             [ui.element.badge.styles :as badge]
+            [ui.element.breadcrumbs.styles :as breadcrumbs]
             [ui.element.button.styles :as button]
             [ui.element.checkbox.styles :as checkbox]
             [ui.element.chooser.styles :as chooser]
@@ -524,7 +525,8 @@
                       (form/style theme)
                       (tabs/style theme)
                       (radio/style theme)
-                      (paginator/style theme)]))
+                      (paginator/style theme)
+                      (breadcrumbs/style theme)]))
 
 (def screen
   (let [theme (:default theme)]

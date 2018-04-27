@@ -1,5 +1,6 @@
 (ns ui.views
   (:require [re-frame.core :as re-frame]
+            [ui.docs.breadcrumbs :as breadcrumbs]
             [ui.docs.buttons :as buttons]
             [ui.docs.card :as card]
             [ui.docs.centered :as centered]
@@ -76,6 +77,10 @@ batteries included, so have a look and get yourself familiarized.
     :horizontally [horizontally/documentation]
     :vertically [vertically/documentation]
 
+    ;; Navigation
+    :breadcrumbs [breadcrumbs/documentation]
+    :paginator [paginator/documentation]
+
     ;; Elements
     :buttons [buttons/documentation]
     :colors [colors/documentation]
@@ -88,7 +93,6 @@ batteries included, so have a look and get yourself familiarized.
     :chooser [chooser/documentation]
     :collection [collection/documentation]
     :radio [radio/documentation]
-    :paginator [paginator/documentation]
     :inputs [inputs/documentation]
     :numberfield [numberfield/documentation]
     :progress [progress/documentation]
@@ -106,7 +110,8 @@ batteries included, so have a look and get yourself familiarized.
   (let [active-item @(re-frame/subscribe [:active-doc-item])
         wires       [:feature :form :load :polyglot]
         layouts     [:centered :horizontally :vertically :fill]
-        elements    [:buttons :colors #_:date-picker #_:period-picker :dialog :tabs :paginator :dropdown :icons :textfield :numberfield :radio :notification :collection #_:chooser :inputs :progress :sheet]
+        navigations [:breadcrumbs :paginator]
+        elements    [:buttons :colors #_:date-picker #_:period-picker :dialog :tabs :dropdown :icons :textfield :numberfield :radio :notification :collection #_:chooser :inputs :progress :sheet]
         labs        [:card]]
     [:div {:style {:width "100vw"
                    :height "100vh"}}
@@ -120,6 +125,7 @@ batteries included, so have a look and get yourself familiarized.
       [layout/vertically {:role :navigation}
        (into [:menu [:h4 "wires/"]] (for [w wires] [menu-item w])) [:br]
        (into [:menu [:h4 "layout/"]] (for [l layouts] [menu-item l])) [:br]
+       (into [:menu [:h4 "navigation/"]] (for [n navigations] [menu-item n])) [:br]
        (into [:menu [:h4 "elements/"]] (for [elem elements] [menu-item elem])) [:br]
        (into [:menu [:h4 "lab/"]] (for [lab labs] [menu-item lab])) [:br]
        [:br]]

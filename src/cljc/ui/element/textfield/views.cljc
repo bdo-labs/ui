@@ -15,7 +15,7 @@
         --on-change   #(let [value (-> % .-target .-value)]
                          (when (not= value @model)
                            (reset! model value)
-                           (when (ifn? on-change) (on-change @model %))))
+                           (when (ifn? on-change) (on-change value %))))
         --on-focus    #(when-let [value (-> % .-target .-value)]
                          (when (ifn? on-focus) (on-focus value %)))
         --on-blur     #(when-let [value (-> % .-target .-value)]
