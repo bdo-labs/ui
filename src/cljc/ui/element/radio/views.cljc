@@ -4,25 +4,28 @@
             [ui.util :as util :refer [get-event-handler]]))
 
 (defn- render-button [model on-change top-id {:keys [id label]}]
-  (let [button-id (str top-id "-" id)]
-   [:li {:class (if (= @model id) "active" "")}
-    [:input {:type :radio
-             :id button-id
-             :on-change #(do (reset! model id)
-                             (when (ifn? on-change) (on-change id)))
-             :name top-id}]
+  (let [button-id (str top-id "-" id)
+        checked? (= @model id)]
+   [:li {:class (if checked? "active" "")}
+    [:input (merge {:type :radio
+                    :id button-id
+                    :on-change #(do (reset! model id)
+                                    (when (ifn? on-change) (on-change id)))
+                    :name top-id}
+                   (if checked?
+                     {:checked true}))]
     (if label
       [:label {:for button-id} label])]))
 
 (defn radio
   [& args]
   (let [{:keys [params]} (util/conform! ::spec/args args)
-        {:keys [id on-change buttons id model render]
+        {:keys [id on-change buttons id render]
          :or {id (util/gen-id)}} params
         render (or render :horizontal)]
     (fn [& args]
       (let [{:keys [params]} (util/conform! ::spec/args args)
-            {:keys [style]
+            {:keys [style model]
              :or   {style {}}} params]
         [:div.Radiobuttons {:key (util/slug "radiobutton" id)
                             :style style

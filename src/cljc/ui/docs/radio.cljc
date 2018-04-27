@@ -37,13 +37,15 @@
 
 [element/radio {;; required
                 :model model
-                 ;; required
-                 :buttons buttons
-                 ;; optional, defaults to :horizontal
-                 :render :horizontal}]
-```
-
-#### :horizontal"
+                ;; required
+                :buttons buttons
+                ;; optional, defaults to :horizontal
+                :render :horizontal
+                ;; optional
+                :on-change (fn [value] (comment \"Takes changed value\"))}]
+```"
+        [:span "Current value is " [:strong (str @model)]]
+        "#### :horizontal"
         [element/radio {:model model :buttons buttons :render :horizontal}]
         "#### :vertical"
         [element/radio {:model model :buttons buttons :render :vertical}]]])))
