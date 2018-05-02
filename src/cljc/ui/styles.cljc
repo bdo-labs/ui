@@ -23,6 +23,7 @@
             [ui.element.sidebar.styles :as sidebar]
             [ui.element.textfield.styles :as textfield]
             [ui.element.tabs.styles :as tabs]
+            [ui.element.transition.styles :as transition]
             [ui.wire.form.styles :as form]
             [ui.util :as util]))
 
@@ -48,6 +49,8 @@
 ;;   "container".
 
 (defcssfn linear-gradient)
+(defcssfn rotateX)
+(defcssfn rotateY)
 (defcssfn rotateZ)
 (defcssfn scale)
 (defcssfn translateX)
@@ -194,6 +197,43 @@
   [:from {:opacity 0}]
   [:to {:opacity 1}])
 
+(defkeyframes fade-in
+  [:from {:opacity 0}]
+  [:to {:opacity 1}])
+
+(defkeyframes fade-out
+  [:from {:opacity 1}]
+  [:to {:opacity 0}])
+
+(defkeyframes zoom-in
+  [:from {:transform (scale 0)}]
+  [:to {:transform (scale 1)}])
+
+(defkeyframes zoom-out
+  [:from {:transform (scale 1)}]
+  [:to {:transform (scale 0)}])
+
+(defkeyframes flip-horizontal-in
+  [:from {:transform (rotateX (unit/deg 0))}]
+  [:to {:transform (rotateX (unit/deg 90))}])
+
+(defkeyframes flip-horizontal-out
+  [:from {:transform (rotateX (unit/deg 90))}]
+  [:to {:transform (rotateX (unit/deg 0))}])
+
+(defkeyframes flip-vertical-in
+  [:from {:transform (rotateY (unit/deg 0))}]
+  [:to {:transform (rotateY (unit/deg 90))}])
+
+(defkeyframes flip-vertical-out
+  [:from {:transform (rotateY (unit/deg 90))}]
+  [:to {:transform (rotateY (unit/deg 0))}])
+
+(defkeyframes jiggle
+  [0 {:height "100%" :width "100%"}]
+  [50 {:height "70%" :width "130%"}]
+  [100 {:height "100%" :width "100%"}])
+
 (defkeyframes up
   [:from {:transform (translateY (unit/percent 50))}]
   [:to {:transform (translateY 0)}])
@@ -209,6 +249,15 @@
 (defn- animations [theme]
   (map #(into '() %) [[pulse-color]
                       [fade]
+                      [fade-in]
+                      [fade-out]
+                      [zoom-in]
+                      [zoom-out]
+                      [flip-horizontal-in]
+                      [flip-horizontal-out]
+                      [flip-vertical-in]
+                      [flip-vertical-out]
+                      [jiggle]
                       [up]
                       [fade-up]
                       [scaled]]))
@@ -526,7 +575,8 @@
                       (tabs/style theme)
                       (radio/style theme)
                       (paginator/style theme)
-                      (breadcrumbs/style theme)]))
+                      (breadcrumbs/style theme)
+                      (transition/style theme)]))
 
 (def screen
   (let [theme (:default theme)]

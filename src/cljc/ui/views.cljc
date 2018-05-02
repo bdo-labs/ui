@@ -27,6 +27,7 @@
             [ui.docs.sheet :as sheet]
             [ui.docs.textfield :as textfield]
             [ui.docs.tabs :as tabs]
+            [ui.docs.transition :as transition]
             [ui.docs.vertically :as vertically]
             [ui.elements :as element]
             [ui.layout :as layout]
@@ -99,6 +100,7 @@ batteries included, so have a look and get yourself familiarized.
     :sheet [sheet/documentation]
     :notification [notification/documentation]
     :tabs [tabs/documentation]
+    :transition [transition/documentation]
     ;; :sidebar [sidebar/documentation]
 
     ;; Labs
@@ -111,7 +113,7 @@ batteries included, so have a look and get yourself familiarized.
         wires       [:feature :form :load :polyglot]
         layouts     [:centered :horizontally :vertically :fill]
         navigations [:breadcrumbs :paginator]
-        elements    [:buttons :colors #_:date-picker #_:period-picker :dialog :tabs :dropdown :icons :textfield :numberfield :radio :notification :collection #_:chooser :inputs :progress :sheet]
+        elements    [:buttons :colors #_:date-picker #_:period-picker :dialog :tabs :dropdown :icons :textfield :numberfield :radio :notification :collection #_:chooser :inputs :progress :sheet :transition]
         labs        [:card]]
     [:div {:style {:width "100vw"
                    :height "100vh"}}

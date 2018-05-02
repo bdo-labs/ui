@@ -27,7 +27,8 @@
             [ui.element.sidebar.views :as sidebar]
             [ui.element.tabs.views :as tabs]
             [ui.element.textfield.views :as textfield]
-            [ui.element.toggle.views :as toggle]))
+            [ui.element.toggle.views :as toggle]
+            [ui.element.transition.views :as transition]))
 
 ;; Action Elements
 (def dropdown menu/dropdown)
@@ -78,6 +79,7 @@
 (def dialog modal/dialog)
 (def confirm-dialog modal/confirm-dialog)
 (def badge badge/badge)
+(def transition transition/transition)
 
 ;; Load-Indication Elements
 (def progress-bar progress-bar/progress-bar)
