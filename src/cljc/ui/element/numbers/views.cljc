@@ -93,21 +93,22 @@
                                                    (if editable? "editable" "not-editable")])}]
               [:td.Body-cell params
                (case type
-                 :fn  (value {:row row :editable true :cell-ref cell-ref})
+                 :fn  (value {:row row :editable editable? :cell-ref cell-ref})
                  :map (if (= editing cell-ref)
-                        (if-let [{:keys [items on-select on-change on-blur]} value]
-                          [chooser {:id         (util/slug "chooser" cell-ref)
-                                    :labels     false
-                                    :multiple   false
-                                    :deletable  true
-                                    :close-on-select true
-                                    :predicate? util/case-insensitive-includes?
-                                    :selected   (set (filter #(= (:value %) display-value) items))
-                                    :items      items
-                                    :on-blur    (--on-blur cell-ref (if (ifn? on-blur) (partial on-blur row cell-ref) nil))
-                                    :on-select  (--on-change cell-ref (if (ifn? on-select) (partial on-select row cell-ref) nil))
-                                    :on-change  #(when (ifn? on-change) (on-change %))
-                                    :auto-focus true}]
+                        (if-let [{:keys [items]} value]
+                          (let [{:keys [on-select on-change on-blur]} value
+                                value (dissoc value :on-select :on-change :on-blur)]
+                           [chooser (merge {:id              (util/slug "chooser" cell-ref)
+                                            :labels          false
+                                            :multiple        false
+                                            :deletable       true
+                                            :close-on-select true
+                                            :predicate?      util/case-insensitive-includes?
+                                            :selected        (filter #(= (:value %) display-value) items)
+                                            :on-blur         (--on-blur cell-ref (if (ifn? on-blur) (partial on-blur row cell-ref) nil))
+                                            :on-select       (--on-change cell-ref (if (ifn? on-select) (partial on-select row cell-ref) nil))
+                                            :on-change       #(when (ifn? on-change) (on-change %))
+                                            :auto-focus      true} value)])
                           (let [{:keys [on-change]} value]
                             [textfield {:placeholder display-value
                                         :on-change   (--on-change cell-ref (partial on-change row))}]))
