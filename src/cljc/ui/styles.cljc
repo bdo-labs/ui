@@ -10,6 +10,7 @@
             [ui.element.badge.styles :as badge]
             [ui.element.chooser.styles :as chooser]
             [ui.element.textfield.styles :as textfield]
+            [ui.element.searchfield.styles :as searchfield]
             [ui.element.collection.styles :as collection]
             [ui.element.checkbox.styles :as checkbox]
             [ui.element.containers.styles :as containers]
@@ -503,6 +504,7 @@
                       (sidebar/style theme)
                       (badge/style theme)
                       (textfield/style theme)
+                      (searchfield/style theme)
                       (button/style theme)
                       (menu/style theme)
                       (checkbox/style theme)

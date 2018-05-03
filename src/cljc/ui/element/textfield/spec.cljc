@@ -24,8 +24,12 @@
 (spec/def ::disabled boolean?)
 (spec/def ::auto-focus boolean?)
 (spec/def ::read-only boolean?)
+(spec/def ::type (spec/and keyword? #{:search :text :password :email}))
+(spec/def ::ref ifn?)
 (spec/def ::params
   (spec/keys :opt-un [::common/id
+                      ::ref
+                      ::type
                       ::placeholder
                       ::label
                       ::model

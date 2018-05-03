@@ -9,6 +9,7 @@
             [ui.element.progress-bar.views :as progress-bar]
             [ui.element.loaders.views :as loaders]
             [ui.element.textfield.views :as textfield]
+            [ui.element.searchfield.views :as searchfield]
             [ui.element.collection.views :as collection]
             [ui.element.label.views :as label]
             [ui.element.checkbox.views :as checkbox]
@@ -51,6 +52,7 @@
 (def checkbox checkbox/checkbox)
 (def toggle toggle/toggle)
 (def textfield textfield/textfield)
+(def searchfield searchfield/searchfield)
 (def chooser chooser/chooser)
 (def collection collection/collection)
 (def days calendar/days)

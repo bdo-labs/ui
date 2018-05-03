@@ -19,7 +19,7 @@
            on-blur
            on-key-up
            on-focus]
-    :or {id (util/gen-id)}}]
+    :or   {id (util/gen-id)}}]
   (let [initial-value (if (util/ratom? model) @model (str value))
         model         (if (util/ratom? model) model (atom (str value)))
         --on-change   #(let [value (-> % .-target .-value)]
@@ -49,9 +49,9 @@
                                             (when (seq @model) "not-empty")
                                             (when (not= initial-value @model) "dirty")])]
         [:div.Textfield {:key (util/slug "textfield" id) :style style :class class}
-         [:input (merge (dissoc ui-params :label :model)
-                        {:type          :text
-                         :value         @model
+         [:input (merge {:type :text}
+                        (dissoc ui-params :label :model)
+                        {:value         @model
                          :auto-complete "off"
                          :on-change     --on-change
                          :on-blur       --on-blur
