@@ -30,7 +30,7 @@
     [card {} params content]
     (let [default-params {:raised? true :class "Card" :scrollable? true}
           params         (merge default-params params)]
-      [container params content])))
+      (into [container params] content))))
 
 (defn header
   "
