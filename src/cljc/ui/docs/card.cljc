@@ -1,5 +1,6 @@
 (ns ui.docs.card
   (:require [#?(:clj clojure.core :cljs reagent.core) :refer [atom]]
+            [#?(:clj clj-time.core :cljs cljs-time.core) :as time]
             [ui.elements :as element]
             [ui.layout :as layout]
             [ui.util :as util]
@@ -25,18 +26,26 @@
    [:h4 title]])
 
 (defn documentation []
-  (let [messages #{{:id    1
-                    :label (label "Do not take life too seriously" "You will never get out of it alive")
-                    :value "alive"}
-                   {:id    2
-                    :label (label "A day without sunshine is like," "you know, night")
-                    :value "night"}}
-        on-click #(re-frame/dispatch [::toggle-show])]
-    [layout/vertically {:fill?      true
-                        :background :white
-                        :style      {:padding       "4em"
-                                     :margin-bottom "4em"}}
-     [:div {:style {:margin "2em" :width "600px"}}
-      [element/card {:rounded? true :gap? false :fill? true}
-       [element/collection {:collapsable true
-                            :sorted false} messages]]]]))
+  (let [messages  #{{:id    1
+                     :label (label "Do not take life too seriously" "You will never get out of it alive")
+                     :value "alive"}
+                    {:id    2
+                     :label (label "A day without sunshine is like," "you know, night")
+                     :value "night"}}
+        on-click  #(re-frame/dispatch [::toggle-show])
+        selected* (atom nil)]
+    (fn []
+      [layout/vertically {:fill?      true
+                          :background :white
+                          :style      {:padding       "4em"
+                                       :margin-bottom "4em"}}
+       [:div {:style {:margin "2em" :width "600px"}}
+        [element/card {:rounded? true :gap? false :fill? true}
+         [element/collection {:collapsable true
+                              :sorted      false} messages]]
+        [element/months {:every 3
+                         :max (time/now)
+                         :model selected*}]
+        [element/days {:on-click #(util/log "foo")
+                       :max (time/now)
+                       :nav? false}]]])))

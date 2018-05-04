@@ -1,11 +1,11 @@
 (ns ui.element.calendar.spec
   (:require [clojure.test.check.generators :as gen]
-            [#?(:clj clj-time.core :cljs cljs-time.core) :as time]
-            [clojure.spec.alpha :as spec]))
+            #?(:cljs [cljs-time.core :refer [date?]])
+            #?(:clj [clj-time.types :refer [date-time?]])
+            [clojure.spec.alpha :as spec]
+            [ui.specs :as common]))
 
-(spec/def ::stub
-  (spec/with-gen fn?
-    (gen/return (constantly nil))))
+#?(:cljs (defn date-time? [d] (date? d)))
 
 (spec/def ::start-of-week (spec/and integer? #(>= % 0) #(<= % 6)))
 (spec/def ::show-weekend? boolean?)
@@ -14,29 +14,33 @@
 (spec/def ::multiple? boolean?)
 (spec/def ::short-form? boolean?)
 (spec/def ::jump pos-int?)
-(spec/def ::on-navigation ::stub)
+(spec/def ::on-navigation ::common/maybe-fn)
 (spec/def ::every (spec/and pos-int? #(int? (/ 12 %)) #(<= % 6)))
-(spec/def ::selected #?(:clj inst? :cljs time/date?))
-(spec/def ::on-click ::stub)
+(spec/def ::period (spec/coll-of date-time? :count 2))
+(spec/def ::model
+  (spec/nonconforming
+   (spec/or :ratom ::common/ratom
+            :period ::period)))
+(spec/def ::on-click ::common/maybe-fn)
 
 (spec/def ::years-params
   (spec/keys :opt-un [::on-click]))
 (spec/def ::years-args (spec/cat :params ::years-params))
 
 (spec/def ::months-params
-  (spec/keys :req-un [::on-click]
-             :opt-un [::selected ::every]))
+  (spec/keys :opt-un [::on-click ::model ::every]))
 (spec/def ::months-args
   (spec/cat :params ::months-params))
 
 (spec/def ::days-params
-  (spec/keys :req-un [::on-click]
-             :opt-un [::on-navigation
+  (spec/keys :opt-un [::on-click
+                      ::on-navigation
                       ::jump
                       ::short-form?
                       ::selectable?
                       ::nav?
                       ::show-weekend?
-                      ::start-of-week]))
+                      ::start-of-week
+                      ::model]))
 (spec/def ::days-args
   (spec/cat :params ::days-params))

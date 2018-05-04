@@ -109,21 +109,28 @@
     (let [minimum?    #(after? % (:min params))
           maximum?    #(before? % (:max params))
           month       (time/months jump)
-          less        (time/minus @model month)
-          more        (time/plus @model month)
-          on-previous #(do (reset! model less)
-                           (when (fn? on-click) (on-click less)))
-          on-next     #(do (reset! model more)
-                           (when (fn? on-click) (on-click more)))]
+          current     (if-some [selected @model] selected [(time/now) (time/plus (time/now) month)])
+          less        (time/minus (first current) month)
+          more        (time/plus (first current) month)
+          on-previous #(do (reset! model [less (time/minus (last current) month)])
+                           (when (ifn? on-click) (on-click less %)))
+          on-next     #(do (reset! model [more (time/plus (last current) month)])
+                           (when (ifn? on-click) (on-click more %)))]
       [container {:layout :horizontally
                   :gap?   true
                   :fill?  true
                   :align  [:center :center]
                   :space  :between
                   :class  "calendar-nav"}
-       ^{:key "previous-month"} [icon {:font "ion" :on-click on-previous} "chevron-left"]
-       ^{:key "current-month"} [:h3 (translate format (coerce/to-date @model))]
-       ^{:key "next-month"} [icon {:font "ion" :on-click on-next} "chevron-right"]])))
+       ^{:key "previous-month"} [icon (merge {:class (str (when (minimum? (first current)) "disabled"))
+                                              :font  "ion"}
+                                             (when (not (minimum? (last current)))
+                                               {:on-click on-previous})) "chevron-left"]
+       ^{:key "current-month"} [:h3 (translate format (coerce/to-date (first current)))]
+       ^{:key "next-month"} [icon (merge {:class (str (when (maximum? (last current)) "disabled"))
+                                          :font  "ion"}
+                                         (when (not (maximum? (last current)))
+                                           {:on-click on-next})) "chevron-right"]])))
 
 (defn years [& args]
   (let [{:keys [params]}   (util/conform! ::spec/years-args args)
@@ -146,91 +153,126 @@
            (str year)])])]))
 
 (defn months
-  "Display the calendar-months of a [selected] year"
+  "Display the calendar-months of a year"
   [& args]
-  (let [{:keys [params]}              (util/conform! ::spec/months-args args)
-        {:keys [every
-                on-click
-                selected]
-         :or   {selected (time/now)}} params
-        model                        (atom selected)
-        dt->str #(fmt/unparse (fmt/formatter "yyyyMMdd") %)]
+  (let [{:keys [params]} (util/conform! ::spec/months-args args)
+        {:keys [on-click
+                model]}  params
+        model            (if (util/ratom? model) model (atom model))
+        dt->str          #(fmt/unparse (fmt/formatter "yyyyMMdd") %)]
     (fn [& args]
       (let [{:keys [params]}  (util/conform! ::spec/months-args args)
-            {:keys [every
-                    selected]
-             :or   {every 1
-                    selected @model}} params
+            {:keys [every]
+             :or   {every 1}} params
+            minimum?          #(after? % (:min params))
+            maximum?          #(before? % (:max params))
             group-every       (if (= every 1) 3 every)
-            year              (int (fmt/unparse (fmt/formatter "yyyy") @model))
+            year              (int (fmt/unparse (fmt/formatter "yyyy") (if-some [y @model] (first y) (time/now))))
             rows              (->> (range 1 13)
-                                   (map #(time/date-time year % 1))
-                                   (partition group-every))]
+                                 (map #(time/date-time year % 1))
+                                 (partition group-every))]
         [container {:layout :vertically
                     :align  [:center :center]
                     :fill?  true}
-         [calendar-nav {:jump 12 :format :ui/year :model model}]
-         (for [months rows]
-           [container {:key (str/join months) :layout :horizontally :fill? true :gap? false}
-            (if (= every 1)
-              (for [month months]
-                (let [val (translate :ui/month (coerce/to-date month))]
-                  [button (merge {:key      (str "btn-" val)
-                                  :fill    true
-                                  :on-click #(on-click [(time/first-day-of-the-month month) (time/last-day-of-the-month month)])}
-                                 (when (= (dt->str selected) (dt->str (time/first-day-of-the-month month))) {:class "primary"})) val]))
-              (let [val (str (translate :ui/month (coerce/to-date (first months))) " - " (translate :ui/month (coerce/to-date (last months))))]
-                [button (merge {:key      (str "btn-" val)
-                                :fill    true
-                                :on-click #(on-click [(time/first-day-of-the-month (first months)) (time/last-day-of-the-month (last months))])}
-                               (when (= (dt->str selected) (dt->str (time/first-day-of-the-month (first months)))) {:class "primary"})) val]))])]))))
+         [calendar-nav (merge params {:jump 12 :format :ui/year :model model})]
+         (doall
+          (for [months rows]
+            [container {:key (str/join months) :layout :horizontally :fill? true :gap? false}
+             (if (= every 1)
+               (for [month months]
+                 (let [val (translate :ui/month (coerce/to-date month))]
+                   [button (merge {:key      (str "btn-" val)
+                                   :fill     true
+                                   :disabled (or (minimum? (time/first-day-of-the-month month))
+                                                 (maximum? (time/last-day-of-the-month month)))
+                                   :on-click #(let [selected [(time/first-day-of-the-month month)
+                                                              (time/last-day-of-the-month month)]]
+                                                (reset! model selected)
+                                                (when (ifn? on-click) (on-click selected %)))}
+                                  (when-some [selected @model]
+                                    (when (= (dt->str (first selected))
+                                             (dt->str (time/first-day-of-the-month month)))
+                                      {:class "primary"}))) val]))
+               (let [val (str (translate :ui/month (coerce/to-date (first months)))
+                              " - "
+                              (translate :ui/month (coerce/to-date (last months))))]
+                 [button (merge {:key      (str "btn-" val)
+                                 :fill     true
+                                 :disabled (or (minimum? (time/first-day-of-the-month (first months)))
+                                               (maximum? (time/last-day-of-the-month (last months))))
+                                 :on-click #(let [selected [(time/first-day-of-the-month (first months))
+                                                            (time/last-day-of-the-month (last months))]]
+                                              (reset! model selected)
+                                              (when (ifn? on-click) (on-click selected %)))}
+                                (when-some [selected @model]
+                                  (when (and (= (dt->str (first selected))
+                                                (dt->str (time/first-day-of-the-month (first months))))
+                                             (= (dt->str (last selected))
+                                                (dt->str (time/last-day-of-the-month (last months)))))
+                                    {:class "primary"}))) val]))]))]))))
 
-;; FIXME Overriding start of the week fails
 (defn days
   [& args]
   (let [{:keys [params]}          (util/conform! ::spec/days-args args)
-        {:keys [start-of-week selected show-weekend?
+        {:keys [start-of-week show-weekend?
                 jump on-click nav? selectable? multiple?
-                on-navigation class short-form?]
+                on-navigation class short-form?
+                model period-picker]
          :or   {start-of-week 1
-                selected      (time/now)
                 jump          1
                 short-form?   false
                 nav?          true
                 show-weekend? true
-                selectable?   true}} params
+                selectable?   true
+                period-picker false}} params
+        select*                   (atom 0)
+        model                     (if (util/ratom? model) model (atom model))
         num-days                  (if (true? show-weekend?) 7 5)
-        weekdays-num              (range start-of-week (+ start-of-week num-days))
-        caret                     (atom selected)]
+        weekdays-num              (range start-of-week (+ start-of-week num-days))]
     (fn []
-      [:div.Calendar
-       (when nav?
-         [calendar-nav {:jump     jump
-                        :min      (:min params)
-                        :max      (:min params)
-                        :model    caret
-                        :on-click on-navigation}])
-       [:table {:class class}
-        [:thead.Weekdays
-         [:tr
-          (doall
-           (for [weekday weekdays-num]
-             (let [weekday-name (translate (if short-form? :ui/weekday-short :ui/weekday-long)
-                                           (coerce/to-date (str "2016-1-" (+ 3 weekday))))]
-               ^{:key (str "weekday-" weekday)}
-               [:th weekday-name])))]]
-        [:tbody
-         (for [week (weeks @caret)]
-           ^{:key (str "week-" (:month (first week)) "-" (:day (first week)))}
-           [:tr.Week
-            (for [weekday weekdays-num]
-              (let [day     (nth week (dec weekday))
-                    dt      (day->date day)
-                    classes [(case (:belongs-to-month day) :previous "Previous" :next "Next" "")
-                             (when selectable? "selectable")
-                             (when (same-day? (date->day selected) day) "selected")
-                             (when (same-day? (date->day (time/now)) day) "today")]]
-                ^{:key (str "day-" (:day day))}
-                [:td.Day {:class    (str/join " " classes)
-                          :on-click #(when selectable? (on-click [dt dt]))}
-                 [:span (:day day)]]))])]]])))
+      (let [minimum? #(after? % (:min params))
+            maximum? #(before? % (:max params))
+            caret    (if-some [selected @model] selected [(time/today-at 0 0 0 1) (time/today-at-midnight)])]
+        [:div.Calendar
+         (when nav?
+           [calendar-nav (merge params
+                                {:model    model
+                                 :on-click on-navigation})])
+         [:table {:class class}
+          [:thead.Weekdays
+           [:tr
+            (doall
+             (for [weekday weekdays-num]
+               (let [weekday-name (translate (if short-form? :ui/weekday-short :ui/weekday-long)
+                                             (coerce/to-date (str "2016-1-" (+ 3 weekday))))]
+                 ^{:key (str "weekday-" weekday)}
+                 [:th weekday-name])))]]
+          [:tbody
+           (for [week (weeks (first caret))]
+             ^{:key (str "week-" (:month (first week)) "-" (:day (first week)))}
+             [:tr.Week
+              (for [weekday weekdays-num]
+                (let [day     (nth week (dec weekday))
+                      dt      (day->date day)
+                      classes [(case (:belongs-to-month day) :previous "Previous" :next "Next" "")
+                               (when selectable? "selectable")
+                               (when (or (maximum? dt)
+                                         (minimum? dt)) "disabled")
+                               (when (and period-picker
+                                          (after? (first caret) dt)
+                                          (before? (last caret) dt)) "between")
+                               (when (or (same-day? (date->day (first caret)) day)
+                                         (same-day? (date->day (last caret)) day)) "selected")
+                               (when (same-day? (date->day (time/now)) day) "today")]]
+                  ^{:key (str "day-" (:day day))}
+                  [:td.Day {:class    (str/join " " classes)
+                            :on-click #(when selectable?
+                                         (swap! select* inc)
+                                         (if (or (not period-picker)
+                                                 (odd? @select*))
+                                           (reset! model [dt dt])
+                                           (if (after? (first @model) dt)
+                                             (reset! model [(first @model) dt])
+                                             (reset! model [dt (first @model)])))
+                                         (when (ifn? on-click) (on-click @model %)))}
+                   [:span (:day day)]]))])]]]))))

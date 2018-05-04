@@ -12,6 +12,7 @@
             [ui.element.textfield.styles :as textfield]
             [ui.element.searchfield.styles :as searchfield]
             [ui.element.collection.styles :as collection]
+            [ui.element.calendar.styles :as calendar]
             [ui.element.checkbox.styles :as checkbox]
             [ui.element.containers.styles :as containers]
             [ui.element.sidebar.styles :as sidebar]
@@ -233,33 +234,6 @@
              :user-select   :none
              :cursor        :pointer
              :margin-right  (unit/rem 0.5)}]]])
-
-(defn- calendar [{:keys [primary secondary tertiary]}]
-  [[:.Date-picker {:position :relative
-                   :width    (unit/percent 100)}
-    [:.Calendar {:background :white
-                 :z-index    3}]]
-   [:.Calendar
-    [:table {:user-select  :none
-             :text-align   :center
-             :table-layout :fixed}]
-    [:th {:padding (unit/rem 2)}]
-    [:td {:padding (unit/rem 1)}]
-    [#{:.Previous :.Next} {:color (color/lighten tertiary 40)}]
-    [:.Day {:pointer :not-allowed}
-     [:&.selectable {:cursor :pointer}
-      [:&:hover [:span {:background (color/lighten primary 30)}]]]
-     [:span {:border-radius (unit/percent 50)
-             :line-height   (unit/em 1.2)
-             :display       :inline-block
-             :padding       (unit/rem 1)
-             :height        (unit/rem 2)
-             :width         (unit/rem 2)}]
-     [:&.today
-      [:span {:border [[:solid (unit/px 1) (color/darken primary 10)]]}]]
-     [:&.selected.selectable {:color  :white
-                              :cursor :default}
-      [:span {:background primary}]]]]])
 
 (defn- numbers [{:keys [primary secondary tertiary]}]
   [[:.Worksheet {:width       (unit/percent 100)
@@ -497,7 +471,7 @@
                       (numbers theme)
                       (forms theme)
                       (color-picker theme)
-                      (calendar theme)
+                      (calendar/style theme)
                       (typography theme)
                       (chooser/style theme)
                       (collection/style theme)
