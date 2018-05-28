@@ -1,4 +1,5 @@
-(ns ui.element.searchfield.styles)
+(ns ui.element.searchfield.styles
+  (:require [garden.units :as unit]))
 
 (defn style [theme]
-  [[:.Search {}]])
+  [[:.Textfield.type-search {}]])

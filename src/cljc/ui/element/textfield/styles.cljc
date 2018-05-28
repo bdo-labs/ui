@@ -49,6 +49,7 @@
              :transition    [[:all :200ms :ease]]
              :white-space   :nowrap
              :width         (unit/percent 100)
+             :-webkit-appearance :none
              :z-index       2}
      [:&:hover {:border-color primary}]
      [:&:focus {:border-color primary}
