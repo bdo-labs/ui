@@ -7,7 +7,6 @@
             [ui.layout :as layout]
             [ui.docs.polyglot :as polyglot]
             [ui.docs.load :as load]
-            [ui.docs.feature :as feature]
             [ui.docs.centered :as centered]
             [ui.docs.fill :as fill]
             [ui.docs.horizontally :as horizontally]
@@ -23,6 +22,7 @@
             [ui.docs.date-picker :as date-picker]
             [ui.docs.period-picker :as period-picker]
             [ui.docs.sheet :as sheet]
+            ;; [ui.docs.clamp :as clamp]
             [ui.docs.chooser :as chooser]
             [ui.docs.collection :as collection]
             [ui.docs.textfield :as textfield]))
@@ -61,7 +61,6 @@ batteries included, so have a look and get yourself familiarized.
   [item-name]
   (case item-name
     ;; Wires
-    :feature  [feature/documentation]
     :load     [load/documentation]
     :polyglot [polyglot/documentation]
 
@@ -80,6 +79,7 @@ batteries included, so have a look and get yourself familiarized.
     :dropdown [dropdown/documentation]
     :icons [icons/documentation]
     :textfield [textfield/documentation]
+    ;; :clamp [clamp/documentation]
     :chooser [chooser/documentation]
     :collection [collection/documentation]
     :inputs [inputs/documentation]
@@ -94,9 +94,9 @@ batteries included, so have a look and get yourself familiarized.
 (defn- doc-panel
   []
   (let [active-item @(re-frame/subscribe [:active-doc-item])
-        wires       [:feature :load :polyglot]
+        wires       [:load :polyglot]
         layouts     [:centered :horizontally :vertically :fill]
-        elements    [:buttons :colors #_:date-picker #_:period-picker :dialog :dropdown :icons :textfield :collection #_:chooser :inputs :progress :sheet]
+        elements    [:buttons :colors #_:date-picker #_:period-picker :dialog :dropdown :icons :textfield :collection #_:clamp #_:chooser :inputs :progress :sheet]
         labs        [:card]]
     [:div {:style {:width "100vw"
                    :height "100vh"}}
