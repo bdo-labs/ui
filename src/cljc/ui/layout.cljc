@@ -6,6 +6,7 @@
   "
   (:require [ui.elements :as element]
             [clojure.spec.alpha :as spec]
+            [ui.specs :as common]
             [ui.util :as util]))
 
 
@@ -21,7 +22,9 @@
 (spec/def ::alignment #{:start :end :center})
 (spec/def ::horizontal-alignment #{:left :right :center})
 (spec/def ::vertical-alignment #{:top :bottom :middle})
-(spec/def ::content-type (spec/or :nil nil? :fn fn? :seq seq? :str string? :vec vector?))
+(spec/def ::content-type
+  (spec/nonconforming
+   (spec/or :nil nil? :fn fn? :seq seq? :str string? :vec vector?)))
 (spec/def ::variable-content (spec/* ::content-type))
 
 (spec/def ::layout-params
@@ -39,7 +42,7 @@
                                   (aligned->align (or (-> aligned :y) :top))]
         align                    (if (= layout :vertically) [(last align) (first align)] align)
         params                   (merge {:layout layout :align align} (dissoc params))]
-    (apply element/container (into [params] (map last content)))))
+    (into [element/container params] content)))
 
 
 (defn horizontally [& args]
