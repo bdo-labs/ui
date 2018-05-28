@@ -20,7 +20,7 @@
     #(spec/gen #{"email" "help" "home" "loop" "pause"
                  "search" "settings" "shuffle" "stop"})))
 
-(spec/def ::size nat-int?)
+(spec/def ::size pos?)
 
 (spec/def ::icon-params
   (spec/keys
