@@ -8,7 +8,7 @@
  :dependencies '[[com.andrewmcveigh/cljs-time "0.5.2"]
                  [org.clojure/clojure "1.10.0-alpha4" :scope "provided"]
                  ;; Unfortunately; AOT version can not be used, since we need `clojure.spec`
-                 [org.clojure/clojurescript "1.9.946" :scope "provided" :exclusions [org.clojure/clojure]]
+                 [org.clojure/clojurescript "1.10.238" :scope "provided" :exclusions [org.clojure/clojure]]
                  ;; [metosin/spec-tools "0.6.1"]
                  [org.clojure/tools.namespace "0.3.0-alpha4"]
                  [org.clojure/core.async "0.4.474" :exclusions [org.clojure/clojure]]
@@ -24,13 +24,13 @@
                  [tongue "0.2.3"]
 
                  [org.clojars.stumitchell/clairvoyant "0.2.1" :scope "test"]
-                 [day8.re-frame/re-frame-10x "0.3.1" :scope "test"]
+                 [day8.re-frame/re-frame-10x "0.3.3" :scope "test"]
                  [adzerk/boot-cljs "2.1.4" :scope "test"]
-                 [adzerk/boot-cljs-repl "0.3.3" :scope "test"]
+                 [adzerk/boot-cljs-repl "0.4.0-SNAPSHOT" :scope "test"]
                  [adzerk/boot-reload "0.5.2" :scope "test"]
                  [adzerk/boot-test "1.2.0" :scope "test"]
                  [binaryage/devtools "0.9.9" :scope "test"]
-                 [com.cemerick/piggieback "0.2.2"  :scope "test"]
+                 [cider/piggieback "0.3.5"]
                  [crisptrutski/boot-cljs-test "0.3.4" :scope "test"]
                  [danielsz/boot-autoprefixer "0.1.0" :scope "test"]
                  [degree9/boot-npm "1.9.0" :scope "test"]
@@ -49,7 +49,7 @@
 
 (require '[boot.parallel :refer [runcommands]]
          '[adzerk.boot-cljs :refer [cljs]]
-         '[adzerk.boot-cljs-repl :refer [cljs-repl]]
+         '[adzerk.boot-cljs-repl :refer [cljs-repl cljs-repl-env]]
          '[adzerk.boot-reload :refer [reload]]
          '[adzerk.boot-test :refer [test]]
          '[crisptrutski.boot-cljs-test :refer [test-cljs report-errors!]]
@@ -79,7 +79,7 @@
  jar {:main     'ui.main
       :file     "ui.jar"
       :manifest {"Description" +description+}}
- repl {:middleware '[cemerick.piggieback/wrap-cljs-repl]}
+ repl {:middleware '[cider.piggieback/wrap-cljs-repl]}
  test-cljs {:js-env :phantom}
  target {:dir #{"target"}}
  autoprefixer {:exec-path "target/node_modules/postcss-cli/bin/postcss"
@@ -100,7 +100,7 @@
         (watch)
         (notify)
         (styles)
-        (cljs-repl)
+        (cljs-repl-env)
         (reload :on-jsload 'ui.core/mount-root :cljs-asset-path "")
         (cljs-devtools)
         (cljs :ids #{"ui"}
