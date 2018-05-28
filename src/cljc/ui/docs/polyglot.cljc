@@ -17,7 +17,7 @@ So, first of you'll need to initialize `ui` with your favorite
 language.  
 
 ```clojure
-(dispatch [:ui/add-language :en {:ui/hello \"hello {1}!\"}])
+(dispatch [:ui/add-language :en {:ui/hello \"hello, {1}!\"}])
 (dispatch [:ui/set-current-language :en])
 ```
 
@@ -30,7 +30,5 @@ translate-function and your good.
   
 If a translation is missing, that will become obvious in your  
 `gui`, but you can also register an event-handler named  
-`:missing-translation` that takes one argument which will be the  
-failing keyword. You can do pretty much anything you'd like with 
-that.
+`:missing-translation` that takes the failing keyword as it's argument.
 "])

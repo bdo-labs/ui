@@ -252,6 +252,7 @@
     [:.Column-headings {:background :white}
      [#{:th :td} {:border-top [[:solid (unit/px 1) (util/gray 230)]]}]]
     [#{:th} {:position :relative}
+     [:span {:vertical-align :middle}]
      [:.Dropdown {:background :white
                   :position   [[:absolute :!important]]
                   :right      0}

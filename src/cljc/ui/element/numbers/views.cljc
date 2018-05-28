@@ -1,11 +1,12 @@
 (ns ui.element.numbers.views
   #?(:cljs (:require-macros [cljs.core.async.macros :refer [go]]))
   (:require [re-frame.core :as re-frame]
-            [#?(:clj clojure.core :cljs reagent.core) :refer [atom]]
+            #?(:cljs [reagent.core :as reagent])
             [ui.element.progress-bar.views :refer [progress-bar]]
             [ui.element.numbers.filter-views :refer [column-menu]]
             [ui.element.numbers.subs]
             [ui.element.numbers.events]
+            [ui.element.icon.views :refer [icon]]
             [ui.element.loaders.views :refer [spinner]]
             [ui.element.chooser.views :refer [chooser]]
             [ui.element.textfield.views :refer [textfield]]
@@ -37,7 +38,10 @@
   (let [title-rows         @(re-frame/subscribe [:visible-title-rows id])
         sort-ascending?    @(re-frame/subscribe [:sort-ascending? id] {})
         sorted-column      @(re-frame/subscribe [:sorted-column id])
-        toggle-column-menu (fn [col-ref] #(re-frame/dispatch [:show-column-menu id col-ref]))
+        filters            @(re-frame/subscribe [:filters id])
+        toggle-column-menu (fn [col-ref]
+                             #(go (<! (timeout 20))
+                                  (re-frame/dispatch [:show-column-menu id col-ref])))
         hidden?            (partial hidden? id)]
     #_[caption id]
     [:thead
@@ -55,6 +59,10 @@
                                        :class (str/join " " [(util/slug "cell" cell-ref) (util/slug "col" col-ref)])
                                        :style {:border-top "1px solid rgb(230,230,230)"}}
                      [:span value]
+                     (when (seq (nth filters (util/col-num cell-ref)))
+                       [icon {:style {:margin-left "1em"}
+                              :size 1.25
+                              :color "rgb(150,150,150)"} "funnel"])
                      (when (= sorted-column (util/col-ref cell-ref))
                        [:span.Arrow (if sort-ascending? "↑" "↓")])
                      [:span
@@ -98,17 +106,17 @@
                         (if-let [{:keys [items]} value]
                           (let [{:keys [on-select on-change on-blur]} value
                                 value (dissoc value :on-select :on-change :on-blur)]
-                           [chooser (merge {:id              (util/slug "chooser" cell-ref)
-                                            :labels          false
-                                            :multiple        false
-                                            :deletable       true
-                                            :close-on-select true
-                                            :predicate?      util/case-insensitive-includes?
-                                            :selected        (filter #(= (:value %) display-value) items)
-                                            :on-blur         (--on-blur cell-ref (if (ifn? on-blur) (partial on-blur row cell-ref) nil))
-                                            :on-select       (--on-change cell-ref (if (ifn? on-select) (partial on-select row cell-ref) nil))
-                                            :on-change       #(when (ifn? on-change) (on-change %))
-                                            :auto-focus      true} value)])
+                            [chooser (merge {:id              (util/slug "chooser" cell-ref)
+                                             :labels          false
+                                             :multiple        false
+                                             :deletable       true
+                                             :close-on-select true
+                                             :predicate?      util/case-insensitive-includes?
+                                             :selected        (filter #(= (:value %) display-value) items)
+                                             :on-blur         (--on-blur cell-ref (if (ifn? on-blur) (partial on-blur row cell-ref) nil))
+                                             :on-select       (--on-change cell-ref (if (ifn? on-select) (partial on-select row cell-ref) nil))
+                                             :on-change       #(when (ifn? on-change) (on-change %))
+                                             :auto-focus      true} value)])
                           (let [{:keys [on-change]} value]
                             [textfield {:placeholder display-value
                                         :on-change   (--on-change cell-ref (partial on-change row))}]))
@@ -118,13 +126,15 @@
                  [:span display-value])]))))
        (doall
         (for [x (range column-count)]
-          [:td.Body-cell {:key (util/slug id "body" n "empty-cell" x) :class (str/join [(util/slug "cell" "temporary") "can-edit"])} ""])))]))
+          [:td.Body-cell {:key (util/slug id "body" n "empty-cell" x)
+                          :class (str/join [(util/slug "cell" "temporary") "can-edit"])} ""])))]))
 
 (defn- table-body [id]
   (let [row-count @(re-frame/subscribe [:row-count id])]
-    (into [:tbody.selectable] (->> (range 0 row-count)
-                                   (map (fn [n] [table-body-row id n]))
-                                   (doall)))))
+    (when (> row-count 0)
+     (into [:tbody.selectable] (->> (range 0 row-count)
+                                    (map (fn [n] [table-body-row id n]))
+                                    (doall))))))
 
 ;; Dispatches an event whenever the user scrolls the table-view.
 ;; The event calculates what elements needs to be rendered, ignoring
@@ -143,19 +153,23 @@
   TODO Write a bunch of examples
   "
   [{:keys [hidden] :as params} data]
-  (let [id            (util/slug (:name params))
-        ascending?    (re-frame/subscribe [:sort-ascending? id])
-        table-height  (re-frame/subscribe [:state id :table-height])
-        render-cycle* (atom 0)]
-    (re-frame/dispatch [:sheet id data params])
-    (fn []
-      (when-not hidden
-        [:div.Worksheet.fill {:key id}
-         [:div.Table
-          [:div.Table-Header
-           [table id {} [table-header id]]]
-          [:div.Table-Body {:ref #(do (swap! render-cycle* inc)
-                                      (when (= @render-cycle* 1)
-                                        (virtualize id %)))}
-           [table id {:style {:height @table-height}}
-            [table-body id]]]]]))))
+  (let [id                (util/slug (:name params))
+        ascending?        (re-frame/subscribe [:sort-ascending? id])
+        table-height      (re-frame/subscribe [:table-height id])
+        scroll-container* (atom nil)]
+    (letfn [(view []
+              (when-not hidden
+                [:div.Worksheet.fill {:key id}
+                 [:div.Table
+                  [:div.Table-Header
+                   [table id {} [table-header id]]]
+                  [:div.Table-Body {:ref #(reset! scroll-container* %)}
+                   [table id {:style {:height @table-height}}
+                    [table-body id]]]]]))]
+      #?(:clj view
+         :cljs (reagent/create-class
+                {:display-name "sheet"
+                 :component-will-mount #(re-frame/dispatch [:sheet id data params])
+                 :component-did-mount #(when-let [scroll-container @scroll-container*]
+                                         (virtualize id scroll-container))
+                 :reagent-render view})))))

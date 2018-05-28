@@ -13,8 +13,17 @@
  (fn [db [k id param]]
    (get-in db (sheet-path [:state param] id) nil)))
 
-;; Table Headings ---------------------------------------------------------
+(re-frame/reg-sub
+ :table-height
+ (fn [[_ id]]
+   [(re-frame/subscribe [:state id :row-height])
+    (re-frame/subscribe [:row-count id])])
+ (fn [[row-height row-count] _]
+   (when (some? row-height)
+     (* row-height row-count))))
 
+
+;; Table Headings ---------------------------------------------------------
 
 (re-frame/reg-sub :title-rows sheet-extract)
 
@@ -24,30 +33,25 @@
    [(re-frame/subscribe [:title-rows id])
     (re-frame/subscribe [:state id :hide-columns])])
  (fn [[title-rows hide]]
-   (->> title-rows (map (fn [row] (remove #(contains? hide (:col-ref %)) row))))))
-
-(re-frame/reg-sub
- :show-column-menu?
- (fn [[_ id]]
-   (re-frame/subscribe [:state id :show-column-menu]))
- (fn [column-menu [_ _ col-ref]]
-   (= col-ref column-menu)))
+   (let [hidden (fn [col] (contains? hide (:col-ref col)))]
+     (->> title-rows
+          (map #(remove hidden %))))))
 
 ;; Table Columns ----------------------------------------------------------
-
 
 (re-frame/reg-sub :columns sheet-extract)
 
 (re-frame/reg-sub
  :column
  (fn [db [_ id col-ref]]
-   (let [column-path (sheet-path [:columns (util/col-num col-ref)] id)]
-     (get-in db column-path))))
+   (let [path (sheet-path [:columns (util/col-num col-ref)] id)]
+     (get-in db path))))
 
 (re-frame/reg-sub
  :column-count
  (fn [db [_ id]]
-   (get-in db (sheet-path [:column-count] id))))
+   (let [path (sheet-path [:column-count] id)]
+     (get-in db path))))
 
 (re-frame/reg-sub
  :visible-columns
@@ -59,10 +63,8 @@
 
 (re-frame/reg-sub
  :col-refs
- (fn [[_ id]]
-   (re-frame/subscribe [:columns id]))
- (fn [columns _]
-   (map :col-ref columns)))
+ (fn [[_ id]] (re-frame/subscribe [:columns id]))
+ (fn [columns _] (map :col-ref columns)))
 
 (re-frame/reg-sub
  :column-widths
@@ -75,36 +77,6 @@
                            (into (vec (take pad (repeat :auto)))))]
      column-widths)))
 
-;; Table Rows -------------------------------------------------------------
-
-
-(defn filter-rows [columns _]
-  (when (seq columns)
-    (let [filter-fns (map :filters columns)
-          apply-sort-filter (fn [col-num col]
-                              (if-let [filters (vals (nth filter-fns col-num))]
-                                ((complement not-any?) true?
-                                                       (map (fn [filter-fn]
-                                                              (let [value (:value col)]
-                                                                (if-not (nil? (meta value))
-                                                                  (filter-fn (:sort-value (meta value)))
-                                                                  (filter-fn value)))) filters)) true))]
-      (->> columns
-           (map :rows)
-           (apply map list)
-           (remove #(:title-row? (first %)))
-           (filter #(not-any? false? (map-indexed apply-sort-filter %)))))))
-
-(re-frame/reg-sub
- :rows
- (fn [[_ id]]
-   (re-frame/subscribe [:columns id]))
- (fn [columns _]
-   (->> columns
-        (map :rows)
-        (apply map list)
-        (remove #(:title-row? (first %))))))
-
 (re-frame/reg-sub
  :filters
  (fn [[_ id]]
@@ -113,46 +85,77 @@
    (map :filters columns)))
 
 (re-frame/reg-sub
+ :checkboxes
+ (fn [[_ id]]
+   (re-frame/subscribe [:columns id]))
+ (fn [columns [_ _ col-ref]]
+   (let [path [(util/col-num col-ref) :checkboxes]]
+     (get-in columns path))))
+
+;; Table Rows -------------------------------------------------------------
+
+(re-frame/reg-sub
+ :rows
+ (fn [[_ id]]
+   (re-frame/subscribe [:columns id]))
+ (fn [columns _]
+   (when (seq columns)
+    (->> columns
+         (map :rows)
+         (apply map list)
+         (remove #(:title-row? (first %)))))))
+
+(re-frame/reg-sub
  :filtered-rows
  (fn [[_ id]]
    [(re-frame/subscribe [:rows id])
     (re-frame/subscribe [:filters id])])
  (fn [[rows filter-fns]]
-   (letfn [(apply-sort-filter [col-num col]
-             (if-let [filters (vals (nth filter-fns col-num))]
-               ((complement not-any?) true?
-                                      (map (fn [filter-fn]
-                                             (let [value (:value col)]
-                                               (if-not (nil? (meta value))
-                                                 (filter-fn (:sort-value (meta value)))
-                                                 (filter-fn value)))) filters)) true))]
-     (->> rows
-          (filter #(not-any? false? (map-indexed apply-sort-filter %)))))))
+   (when (and (seq rows)
+              (seq filter-fns))
+     (let [any? (complement not-any?)]
+       (letfn [(apply-sort-filter [col-num col]
+                 (if-let [filters (vals (nth filter-fns col-num))]
+                   (any? true?
+                         (map (fn [filter-fn]
+                                (let [value (:display-value col)]
+                                  (if (and (some? (meta value))
+                                           (some? (:sort-value (meta value))))
+                                    (filter-fn (:sort-value (meta value)))
+                                    (filter-fn value)))) filters)) true))
+               (only-true? [row]
+                 (not-any? false? (map-indexed apply-sort-filter row)))]
+         (let [xf (filter only-true?)]
+           (transduce xf conj rows)))))))
 
 (re-frame/reg-sub
- :treated-rows
+ :sorted-rows
  (fn [[_ id]]
    [(re-frame/subscribe [:filtered-rows id])
     (re-frame/subscribe [:sorted-column id])
     (re-frame/subscribe [:sort-ascending? id])])
  (fn [[rows sorted-column ascending]]
-   (if (nil? sorted-column)
-     rows
-     (let [col (nth (first rows) (util/col-num sorted-column))
-           f   (case (:type col)
-                 (:map :string)
-                 (if ascending
-                   #(.localeCompare %1 %2)
-                   #(.localeCompare %2 %1))
-                 (if ascending < >))]
-       (->> rows
-            (sort-by
-             (comp #(if-some [sort-value (:value (:value %))]
-                      sort-value
-                      (:value %)) #(nth % (util/col-num sorted-column))) f)
-            (doall))))))
+   (when (seq rows)
+    (if (nil? sorted-column)
+      rows
+      (let [col (nth (first rows) (util/col-num sorted-column))
+            f   (case (:type col)
+                  (:map :string) (if ascending
+                                   #(.localeCompare %1 %2)
+                                   #(.localeCompare %2 %1))
+                  (if ascending < >))
+            comparator (comp #(if-some [sort-value (:value (:value %))]
+                                sort-value
+                                (:value %))
+                             #(nth % (util/col-num sorted-column)))]
+        (sort-by comparator f rows))))))
 
-(re-frame/reg-sub :row-count sheet-extract)
+(re-frame/reg-sub
+ :row-count
+ (fn [[_ id]]
+   (re-frame/subscribe [:filtered-rows id]))
+ (fn [rows _]
+   (if (seq rows) (count rows) 0)))
 
 (re-frame/reg-sub
  :virtual-range
@@ -169,37 +172,20 @@
  (fn [[_ id]]
    [(re-frame/subscribe [:state id :buffer-pos])
     (re-frame/subscribe [:state id :buffer-size])
-    (re-frame/subscribe [:treated-rows id])])
+    (re-frame/subscribe [:sorted-rows id])])
  (fn [[buffer-pos buffer-size rows] [_ id n]]
    (when (and (>= n buffer-pos)
               (<= n (+ buffer-pos buffer-size))
-              (some? rows))
+              (seq rows))
      (nth rows n []))))
 
 (re-frame/reg-sub
  :unique-values
  (fn [db [_ id col-ref]]
-   (get-in db (sheet-path [:unique-values (util/col-num col-ref)] id))))
-
-#_(re-frame/reg-sub
-   :unique-values
-   (fn [[_ id col-ref]]
-     (re-frame/subscribe [:column id col-ref]))
-   (fn [{:keys [rows]}]
-     (let [values      (->> rows (remove :title-row?) (map :value))
-           sort-values (->> values
-                            (map #(if-not (nil? (meta %))
-                                    (:sort-value (meta %))
-                                    %)))
-           uniq        (->> sort-values
-                            (distinct)
-                            (sort <))]
-       (if (vector? (first uniq))
-         (map #(:sort-value (meta %)) uniq)
-         uniq))))
+   (let [path (sheet-path [:unique-values (util/col-num col-ref)] id)]
+     (get-in db path []))))
 
 ;; Sorting ----------------------------------------------------------------
-
 
 (re-frame/reg-sub
  :sort-ascending?
@@ -214,30 +200,6 @@
    (re-frame/subscribe [:state id :sort-column]))
  (fn [sorted-column-state _]
    (get sorted-column-state :sorted-column)))
-
-#_(re-frame/reg-sub
-   :selection
-   (fn [[_ id]]
-     (re-frame/subscribe [:sheet id]))
-   (fn [sheet _]
-     (get sheet :selection)))
-
-#_(re-frame/reg-sub
-   :cells
-   (fn [[_ id]]
-     (re-frame/subscribe [:rows id]))
-   (fn [rows _]
-     (into (sorted-map)
-           (map #(do {(:cell-ref %) (:value %)})
-                (flatten rows)))))
-
-#_(re-frame/reg-sub
-   :cell
-   (fn [[_ id]]
-     (re-frame/subscribe [:cells id]))
-   (fn [cells [_ id cell-ref]]
-     (let [index (.indexOf (keys cells) (keyword cell-ref))]
-       (nth (vals cells) index))))
 
 (re-frame/reg-sub
  :range

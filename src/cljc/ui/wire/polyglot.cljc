@@ -40,6 +40,7 @@
    :ui/date-period          "Date-period"
    :ui/change-log-version   "{1} ({2})"
    :ui/report-issue         "Report and issue"
+   :ui/keyword              "Keyword"
    :ui/hello                "hello {1}!"})
 
 ;; Events -----------------------------------------------------------------
