@@ -11,7 +11,9 @@
 (spec/def ::pill boolean?)
 (spec/def ::circular boolean?)
 (spec/def ::disabled boolean?)
-(spec/def ::content ::common/hiccup)
+(spec/def ::content
+  (spec/with-gen ::common/hiccup
+    #(spec/gen #{"button"})))
 
 (spec/def ::class
   (spec/with-gen string?

@@ -46,12 +46,16 @@
         #?(:cljs
            (let [background (css [:.Container.Header {:background [[primary :!important]]}])]
              (styles/inject js/document "--colors" background)))
-        [article
-         "### Color-picker
+        [layout/vertically {:background :white
+                            :fill?      true
+                            :gap?       false}
+         [layout/centered {:class "demo"
+                           :style {:position :relative
+                                   :height   "6rem"}}
+          [color-picker {:hex       primary
+                         :class     "raised"
+                         :on-change set-primary}]]
+         [article
+          "### Color-picker
 
-Pick and choose colors that can easily be persisted as a theme"
-         [layout/horizontally
-          [layout/centered {:class "demo"}
-           [color-picker {:hex       primary
-                          :class     "raised"
-                          :on-change set-primary}]]]]))))
+Pick and choose colors that can easily be persisted as a theme"]]))))

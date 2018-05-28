@@ -3,10 +3,7 @@
             [ui.util :as util]))
 
 (defn button
-  "### button
-  
-  Pretty actionable items of different flavors.
-  "
+  "Takes an optional `map` of parameters and arbitrary content."
   [& args]
   (let [{:keys [params content]} (util/conform! ::spec/args args)
         class                    (util/params->classes params)
