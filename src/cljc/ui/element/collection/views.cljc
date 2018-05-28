@@ -57,11 +57,13 @@
                 max-selected
                 expanded
                 multiple
+                keyboard
                 on-toggle-expand
                 on-click
                 on-select
                 on-mouse-enter]
          :or   {id         (util/gen-id)
+                keyboard   true
                 selectable false
                 expanded   false}}   params
         id                     (util/slug id)
@@ -208,10 +210,12 @@
       #?(:clj render-fn
          :cljs (reagent/create-class
                 {:display-name           "collection"
-                 :component-did-mount    #(when-not @on-key-down-listener*
-                                            (reset! on-key-down-listener* (partial --on-key-down (reagent/dom-node %)))
-                                            (.addEventListener js/document "keydown" @on-key-down-listener* true))
-                 :component-will-unmount #(when @on-key-down-listener*
-                                            (.removeEventListener js/document "keydown" @on-key-down-listener* true)
-                                            (reset! on-key-down-listener* nil))
+                 :component-did-mount    #(when keyboard
+                                            (when-not @on-key-down-listener*
+                                              (reset! on-key-down-listener* (partial --on-key-down (reagent/dom-node %)))
+                                              (.addEventListener js/document "keydown" @on-key-down-listener* true)))
+                 :component-will-unmount #(when keyboard
+                                            (when @on-key-down-listener*
+                                              (.removeEventListener js/document "keydown" @on-key-down-listener* true)
+                                              (reset! on-key-down-listener* nil)))
                  :reagent-render         render-fn})))))
