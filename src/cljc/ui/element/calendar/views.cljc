@@ -14,7 +14,6 @@
 
 ;; Helper functions -------------------------------------------------------
 
-
 (defn- previous-month-days
   [date]
   (let [current-month (time/date-time (time/year date) (time/month date))
@@ -190,8 +189,10 @@
                                                 (reset! model selected)
                                                 (when (ifn? on-click) (on-click selected %)))}
                                   (when-some [selected @model]
-                                    (when (= (dt->str (first selected))
-                                             (dt->str (time/first-day-of-the-month month)))
+                                    (when (and (= (dt->str (first selected))
+                                                  (dt->str (time/first-day-of-the-month month)))
+                                               (= (dt->str (last selected))
+                                                  (dt->str (time/last-day-of-the-month month))))
                                       {:class "primary"}))) val]))
                (let [val (str (translate :ui/month (coerce/to-date (first months)))
                               " - "
