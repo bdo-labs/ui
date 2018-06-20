@@ -39,7 +39,7 @@
    :ui/time-period          "Time-period"
    :ui/date-period          "Date-period"
    :ui/change-log-version   "{1} ({2})"
-   :ui/report-issue         "Report and issue"
+   :ui/report-issue         "Report issue"
    :ui/keyword              "Keyword"
    :ui/hello                "hello {1}!"})
 
