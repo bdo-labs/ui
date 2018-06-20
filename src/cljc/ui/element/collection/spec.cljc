@@ -26,6 +26,7 @@
 (spec/def ::on-toggle-expand ::common/maybe-fn)
 (spec/def ::on-click ::common/maybe-fn)
 (spec/def ::on-select ::common/maybe-fn)
+(spec/def ::on-remove ::common/maybe-fn)
 (spec/def ::on-mouse-enter ::common/maybe-fn)
 
 (spec/def ::params
@@ -47,6 +48,7 @@
                       ::on-toggle-expand
                       ::on-click
                       ::on-select
+                      ::on-remove
                       ::on-mouse-enter]))
 
 ;; Item

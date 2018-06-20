@@ -19,8 +19,16 @@
      (assoc db k font))))
 
 (defn icon
+  "#### Add some Flare with a Decent set of Symbols
+
+   `ui` is compatible with most icon-fonts available through the same  
+   construct. You give it a font-name and an icon-name and it will  
+   find out how to render it. You will also need to include the  
+   icon-font in your projects `index.html`.  
+     
+   *Note that you can set a default icon-font for your entire project by dispatching `icon-font` with the name of your font*"
   [& args]
-  (let [{:keys [params icon]} (util/conform! ::spec/icon-args args)
+  (let [{:keys [params content]} (util/conform! ::spec/args args)
         {:keys [style font size color]
          :or   {font  @(re-frame/subscribe [:ui/icon-font])
                 style {}}}     params
@@ -33,9 +41,9 @@
     (if-let [font-name (:font-name font)]
       [:i.Icon (merge {:class (str font-name " " class)
                        :style style}
-                      params) icon]
+                      params) content]
       (let [font-prefix (:font-prefix font)
-            class       (str/join " " (conj [font-prefix (str font-prefix "-" icon)] class))]
+            class       (str/join " " (conj [font-prefix (str font-prefix "-" content)] class))]
         [:i.Icon (merge {:class class
                          :style style}
                         params)]))))

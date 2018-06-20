@@ -2,4 +2,4 @@
   (:require [ui.element.textfield.views :refer [textfield]]))
 
 (defn searchfield [params]
-  [textfield (merge params {:type :search :class "Search"})])
+  [textfield (merge {:type :search :class "Search"} params)])

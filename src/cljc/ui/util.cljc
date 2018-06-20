@@ -194,15 +194,22 @@
        (flatten)
        (mapv (comp keyword name))))
 
+(defn get-str [s]
+  (cond
+    (string? s) s
+    (keyword? s) (name s)
+    :else (str s)))
+
 (defn param->class
   [[k v]]
-  (-> (cond
-        (vector? v)  (str (name k) "-" (str/join "-" (map name v)))
-        (keyword? v) (str (name k) "-" (name v))
-        (string? v)  (name k)
-        (true? v)    (name k)
-        :else        "")
-      (str/replace #"\?" "")))
+  (some->
+   (cond
+     (vector? v)  (str (get-str k) "-" (str/join "-" (map get-str v)))
+     (keyword? v) (str (get-str k) "-" (get-str v))
+     (string? v)  (get-str k)
+     (true? v)    (get-str k)
+     :else        "")
+   (str/replace #"\?" "")))
 
 (defn params->classes
   [params]

@@ -17,7 +17,10 @@
    {:background-color color
     :border-color     color
     :color            (if (util/dark? color) :white :black)}
-   [:&:hover {:background-color (color/lighten color 10)}]])
+   [:&:hover {:background-color (color/lighten color 10)}]
+   [:&:focus {:background-color (color/lighten color 15)
+              :box-shadow [[0 0 (unit/em 0.2) color]]
+              :text-shadow :none}]])
 
 (defn style [theme]
   (let [colors (select-keys theme [:primary :secondary :tertiary :positive :negative])]
@@ -34,7 +37,10 @@
                 :overflow    :hidden
                 :transition  [[:background-color :200ms :ease]]
                 :line-height 2.5}
-      [:&:hover {:background-color (util/gray 250)}]
+      [:&:hover {:background-color (color/lighten (util/gray 245) 10)}]
+      [:&:focus {:background-color (color/lighten (util/gray 245) 15)
+                 :box-shadow [[0 0 (unit/em 0.2) (util/gray 245)]]
+                 :text-shadow :none}]
       [:&.disabled {:opacity 0.3
                     :pointer-events :none
                     :cursor  :not-allowed}]
@@ -47,7 +53,8 @@
       [:&.circular {:border-radius (unit/percent 50)
                     :padding       (unit/rem 0.25)
                     :min-width     (unit/rem 3.5)}]
-      [:&.flat {:background-color :transparent}
+      [:&.flat {:background-color :transparent
+                :font-weight 600}
        (->> colors (map (fn [[k v]] [(keyword (str "&." (name k))) {:color (color/darken v 10)}])))]
       [:&.pill {:border-radius (unit/em 2)}]
       [:&.raised {:box-shadow [[0 (unit/rem 0.2) (unit/rem 0.3) (color/rgba [0 0 0 0.05])]]

@@ -80,12 +80,21 @@
 
 (defn- base [{:keys [primary secondary tertiary positive negative]
               :as   theme}]
-  [[#{:b :stron} {:font-weight :bolder}]
+  [[#{:b :strong} {:font-weight :bolder}]
    [:img {:border-style :none}]
    [:ul {:list-style-position :inside}]
    [:.face-primary {:color primary}]
    [:.face-secondary {:color secondary}]
-   [:.face-tertiary {:color tertiary}]])
+   [:.face-tertiary {:color tertiary}]
+   [:a
+    [:&:visited
+     [:.face-primary {:color (color/darken primary 10)}]
+     [:.face-secondary {:color (color/darken secondary 10)}]
+     [:.face-tertiary {:color (color/darken tertiary 10)}]]
+    [:&:hover
+     [:.face-primary {:color (color/lighten primary 10)}]
+     [:.face-secondary {:color (color/lighten secondary 10)}]
+     [:.face-tertiary {:color (color/lighten tertiary 10)}]]]])
 
 (defn- structure [theme]
   [[:body {:overflow :hidden}]
@@ -194,8 +203,8 @@
   [:to {:transform (translateY 0)}])
 
 (defkeyframes scaled
-  [:from {:transform (scale 0)}]
-  [:to {:transform (scale 1)}])
+  [0 {:transform (scale 0)}]
+  [100 {:transform (scale 1)}])
 
 (defkeyframes can-edit
   [0 {:background (util/gray 200)}]

@@ -17,7 +17,7 @@
 
 (spec/def ::class
   (spec/with-gen string?
-    #(spec/gen #{"primary" "secondary" "tertiary" "positive" "negative" ""})))
+    #(spec/gen #{"primary" "secondary" "tertiary" "positive" "negative"})))
 
 (spec/def ::params
   (spec/keys :opt-un [::flat

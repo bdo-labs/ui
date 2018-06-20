@@ -61,6 +61,7 @@
                 on-toggle-expand
                 on-click
                 on-select
+                on-remove
                 on-mouse-enter]
          :or   {id         (util/gen-id)
                 keyboard   true
@@ -82,7 +83,9 @@
               (reset! intended* item))
 
             (remove-item! [item]
-                          (reset! model (remove (partial = item) @model)))
+              (reset! model (remove (partial = item) @model))
+              (when (ifn? on-remove)
+                (on-remove @model item)))
 
             (add-item! [item]
                        (when (seq item)

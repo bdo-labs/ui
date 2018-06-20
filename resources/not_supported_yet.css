@@ -82,6 +82,21 @@ in 2.0, but at-least our upgrade-path is way easier now.
     color: rgb(117,117,117);
 }
 
+.Textfield input::-webkit-search-cancel-button {
+    display: none;
+}
+
+.Textfield.required label::after {
+    content: "*";
+    color: inherit;
+    display: inline-block;
+    font-size: 0.8em;
+    vertical-align: top;
+    margin-left: 0.3em;
+}
+.Textfield.required.dirty.invalid label::after {content: "✗";}
+.Textfield.required.dirty.valid label::after {content: "✓";}
+
 
 /* Button */
 .Button:not(.circular) .Icon {

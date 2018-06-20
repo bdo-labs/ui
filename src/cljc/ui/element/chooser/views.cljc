@@ -28,7 +28,7 @@
   [& args]
   (let [{:keys [params]}      (util/conform! ::spec/args args)
         {:keys [id selected deletable items multiple
-                on-key-up on-change on-focus on-blur on-select]
+                on-key-up on-change on-focus on-blur on-select on-remove]
          :or   {id       (util/gen-id)
                 selected []}} params
         id                    (util/slug id)
@@ -80,13 +80,14 @@
                                                       (when (not= (count @selected*) (count valid-ones))
                                                         (reset! selected* valid-ones)))
                                                     (when (fn? on-key-up) (on-key-up key value event)))
+                                       :on-cancel (fn [event] (reset! selected* []))
                                      ;; Reveal collection and execute external on-focus
                                        :on-focus  (fn [value event]
                                                     (.persist event)
                                                     (let [el    (.-target event)
                                                           value (.-value el)]
                                                       (.setSelectionRange el (dec (count value)) (count value))
-                                                      (set! (.-scrollLeft el) (.-scrollWidth el))
+                                                      (set! (.-scrollLeft el) (- (.-scrollWidth el) 30))
                                                       (reset! focus* true)
                                                       (go (<! (timeout 20))
                                                           (do (reset! show* true)
@@ -123,6 +124,8 @@
                                       :selectable   selectable
                                       :searchable   searchable
                                       :deselectable deselectable
+                                      :on-remove    (fn [items item]
+                                                      (when (ifn? on-remove) (on-remove items item)))
                                       :on-select    (fn [items]
                                                       (if deletable
                                                         (reset! query* (str (str/join ",\u2002" (map :value items))
@@ -138,7 +141,7 @@
            [dropdown {:open? @show* :origin [:top :left]}
             [collection collection-params filtered-items]])
 
-         (when (and multiple (false? labels))
+         (when (and multiple (false? labels) (> (count @selected*) 0))
            [badge {:show-content? true} (count @selected*)])
 
          (when (and multiple labels)

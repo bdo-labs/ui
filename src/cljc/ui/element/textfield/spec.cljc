@@ -7,6 +7,7 @@
 
 ;; Events
 (spec/def ::on-change ::common/maybe-fn)
+(spec/def ::on-cancel ::common/maybe-fn)
 (spec/def ::on-focus ::common/maybe-fn)
 (spec/def ::on-blur ::common/maybe-fn)
 (spec/def ::on-key-up ::common/maybe-fn)
@@ -19,13 +20,16 @@
   (spec/nonconforming
    (spec/or :string string? :nil nil?)))
 (spec/def ::model
-  (spec/with-gen (spec/and ::common/ratom #(string? (deref %)))
-    #(gen/fmap atom gen/string-alphanumeric)))
+  (spec/nonconforming
+   (spec/with-gen (spec/and ::common/ratom #(string? (deref %)))
+     #(gen/fmap atom gen/string-alphanumeric))))
+(spec/def ::required boolean?)
+(spec/def ::valid? ::common/maybe-fn)
 (spec/def ::disabled boolean?)
 (spec/def ::auto-focus boolean?)
 (spec/def ::read-only boolean?)
 (spec/def ::type (spec/and keyword? #{:search :text :password :email}))
-(spec/def ::ref ifn?)
+(spec/def ::ref ::common/maybe-fn)
 (spec/def ::params
   (spec/keys :opt-un [::common/id
                       ::ref
@@ -35,6 +39,8 @@
                       ::model
                       ::value
                       ::disabled
+                      ::required
+                      ::valid?
                       ::read-only
                       ::auto-focus
                       ::on-change
