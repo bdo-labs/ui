@@ -1,7 +1,7 @@
 (ns ui.views
   (:require [clojure.string :as str]
+            [ui.element.documentation.views :refer [documentation]]
             [ui.wire.polyglot :refer [translate]]
-            [ui.element.showcase.views :refer [showcase]]
             [re-frame.core :as re-frame]
             [ui.elements :as element]
             [ui.layout :as layout]
@@ -11,8 +11,6 @@
             [ui.docs.fill :as fill]
             [ui.docs.horizontally :as horizontally]
             [ui.docs.vertically :as vertically]
-            [ui.docs.card :as card]
-            [ui.docs.buttons :as buttons]
             [ui.docs.icons :as icons]
             [ui.docs.progress :as progress]
             [ui.docs.colors :as colors]
@@ -21,8 +19,8 @@
             [ui.docs.inputs :as inputs]
             [ui.docs.date-picker :as date-picker]
             [ui.docs.period-picker :as period-picker]
+            [ui.docs.sidebar :as sidebar]
             [ui.docs.sheet :as sheet]
-            ;; [ui.docs.clamp :as clamp]
             [ui.docs.chooser :as chooser]
             [ui.docs.collection :as collection]
             [ui.docs.textfield :as textfield]))
@@ -42,16 +40,11 @@
 (defn- intro
   []
   [element/article
-   "
-# A Straight-Forward Library for Composing User-Interfaces
-
-UI is geared towards Clojure(Script) applications and more
-specifically, reagent/re-frame applications. There are a lot of
-batteries included, so have a look and get yourself familiarized.
-"
    [layout/vertically
     [:h2 "Changelog"]
-    [:h3 "0.0.1" [:span {:style {:color :darkgray :margin-left "1em" :display :inline-block}} (translate :ui/date-full  #inst "2016-07-11T22:31:00+06:00")]]
+    [:h3 "0.0.1"
+     [:span {:style {:color :darkgray :margin-left "1em" :display :inline-block}}
+      (translate :ui/date-full  #inst "2016-07-11T22:31:00+06:00")]]
     [layout/horizontally {:gap? false}
      [element/badge {} "CHANGED"]
      [:span "Everything"]]]])
@@ -71,24 +64,21 @@ batteries included, so have a look and get yourself familiarized.
     :vertically [vertically/documentation]
 
     ;; Elements
-    :buttons [buttons/documentation]
+    :buttons [documentation #'ui.element.button.views/button "button"]
     :colors [colors/documentation]
     :date-picker [date-picker/documentation]
     :period-picker [period-picker/documentation]
     :dialog [dialog/documentation]
     :dropdown [dropdown/documentation]
-    :icons [icons/documentation]
-    :textfield [textfield/documentation]
-    ;; :clamp [clamp/documentation]
+    :icons [documentation #'ui.element.icon.views/icon]
+    :textfield [documentation #'ui.element.textfield.views/textfield]
+    ;; :clamp [documentation #'ui.element.clamp.views/clamp]
     :chooser [chooser/documentation]
     :collection [collection/documentation]
     :inputs [inputs/documentation]
     :progress [progress/documentation]
     :sheet [sheet/documentation]
-    ;; :sidebar [sidebar/documentation]
-
-    ;; Labs
-    :card [card/documentation]
+    :sidebar [sidebar/documentation]
     [intro]))
 
 (defn- doc-panel
@@ -96,22 +86,37 @@ batteries included, so have a look and get yourself familiarized.
   (let [active-item @(re-frame/subscribe [:active-doc-item])
         wires       [:load :polyglot]
         layouts     [:centered :horizontally :vertically :fill]
-        elements    [:buttons :colors #_:date-picker #_:period-picker :dialog :dropdown :icons :textfield :collection #_:clamp #_:chooser :inputs :progress :sheet]
-        labs        [:card]]
-    [:div {:style {:width "100vw"
+        elements    [:buttons
+                     :colors
+                     #_:date-picker
+                     #_:period-picker
+                     :dialog
+                     :dropdown
+                     :icons
+                     :textfield
+                     :collection
+                     #_:clamp
+                     #_:chooser
+                     :inputs
+                     :progress
+                     :sheet
+                     #_:sidebar]]
+    [:div {:style {:width  "100vw"
                    :height "100vh"}}
      [element/header {:background "rgb(65,88,208)"
-                      :style {:color :white}}
+                      :style      {:color :white}}
+      [:a {:href "/"
+           :on-click #(re-frame/dispatch [:navigate "/"])}
+       [:img {:src "/ui-logo-white.svg" :width 48}]]
       [:span]
-      [:a {:href "https://github.com/bdo-labs/ui/"
+      [:a {:href   "https://github.com/bdo-labs/ui/"
            :target :_blank
-           :style {:color :white}} [element/icon {:size 3} "social-github"]]]
+           :style  {:color :white}} [element/icon {:size 3} "social-github"]]]
      [element/sidebar {:locked? true :open? true}
       [layout/vertically {:role :navigation}
        (into [:menu [:h4 "wires/"]] (for [w wires] [menu-item w])) [:br]
        (into [:menu [:h4 "layout/"]] (for [l layouts] [menu-item l])) [:br]
        (into [:menu [:h4 "elements/"]] (for [elem elements] [menu-item elem])) [:br]
-       (into [:menu [:h4 "lab/"]] (for [lab labs] [menu-item lab])) [:br]
        [:br]]
       [doc-item active-item]]]))
 
