@@ -6,11 +6,11 @@
  :source-paths #{"src/cljc" "src/cljs"}
  :resource-paths #{"resources" "src/cljc" "src/cljs"}
  :dependencies '[[com.andrewmcveigh/cljs-time "0.5.2"]
-                 [org.clojure/clojure "1.10.0-alpha4" :scope "provided"]
-                 ;; Unfortunately; AOT version can not be used, since we need `clojure.spec`
-                 [org.clojure/clojurescript "1.10.238" :scope "provided" :exclusions [org.clojure/clojure]]
+                 [org.clojure/clojure "1.9.0"]
+                 [org.clojure/spec.alpha "0.1.143"]
+                 [org.clojure/tools.analyzer.jvm "0.7.0"]
+                 [org.clojure/clojurescript "1.10.238" :exclusions [org.clojure/clojure]]
                  ;; [metosin/spec-tools "0.6.1"]
-                 [org.clojure/tools.namespace "0.3.0-alpha4"]
                  [org.clojure/core.async "0.4.474" :exclusions [org.clojure/clojure]]
                  [venantius/accountant "0.2.3"]
                  [com.cemerick/url "0.1.1"]
@@ -18,7 +18,7 @@
                  [clj-time "0.14.2"]
                  [garden "2.0.0-alpha1"]
                  [markdown-clj "1.0.2"]
-                 [re-frame "0.10.5"]
+                 [re-frame "0.10.5" :exclusions [org.clojure/tools.logging]]
                  [reagent "0.8.0-alpha2"]
                  [secretary "1.2.3"]
                  [tongue "0.2.3"]
@@ -29,8 +29,8 @@
                  [adzerk/boot-cljs-repl "0.4.0-SNAPSHOT" :scope "test"]
                  [adzerk/boot-reload "0.5.2" :scope "test"]
                  [adzerk/boot-test "1.2.0" :scope "test"]
-                 [binaryage/devtools "0.9.9" :scope "test"]
-                 [cider/piggieback "0.3.5"]
+                 [binaryage/devtools "0.9.10" :scope "test"]
+                 [cider/piggieback "0.3.5" :scope "test"]
                  [crisptrutski/boot-cljs-test "0.3.4" :scope "test"]
                  [danielsz/boot-autoprefixer "0.1.0" :scope "test"]
                  [degree9/boot-npm "1.9.0" :scope "test"]
@@ -43,7 +43,7 @@
                  [pandeiro/boot-http "0.8.3" :scope "test"]
                  [afrey/ring-html5-handler "1.1.1" :scope "test"]
                  [powerlaces/boot-cljs-devtools "0.2.0" :scope "test"]
-                 [org.clojure/tools.nrepl "0.2.13" :scope "test"]
+                 [nrepl "0.3.1" :scope "test"]
                  [ns-tracker "0.3.1" :scope "test"]
                  [weasel "0.7.0"  :scope "test"]])
 
