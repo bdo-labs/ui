@@ -186,6 +186,7 @@
                         :on-select     #(reset! selected* %)
                         :items         (sort-by :value sep-filtered-items)
                         :predicate?    smart-case-includes?
+                        :required      true
                         :deletable     true
                         :multiple      multiple
                         :disabled      disabled

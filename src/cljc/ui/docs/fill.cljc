@@ -15,10 +15,14 @@
     [layout/vertically {:background :white :gap? false :fill? true}
 
      (if horizontally?
-       [layout/horizontally {:class "demo fill-demo" :fill? true}
+       [layout/horizontally {:class "demo fill-demo"
+                             :style {:height "22em"
+                                     :max-height "22em"}}
         [layout/fill]
         [:div.Demo-box "Box"]]
-       [layout/vertically {:class "demo fill-demo" :fill? true}
+       [layout/vertically {:class "demo fill-demo"
+                           :style {:height "22em"
+                                   :max-height "22em"}}
         [layout/fill]
         [:div.Demo-box "Box"]])
      [element/article

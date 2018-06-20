@@ -45,7 +45,7 @@
         [:option {:value "left"} "Left"]
         [:option {:value "right"} "Right"]]]
       [layout/vertically {:class "demo" :fill? true}
-       [element/sidebar {:open open? :backdrop backdrop? :ontop ontop? :to-the to-the :fill true}
+       [element/sidebar {:open open? :backdrop backdrop? :ontop ontop? :to-the (or to-the :left) :fill true}
         [layout/vertically {:fill? true}
          [:h3 "Sidebar content"]]
         [layout/vertically {:fill? true}
