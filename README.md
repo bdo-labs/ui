@@ -1,4 +1,4 @@
-# [ **ui** \"0.0.1\" ] 
+# [ui "0.0.1"] 
 
 ## A Straight-Forward Library for Composing User-Interfaces
 
@@ -17,10 +17,10 @@ considered stable.
 ### Project anatomy
 
 There are four verticals to `ui`. Layout, elements, virtuals and
-wires. Layout and elements are quite self-explanetory in their naming
-and then you have virtuals. Virtuals are mostly used in the same
-manner as regular elements, but instead of adding nodes to the DOM,
-they will add functionality to existing nodes. Wires are a bunch of
+wires. Layout and elements are self-explanetory in their naming and
+then you have virtuals. Virtuals are used in the same manner as
+regular elements, but instead of adding nodes to the DOM, they will
+add functionality to existing nodes. Wires are a bunch of
 initialization, events and subscriptions that makes ui easier to work
 with.
 
@@ -45,7 +45,7 @@ should have in mind.
 To build `ui`, simply issue the command `boot dev -s`. That will set
 the wheels in motion and leave you with an interactive build
 environment. The first time it will also grab some
-JavaScript-dependencies from `npm`, so be very patient.  Ones you hear
-a *pling*, it should all be installed and running, you'll be asked
+JavaScript-dependencies from `npm`, so be patient.  Ones you hear a
+*pling*, it should all be installed and running, you'll be asked
 whether you'd like to open up a browser with the URL
 (http://localhost:3000/). Answer [y]es, and that's it.. Good luck!

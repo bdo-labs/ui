@@ -1,14 +1,10 @@
 (ns ui.layout
-  "
-  Layout
-
-  A set of functions that will work for 99% of your layout-needs.
-  "
   (:require [ui.elements :as element]
             [clojure.spec.alpha :as spec]
             [ui.specs :as common]
             [ui.util :as util]))
 
+;; Helper Functions -------------------------------------------------------
 
 (defn aligned->align [v]
   (case v
@@ -16,6 +12,7 @@
     (:bottom :right) :end
     :center))
 
+;; Specification ----------------------------------------------------------
 
 (spec/def ::aligned (spec/or :x ::horizontal-alignment
                              :y ::vertical-alignment))
@@ -34,6 +31,7 @@
   (spec/cat :params (spec/? ::layout-params)
             :content ::variable-content))
 
+;; Views ------------------------------------------------------------------
 
 (defn- layout [layout & args]
   (let [{:keys [params content]} (util/conform! ::layout-args args)
@@ -44,14 +42,11 @@
         params                   (merge {:layout layout :align align} (dissoc params))]
     (into [element/container params] content)))
 
-
 (defn horizontally [& args]
   (apply layout :horizontally args))
 
-
 (defn vertically [& args]
   (apply layout :vertically args))
-
 
 (defn centered [& args]
   (let [{:keys [params content]} (util/conform! ::layout-args args)

@@ -51,22 +51,22 @@
 (defcssfn translateZ)
 
 (def theme
-  {:default {:background (color/rgb [245 245 245])
-             :primary (color/rgb [70 111 226])
-             :secondary (color/rgb [247 90 109])
-             :tertiary (color/rgb [101 124 145])
-             :positive (color/rgb [34 192 100])
-             :negative (color/rgb [232 83 73])
+  {:default {:background  (color/rgb [245 245 245])
+             :primary     (color/rgb [60 100 230])
+             :secondary   (color/rgb [247 90 109])
+             :tertiary    (color/rgb [101 124 145])
+             :positive    (color/rgb [34 192 100])
+             :negative    (color/rgb [232 83 73])
              :font-weight 100
-             :font-base (unit/rem 1.6)
-             :font-scale :augmented-fourth}})
+             :font-base   (unit/rem 1.6)
+             :font-scale  :augmented-fourth}})
 
 (def breakpoint
-  {:phone {:max-width (unit/px 599)}
-   :pad-portrait {:min-width (unit/px 600)}
+  {:phone         {:max-width (unit/px 599)}
+   :pad-portrait  {:min-width (unit/px 600)}
    :pad-landscape {:min-width (unit/px 900)}
-   :desktop {:min-width (unit/px 1200)}
-   :big-screen {:min-width (unit/px 1800)}})
+   :desktop       {:min-width (unit/px 1200)}
+   :big-screen    {:min-width (unit/px 1800)}})
 
 (def scales
   {:minor-second     (/ 16 15)

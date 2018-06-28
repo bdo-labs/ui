@@ -16,4 +16,6 @@ Mess with the clamp to make some progress 🤓
 
 ### Spinner
 "
+   [element/progress-bar {:progress 20
+                          :align    :header-bottom}]
    [element/spinner]])
